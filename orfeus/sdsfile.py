@@ -23,11 +23,12 @@ class SDSFile():
 
     """
     Public Class SDSFile
-    Class for handling files in SDS archive
+    Class for handling files in SDS structure
     """
 
     # Same some configuration to the class
-    archive = config["ARCHIVE_ROOT"]
+    archiveRoot = config["ARCHIVE_ROOT"]
+    irodsRoot = config["IRODS_ROOT"]
     fdsnws = config["FDSNWS_ADDRESS"]
 
     def __init__(self, filename):
@@ -51,6 +52,11 @@ class SDSFile():
     def filepath(self):
         return os.path.join(self.directory, self.filename)
 
+    # Returns filepath for a given file
+    @property
+    def irodsPath(self):
+        return os.path.join(self.irodsDirectory, self.filename)
+
     # Returns the stream identifier
     @property
     def id(self):
@@ -61,11 +67,21 @@ class SDSFile():
             self.cha
         ])
 
+    @property
+    def irodsDirectory(self):
+        return os.path.join(
+            self.irodsRoot,
+            self.year,
+            self.net,
+            self.sta,
+            self.channelDirectory
+        )
+
     # Returns the file directory based on SDS structure
     @property
     def directory(self):
         return os.path.join(
-            self.archive,
+            self.archiveRoot,
             self.year,
             self.net,
             self.sta,
@@ -106,11 +122,6 @@ class SDSFile():
     @property
     def sampleEnd(self):
         return self.start.strftime("%Y,%j,23,59,59.999999")
-
-    # Returns the file path of file
-    @property
-    def filepath(self):
-        return os.path.join(self.archive, self.directory, self.filename)
 
     # Returns list of files neighbouring a file
     @property

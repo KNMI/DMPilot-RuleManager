@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-
+from irodsmanager import IRODSManager
 
 class RuleFunctions():
 
@@ -7,6 +7,8 @@ class RuleFunctions():
     Class RuleFunctions
     Container for configured rule functions
     """
+
+    iRODSManager = IRODSManager()
 
     def __init__(self):
         pass
@@ -29,9 +31,8 @@ class RuleFunctions():
         if options["prune"]:
             print "Prune is requested."
 
-        print "Setting record size to %i" % options["repackRecordSize"]
-
-        print(SDSFile.filename)
+        # Attempt to ingest to iRODS
+        self.iRODSManager.createDataObject(SDSFile)
 
     def isIngested(self, SDSFile):
         """

@@ -81,6 +81,7 @@ class RuleManager():
 
         # EXAMPLE XXX Collect a bunch of files
         files = self.fileCollector.collectFromWildcards("*.*.*.LHE.D.*.*")
+        files = files[-1:]
 
         # Apply the sequence of rules
         self.sequence(files)
