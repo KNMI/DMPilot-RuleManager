@@ -34,6 +34,9 @@ class RuleFunctions():
         # Attempt to ingest to iRODS
         self.iRODSManager.createDataObject(SDSFile)
 
+        # Check if checksum is saved
+        print self.iRODSManager.getDataObject(SDSFile).checksum
+
     def isIngested(self, SDSFile):
         """
         Stateless check to see if the file exists in iRODS?

@@ -155,7 +155,7 @@ class SDSFile():
         with open(self.filepath, "rb") as f:
             for block in iter(lambda: f.read(0x10000), b""):
                 checksum.update(block)
-        return checksum.hexdigest()
+        return checksum.digest().encode("base64").strip()
 
     @property
     def queryString(self):

@@ -2,6 +2,8 @@ import irods
 import os
 from irods.session import iRODSSession
 from irods.models import DataObject
+from irods.exception import DataObjectDoesNotExist
+import irods.keywords as kw
 
 from configuration import config
 
@@ -59,21 +61,40 @@ class IRODSManager():
         Registers a data object to iRODS
         """
 
+        # Attempt to get the data object
+        dataObject = self.getDataObject(SDSFile)
+        if dataObject is not None:
+            return
+
+        # Checksum of file did not change vs. iRODS checksum
+        if dataObject.checksum == "sha2:%s" % SDSFile.checksum:
+            return
+
         # Create the collection if it does not exist
         self.createCollection(SDSFile.irodsDirectory)
 
+        # Some put options
+        options = {
+            kw.RESC_NAME_KW: "compResc",
+            kw.REG_CHKSUM_KW: True
+        }
+
         # Add the data object
-        self.session.data_objects.put(SDSFile.filepath, SDSFile.irodsPath)
+        self.session.data_objects.put(SDSFile.filepath, SDSFile.irodsPath, **options)
       
 
-    def dataObjectExists(self, SDSFile):
+    def getDataObject(self, SDSFile):
         """
         def IRODSManager::createDataObject
-        Registers a data object to iRODS
-        XXX TODO
+        Retrieves a data object from iRODS and returns None if it does not exist
         """
 
-        return self.session.query(DataObject.name, DataObject.checksum).filter(DataObject.name == SDSFile.filename)
+        # Attempt to get the file from iRODS
+        # If it does not exists an exception is raised and we return None
+        try:
+          return self.session.data_objects.get(SDSFile.irodsPath) 
+        except DataObjectDoesNotExist:
+          return None
 
 I = IRODSManager()
 I.connect()

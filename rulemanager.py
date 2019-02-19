@@ -80,8 +80,8 @@ class RuleManager():
         self.fileCollector = SDSFileCollector()
 
         # EXAMPLE XXX Collect a bunch of files
-        files = self.fileCollector.collectFromWildcards("*.*.*.LHE.D.*.*")
-        files = files[-1:]
+        files = self.fileCollector.collectFromWildcards("*.*.*.*.*.*.*")
+        files = [files[4]]
 
         # Apply the sequence of rules
         self.sequence(files)
