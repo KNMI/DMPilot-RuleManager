@@ -67,14 +67,21 @@ class SDSFile():
             self.cha
         ])
 
+    # Returns the subdirectory
     @property
-    def irodsDirectory(self):
+    def subDirectory(self):
         return os.path.join(
-            self.irodsRoot,
             self.year,
             self.net,
             self.sta,
             self.channelDirectory
+        )
+
+    @property
+    def irodsDirectory(self):
+        return os.path.join(
+            self.irodsRoot,
+            self.subDirectory
         )
 
     # Returns the file directory based on SDS structure
@@ -82,10 +89,7 @@ class SDSFile():
     def directory(self):
         return os.path.join(
             self.archiveRoot,
-            self.year,
-            self.net,
-            self.sta,
-            self.channelDirectory
+            self.subDirectory
         )
 
     # Returns channel directory
