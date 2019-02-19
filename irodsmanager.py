@@ -9,6 +9,7 @@ import irods.keywords as kw
 
 from configuration import config
 
+
 class IRODSManager():
     """
     Class IRODSManager
@@ -84,7 +85,6 @@ class IRODSManager():
 
         # Add the data object
         self.session.data_objects.put(SDSFile.filepath, SDSFile.irodsPath, **options)
-      
 
     def purgeTemporaryFile(self, SDSFile):
         """
@@ -110,9 +110,9 @@ class IRODSManager():
         # Attempt to get the file from iRODS
         # If it does not exists an exception is raised and we return None
         try:
-          return self.session.data_objects.get(SDSFile.irodsPath) 
+            return self.session.data_objects.get(SDSFile.irodsPath)
         except DataObjectDoesNotExist:
-          return None
+            return None
 
 I = IRODSManager()
 I.connect()

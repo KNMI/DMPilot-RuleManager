@@ -23,10 +23,29 @@ class SDSFile():
 
     """
     Public Class SDSFile
-    Class for handling files in SDS structure
+    Class for handling files in SDS structure.
+
+    Attributes
+    ----------
+    filename : `str`
+        Name of file.
+    net : `str`
+        Network code.
+    sta : `str`
+        Station code.
+    loc : `str`
+        Location code.
+    cha : `str`
+        Channel code.
+    quality : `str`
+        Quality parameter.
+    year : `str`
+        Year in YYYY format.
+    day : `str`
+        Day of the year, in DDD format (i.e., it goes from '001' to '366').
     """
 
-    # Same some configuration to the class
+    # Save some configuration to the class
     archiveRoot = config["ARCHIVE_ROOT"]
     irodsRoot = config["IRODS_ROOT"]
     fdsnws = config["FDSNWS_ADDRESS"]
