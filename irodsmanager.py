@@ -1,5 +1,7 @@
-import irods
 import os
+
+# Lots of iRODS imports
+import irods
 from irods.session import iRODSSession
 from irods.models import DataObject
 from irods.exception import DataObjectDoesNotExist
@@ -29,7 +31,8 @@ class IRODSManager():
         if self.session is not None:
             return
 
-        self.session = irods.session.iRODSSession(
+        # Open a session
+        self.session = iRODSSession(
             host=config["IRODS"]["HOST"],
             port=config["IRODS"]["PORT"],
             user=config["IRODS"]["USER"],
@@ -82,6 +85,21 @@ class IRODSManager():
         # Add the data object
         self.session.data_objects.put(SDSFile.filepath, SDSFile.irodsPath, **options)
       
+
+    def purgeTemporaryFile(self, SDSFile):
+        """
+        def IRODSManager::purgeTemporaryFile
+        Purges an SDSFile from the temporary archive if it exists in iRODS
+        """
+
+        dataObject = self.getDataObject(SDSFile)
+
+        # Not in iRODS: do not purge from disk
+        if dataObject is None:
+            return
+
+        # Yeah let's be careful with this..
+        # os.remove(SDSFile.filepath)
 
     def getDataObject(self, SDSFile):
         """

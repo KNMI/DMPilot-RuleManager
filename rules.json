@@ -6,4 +6,9 @@
     "repackRecordSize": 4096,
     "daysIgnoreOlderThan": 700
   }
+}, {
+  "name": "purge",
+  "options": {
+    "daysPurgeAfter": 7
+  }
 }]
