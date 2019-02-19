@@ -36,6 +36,7 @@ class RuleFunctions():
 
         # Check if checksum is saved
         print self.iRODSManager.getDataObject(SDSFile).checksum
+        print self.iRODSManager.purgeTemporaryFile(SDSFile)
 
     def isIngested(self, SDSFile):
         """
