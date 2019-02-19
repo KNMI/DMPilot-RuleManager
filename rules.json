@@ -1,0 +1,9 @@
+[{
+  "name": "ingestion",
+  "options": {
+    "days": 100,
+    "prune": true,
+    "repackRecordSize": 4096,
+    "daysIgnoreOlderThan": 700
+  }
+}]
