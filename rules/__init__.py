@@ -13,6 +13,15 @@ class RuleFunctions():
     def __init__(self):
         pass
 
+    def purge(self, options, SDSFile):
+
+        # We can check time modified etc etc..
+        if SDSFile.created > (datetime.now() - timedelta(days=7)):
+            return 
+
+        # Some other configurable rules
+        print self.iRODSManager.purgeTemporaryFile(SDSFile)
+
     def ingestion(self, options, SDSFile):
         """
         Function RuleFunctions::ingestion
@@ -36,7 +45,6 @@ class RuleFunctions():
 
         # Check if checksum is saved
         print self.iRODSManager.getDataObject(SDSFile).checksum
-        print self.iRODSManager.purgeTemporaryFile(SDSFile)
 
     def isIngested(self, SDSFile):
         """
