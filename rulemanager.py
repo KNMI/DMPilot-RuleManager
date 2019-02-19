@@ -1,10 +1,17 @@
+import logging
 import json
 import sys
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(name)s %(levelname)s %(message)s"
+)
+
+from rules import RuleFunctions
 from orfeus.filecollector import SDSFileCollector
 from functools import partial
-from rules import RuleFunctions
 
+logger = logging.getLogger(__name__)
 
 class RuleManager():
 
@@ -15,6 +22,8 @@ class RuleManager():
 
     def __init__(self):
 
+        logger.info("Initializing the Rule Manager.")
+
         # Load the configured sequence of rules
         with open("rules.json") as infile:
             self.ruleSequence = json.load(infile)
@@ -24,6 +33,7 @@ class RuleManager():
 
         # Check if the rules are valid
         self.__checkRuleSequence()
+
 
     def __checkRuleSequence(self):
         """
@@ -48,6 +58,7 @@ class RuleManager():
                     "Python rule for configured sequence item %s is not callable." %
                     item)
 
+
     def getRule(self, rule):
         """
         Def RuleManager.getRule
@@ -56,6 +67,7 @@ class RuleManager():
 
         # Bind the rule options to the function call
         return partial(getattr(self.rules, rule["name"]), rule["options"])
+
 
     def sequence(self, files):
         """
@@ -69,6 +81,7 @@ class RuleManager():
 
                 # Rule options are bound to the call
                 ruleCall(SDSFile)
+
 
     def initialize(self):
         """

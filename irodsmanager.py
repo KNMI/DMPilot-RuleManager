@@ -1,4 +1,5 @@
 import os
+import logging
 
 # Lots of iRODS imports
 import irods
@@ -9,6 +10,7 @@ import irods.keywords as kw
 
 from configuration import config
 
+logger = logging.getLogger(__name__)
 
 class IRODSManager():
     """
@@ -32,6 +34,8 @@ class IRODSManager():
         if self.session is not None:
             return
 
+        logger.info("Initializing a new iRODS Session.")
+
         # Open a session
         self.session = iRODSSession(
             host=config["IRODS"]["HOST"],
@@ -41,6 +45,7 @@ class IRODSManager():
             zone=config["IRODS"]["ZONE"]
         )
 
+
     def disconnect(self):
         """
         def IRODSManager::disconnect
@@ -48,7 +53,11 @@ class IRODSManager():
         See: https://github.com/irods/python-irodsclient/blob/master/irods/session.py
         """
 
+        if self.session is None:
+            return
+
         self.session.cleanup()
+
 
     def getCollection(self, path):
         return self.session.collections.get(path)
@@ -112,7 +121,4 @@ class IRODSManager():
         try:
             return self.session.data_objects.get(SDSFile.irodsPath)
         except DataObjectDoesNotExist:
-            return None
-
-I = IRODSManager()
-I.connect()
+          return None
