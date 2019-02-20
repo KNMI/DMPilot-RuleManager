@@ -1,3 +1,20 @@
+"""
+This module implements an iRODS session manager as a _fake singleton_.
+
+Instead of calling the IRODSManager() constructor, use the
+irodsSession variable, that is already created and connected to iRODS
+when the module is loaded.
+
+Example
+-------
+
+```
+from irodsmanager import irodsSession
+irodsSession.createCollection(sdsFile.irodsDirectory)
+irodsSession.createDataObject(sdsFile)
+```
+"""
+
 import os
 import logging
 
