@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from irodsmanager import IRODSManager
+from irodsmanager import irodsSession
+
 
 class RuleFunctions():
 
@@ -8,8 +9,6 @@ class RuleFunctions():
     Container for configured rule functions
     """
 
-    iRODSManager = IRODSManager()
-
     def __init__(self):
         pass
 
@@ -17,10 +16,10 @@ class RuleFunctions():
 
         # We can check time modified etc etc..
         if SDSFile.created > (datetime.now() - timedelta(days=7)):
-            return 
+            return
 
         # Some other configurable rules
-        print self.iRODSManager.purgeTemporaryFile(SDSFile)
+        print(irodsSession.purgeTemporaryFile(SDSFile))
 
     def ingestion(self, options, SDSFile):
         """
@@ -38,13 +37,13 @@ class RuleFunctions():
 
         # A prune is requested
         if options["prune"]:
-            print "Prune is requested."
+            print("Prune is requested.")
 
         # Attempt to ingest to iRODS
-        self.iRODSManager.createDataObject(SDSFile)
+        irodsSession.createDataObject(SDSFile)
 
         # Check if checksum is saved
-        print self.iRODSManager.getDataObject(SDSFile).checksum
+        print(irodsSession.getDataObject(SDSFile).checksum)
 
     def isIngested(self, SDSFile):
         """

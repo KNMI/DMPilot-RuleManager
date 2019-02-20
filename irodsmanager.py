@@ -12,6 +12,7 @@ from configuration import config
 
 logger = logging.getLogger(__name__)
 
+
 class IRODSManager():
     """
     Class IRODSManager
@@ -74,17 +75,16 @@ class IRODSManager():
         Registers a data object to iRODS
         """
 
+        # Create the collection if it does not exist
+        self.createCollection(SDSFile.irodsDirectory)
+
         # Attempt to get the data object
         dataObject = self.getDataObject(SDSFile)
         if dataObject is not None:
-            return
 
-        # Checksum of file did not change vs. iRODS checksum
-        if dataObject.checksum == "sha2:%s" % SDSFile.checksum:
-            return
-
-        # Create the collection if it does not exist
-        self.createCollection(SDSFile.irodsDirectory)
+            # Checksum of file did not change vs. iRODS checksum
+            if dataObject.checksum == "sha2:%s" % SDSFile.checksum:
+                return
 
         # Some put options
         options = {
@@ -121,4 +121,8 @@ class IRODSManager():
         try:
             return self.session.data_objects.get(SDSFile.irodsPath)
         except DataObjectDoesNotExist:
-          return None
+            return None
+
+
+irodsSession = IRODSManager()
+irodsSession.connect()
