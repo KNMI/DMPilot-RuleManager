@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+
+"""
+Main script for running the rule manager.
+
+Usage: First, edit configuration.py and rules.json. The first file
+defines the options for running the script, and the second defines
+which rules are executed on each file, their options, and their order.
+After that, just run this file as a script, with no arguments.
+"""
+
 import logging
 import json
 import sys
@@ -12,6 +23,7 @@ from orfeus.filecollector import SDSFileCollector
 from functools import partial
 
 logger = logging.getLogger(__name__)
+
 
 class RuleManager():
 
