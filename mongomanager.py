@@ -1,7 +1,24 @@
+"""
+This module implements a MongoDB session manager as a _fake singleton_.
+
+Instead of calling the MongoManager() constructor, use the
+mongoSession variable, that is already created and connected to Mongo
+when the module is loaded.
+
+Example
+-------
+
+```
+from mongomanager import mongoSession
+mongoSession.doStuff()
+```
+"""
+
 from configuration import config
 
 # MongoDB driver for Python
 from pymongo import MongoClient
+
 
 class MongoManager():
     """
@@ -34,3 +51,7 @@ class MongoManager():
 
         # Use the wfrepo database
         self.database = self.client.wfrepo
+
+
+mongoSession = MongoManager()
+mongoSession.connect()
