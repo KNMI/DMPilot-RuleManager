@@ -86,11 +86,9 @@ class RuleManager():
         Def RuleManager.sequence
         """
 
-        # Get the sequence of rules to be applied
-        for ruleCall in map(self.getRule, self.ruleSequence):
-            
-            for SDSFile in files:
-
+        for SDSFile in files:
+            # Get the sequence of rules to be applied
+            for ruleCall in map(self.getRule, self.ruleSequence):
                 # Rule options are bound to the call
                 ruleCall(SDSFile)
 
