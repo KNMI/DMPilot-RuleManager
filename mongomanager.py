@@ -10,7 +10,8 @@ Example
 
 ```
 from mongomanager import mongoSession
-mongoSession.doStuff()
+...
+mongoSession.save('collection_name', document)
 ```
 """
 
@@ -51,6 +52,13 @@ class MongoManager():
 
         # Use the wfrepo database
         self.database = self.client.wfrepo
+
+        if 'AUTHENTICATE' in config['MONGO'] and config['MONGO']['AUTHENTICATE']:
+            self.database.authenticate(config['MONGO']['USER'], config['MONGO']['PASS'])
+
+    def save(self, collection, document):
+        """Save a document in a collection."""
+        self.database[collection].save(document)
 
 
 mongoSession = MongoManager()

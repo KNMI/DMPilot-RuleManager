@@ -12,6 +12,7 @@ import os
 import json
 import requests
 import subprocess
+import base64
 
 from datetime import datetime, timedelta
 from hashlib import sha256
@@ -178,7 +179,7 @@ class SDSFile():
         with open(self.filepath, "rb") as f:
             for block in iter(lambda: f.read(0x10000), b""):
                 checksum.update(block)
-        return checksum.digest().encode("base64").strip()
+        return base64.b64encode(checksum.digest()).decode()
 
     @property
     def queryString(self):
