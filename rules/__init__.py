@@ -41,7 +41,7 @@ class RuleFunctions():
             print("Prune is requested.")
 
         # Attempt to ingest to iRODS
-        irodsSession.createDataObject(SDSFile)
+        irodsSession.createDataObject(SDSFile, rescName="compResc", registerChecksum=True)
 
         # Check if checksum is saved
         print(irodsSession.getDataObject(SDSFile).checksum)

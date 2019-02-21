@@ -86,10 +86,25 @@ class IRODSManager():
     def getDataObjects(self, path):
         return self.getCollection(path).data_objects
 
-    def createDataObject(self, SDSFile):
+    def createDataObject(self, SDSFile,
+                         rescName="demoResc",
+                         purgeCache=False,
+                         registerChecksum=False):
         """
         def IRODSManager::createDataObject
-        Registers a data object to iRODS
+        Inserts an SDS data object into iRODS at a collection given by
+        `SDSFile.irodsDirectory`.
+
+        Parameters
+        ----------
+        SDSFile : `SDSFile`
+            An SDS file descriptor.
+        rescName : `str`
+            Name of the resource to save the data object.
+        purgeCache : `bool`
+            Whether or not to purge the cache, in case the resource is compound.
+        registerChecksum : `bool`
+            Whether or not to register the SHA256 checksum of the object in iCAT.
         """
 
         # Create the collection if it does not exist
@@ -105,8 +120,9 @@ class IRODSManager():
 
         # Some put options
         options = {
-            kw.RESC_NAME_KW: "compResc",
-            kw.REG_CHKSUM_KW: True
+            kw.RESC_NAME_KW: rescName,
+            kw.PURGE_CACHE_KW: purgeCache,
+            kw.REG_CHKSUM_KW: registerChecksum
         }
 
         # Add the data object
