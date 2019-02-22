@@ -17,5 +17,9 @@
     {
 	"name": "dublinCore",
 	"options": {}
+    },
+    {
+	"name": "waveformMetadata",
+	"options": {}
     }
 ]

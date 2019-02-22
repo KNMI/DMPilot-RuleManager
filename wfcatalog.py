@@ -1,4 +1,7 @@
+import signal
 import warnings
+from datetime import datetime
+
 from obspy.signal.quality_control import MSEEDMetadata
 
 class Collector():
@@ -37,7 +40,7 @@ class Collector():
                 warnings.simplefilter("always")
 
                 metadata = MSEEDMetadata([SDSFile.filepath],
-                                         starttime=SDSfile.start,
+                                         starttime=SDSFile.start,
                                          endtime=SDSFile.end,
                                          add_flags=True,
                                          add_c_segments=True)
@@ -45,14 +48,15 @@ class Collector():
                 # Mark documents with data warnings
                 metadata.meta.update({"warnings": len(w) > 0})
 
-        except Exception:
+        except Exception as Ex:
+            print Ex
             return None
 
         # Reset the alarm
         finally:
             signal.alarm(0)
 
-        return metadata.meta
+        return self.extractDatabaseDocument(metadata.meta)
 
     def extractDatabaseDocument(self, trace):
         """
@@ -65,12 +69,12 @@ class Collector():
     
         # Source document for granules
         source = {
-          "created": datetime.datetime.now(),
+          "created": datetime.now(),
           "collector": "XXXTODO",
           "warnings": trace["warnings"],
           "status": "open",
           "format": "mSEED",
-          "fileId": trace["fileId"],
+          "fileId": "XXXTODO",
           "type": "seismic",
           "nseg": nSegments,
           "cont": trace["num_gaps"] == 0,
@@ -133,7 +137,7 @@ class Collector():
         trace = trace["miniseed_header_percentages"]
   
         # Add the timing correction
-        return = {
+        return {
             "tcorr": __floatOrNone(trace["timing_correction"]),
             "tqmin": __floatOrNone(trace["timing_quality_min"]),
             "tqmax": __floatOrNone(trace["timing_quality_max"]),

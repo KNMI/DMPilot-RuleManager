@@ -23,13 +23,13 @@ class RuleFunctions():
         # Some other configurable rules
         print(irodsSession.purgeTemporaryFile(SDSFile))
 
-    def wfcatalog(self, options, SDSFile):
+    def waveformMetadata(self, options, SDSFile):
         """
         Function RuleFunctions::wfcatalog
         Handler for the WFCatalog metadata rule
         TODO XXX
         """
-        pass
+        print(collector.getMetadata(SDSFile))
 
     def ingestion(self, options, SDSFile):
         """
