@@ -29,6 +29,9 @@ class RuleFunctions():
         Handler for the WFCatalog metadata rule
         TODO XXX
         """
+        if mongoSession.getMetadataDocument(SDSFile) is None:
+            return
+
         print(collector.getMetadata(SDSFile))
 
     def ingestion(self, options, SDSFile):

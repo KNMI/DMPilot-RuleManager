@@ -11,7 +11,7 @@ Example
 ```
 from mongomanager import mongoSession
 ...
-mongoSession.save('collection_name', document)
+mongoSession.save("collection_name", document)
 ```
 """
 
@@ -53,13 +53,41 @@ class MongoManager():
         # Use the wfrepo database
         self.database = self.client.wfrepo
 
-        if 'AUTHENTICATE' in config['MONGO'] and config['MONGO']['AUTHENTICATE']:
-            self.database.authenticate(config['MONGO']['USER'], config['MONGO']['PASS'])
+        # Authenticate against the database
+        if "AUTHENTICATE" in config["MONGO"] and config["MONGO"]["AUTHENTICATE"]:
+            self.database.authenticate(config["MONGO"]["USER"], config["MONGO"]["PASS"])
+
+    def findOne(self, collection, query):
+        """
+        def MongoManager::findOne
+        Finds a document in a collection
+        """
+
+        self.database[collection].find_one(query)
 
     def save(self, collection, document):
-        """Save a document in a collection."""
+        """
+        def MongoManager::save
+        Saves a document to a collection
+        """
+
         self.database[collection].save(document)
 
+    def setMetadataDocument(self, document):
+        """
+        def MongoManager::saveMetadataDocument
+        Saves a waveform metadata document
+        """
+
+        self.save("daily_streams", document)
+
+    def getMetadataDocument(self, SDSFile):
+        """
+        def MongoManager::getMetadataDocument
+        Returns a waveform metadata document
+        """
+
+        return self.findOne("daily_streams", {"fileId": SDSFile.filename})
 
 mongoSession = MongoManager()
 mongoSession.connect()
