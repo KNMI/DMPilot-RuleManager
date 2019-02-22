@@ -17,7 +17,7 @@ class Collector():
         Raise an exception when a signal SIGALRM was received
         """
 
-        raise Exception("Metric calculation has timed out.")
+        raise TimeoutError("Metric calculation has timed out.")
 
     def getMetadata(self, SDSFile):
         """
@@ -46,7 +46,7 @@ class Collector():
                 metadata.meta.update({"warnings": len(w) > 0})
 
         except Exception:
-            pass
+            return None
 
         # Reset the alarm
         finally:
