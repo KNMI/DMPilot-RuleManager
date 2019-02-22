@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from irodsmanager import irodsSession
 from mongomanager import mongoSession
+from wfcatalog import collector
 
 
 class RuleFunctions():
@@ -21,6 +22,14 @@ class RuleFunctions():
 
         # Some other configurable rules
         print(irodsSession.purgeTemporaryFile(SDSFile))
+
+    def wfcatalog(self, options, SDSFile):
+        """
+        Function RuleFunctions::wfcatalog
+        Handler for the WFCatalog metadata rule
+        TODO XXX
+        """
+        pass
 
     def ingestion(self, options, SDSFile):
         """
