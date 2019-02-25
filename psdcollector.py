@@ -85,11 +85,16 @@ class PSDCollector():
 		return [counter - 1] + [self.__reduce(int(x)) for x in segment]
 
     def __reduce(self, x):
+	"""
+	def PSDCollector::__reduce
+        Keeps values within single byte bounds
+        (ObsPy PSD values are negative)
+	"""
 
-      if -255 <= x and x <= 0:
-	return x + 255
-      else:
-	return 255
+        if -255 <= x and x <= 0:
+            return x + 255
+        else:
+            return 255
 
 
     def process(self, SDSFile):
@@ -113,15 +118,15 @@ class PSDCollector():
 	# Try creating the PPSD
 	try:
 
-	  ppsd = PPSD(data[0].stats,
-		      inventory,
-		      period_limits=self.PERIOD_LIMIT_TUPLE)
+	    ppsd = PPSD(data[0].stats,
+	                inventory,
+	                period_limits=self.PERIOD_LIMIT_TUPLE)
 
-          # Add the waveform
-	  ppsd.add(data)
+            # Add the waveform
+	    ppsd.add(data)
 
 	except Exception as ex:
-	  return spectra
+	    return spectra
 
 	for segment, time in zip(ppsd._binned_psds, SDSFile.psdBins):
 
@@ -132,18 +137,17 @@ class PSDCollector():
 		psd_array = self.__getFrequencyOffset(segment, ppsd.valid)
 		byteAmplitudes = self.__toByteArray(psd_array)
 	    except Exception as ex:
-		print(ex)
 		continue
 
 	    psdObject = {
-	      "net": SDSFile.net,
-	      "file": SDSFile.filename,
-	      "sta": SDSFile.sta,
-	      "loc": SDSFile.loc,
-	      "cha": SDSFile.cha,
-	      "ts": SDSFile.start,
-	      "te": SDSFile.start + timedelta(minutes=60),
-	      "bin": byteAmplitudes
+	        "net": SDSFile.net,
+	        "file": SDSFile.filename,
+	        "sta": SDSFile.sta,
+	        "loc": SDSFile.loc,
+	        "cha": SDSFile.cha,
+	        "ts": SDSFile.start,
+	        "te": SDSFile.start + timedelta(minutes=60),
+	        "bin": byteAmplitudes
 	    }
 
 	    spectra.append(psdObject)
