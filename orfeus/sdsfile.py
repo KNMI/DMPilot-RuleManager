@@ -43,7 +43,7 @@ class SDSFile():
     year : `str`
         Year in YYYY format.
     day : `str`
-        Day of the year, in DDD format (i.e., it goes from '001' to '366').
+        Day of the year, in DDD format (i.e., it goes from "001" to "366").
     """
 
     # Save some configuration to the class

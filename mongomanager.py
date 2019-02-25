@@ -20,7 +20,7 @@ from configuration import config
 # MongoDB driver for Python
 from pymongo import MongoClient
 
-METADATA_COLLECTION = 'daily_streams'
+METADATA_COLLECTION = "daily_streams"
 
 
 class MongoManager():
