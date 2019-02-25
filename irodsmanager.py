@@ -63,7 +63,6 @@ class IRODSManager():
             zone=config["IRODS"]["ZONE"]
         )
 
-
     def disconnect(self):
         """
         def IRODSManager::disconnect
@@ -75,7 +74,6 @@ class IRODSManager():
             return
 
         self.session.cleanup()
-
 
     def getCollection(self, path):
         return self.session.collections.get(path)

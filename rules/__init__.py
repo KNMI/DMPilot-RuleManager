@@ -9,6 +9,7 @@ from psdcollector import psdCollector
 
 logger = logging.getLogger(__name__)
 
+
 class RuleFunctions():
 
     """

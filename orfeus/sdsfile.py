@@ -9,7 +9,6 @@
 """
 
 import os
-import json
 import requests
 import subprocess
 import base64
@@ -288,7 +287,6 @@ class SDSFile():
         except Exception as ex:
             return None
 
-
     @property
     def location(self):
         """
@@ -320,13 +318,13 @@ class SDSFile():
 
     @property
     def psdBins(self):
-      """
-      def SDSFile::psdBins
-      Returns 48 times starting at the start of the SDSFile
-      with 30 minute increments
-      """
+        """
+        def SDSFile::psdBins
+        Returns 48 times starting at the start of the SDSFile
+        with 30 minute increments
+        """
 
-      return [self.start + timedelta(minutes=(30 * x)) for x in range(48)]
+        return [self.start + timedelta(minutes=(30 * x)) for x in range(48)]
 
     def prune(self):
         """
