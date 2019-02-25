@@ -1,7 +1,12 @@
 from datetime import datetime, timedelta
+import logging
+
 from irodsmanager import irodsSession
 from mongomanager import mongoSession
 from wfcatalog import collector
+from dublincore import DublinCore
+
+logger = logging.getLogger(__name__)
 
 
 class RuleFunctions():
@@ -32,7 +37,7 @@ class RuleFunctions():
         if mongoSession.getMetadataDocument(SDSFile) is not None:
             return
 
-        print(collector.getMetadata(SDSFile))
+        #print(collector.getMetadata(SDSFile))
 
     def ingestion(self, options, SDSFile):
         """
@@ -69,41 +74,13 @@ class RuleFunctions():
     def dublinCore(self, options, sdsFile):
         """Process and save Dublin Core metadata of an SDS file."""
 
-        nowTime = datetime.now()
-
-        # Determine coordinates
-        location = sdsFile.location
-        if location is None:
-            print("Impossible to locate " + sdsFile.filename)
+        if DublinCore.getDCMetadata(sdsFile) is not None:
+            logger.info("DC metadata already exists for " + sdsFile.filename)
             return
-        lon = location["longitude"]
-        lat = location["latitude"]
-        ele = location["elevation"]
 
-        # Build the document that will be saved
-        document = {
-            "_cls": "eudat.models.mongo.wf_do",
-            "fileId": sdsFile.filename,
-            "dc_identifier": "TODO_PID",
-            "dc_title": "INGV_Repository",
-            "dc_subject": "mSEED, waveform, quality",
-            "dc_creator": "EIDA NODE (TODO)",
-            "dc_contributor": "network operator",
-            "dc_publisher": "EIDA NODE (TODO)",
-            "dc_type": "seismic waveform",
-            "dc_format": "MSEED",
-            "dc_date": nowTime,
-            "dc_coverage_x": lat,
-            "dc_coverage_y": lon,
-            "dc_coverage_z": ele,
-            "dc_coverage_t_min": sdsFile.sampleStart,
-            "dc_coverage_t_max": sdsFile.sampleEnd,
-            "dcterms_available": nowTime,
-            "dcterms_dateAccepted": nowTime,
-            "dc_rights": "open access",
-            "dcterms_isPartOf": "wfmetadata_catalog",
-            "irods_path": sdsFile.irodsPath
-        }
+        document = DublinCore.extractDCMetadata(sdsFile)
 
         # Save to the database
-        mongoSession.save("wf_do", document)
+        if document:
+            mongoSession.saveDCDocument(document)
+            logger.info("Saved DC metadata for " + sdsFile.filename)
