@@ -20,6 +20,7 @@ from configuration import config
 # MongoDB driver for Python
 from pymongo import MongoClient
 
+DC_COLLECTION = "wf_do"
 METADATA_COLLECTION = "daily_streams"
 
 
@@ -74,6 +75,22 @@ class MongoManager():
         """
 
         self.database[collection].save(document)
+
+    def saveDCDocument(self, document):
+        """
+        def MongoManager::saveDCDocument
+        Saves a Dublin Core metadata document
+        """
+
+        self.save(DC_COLLECTION, document)
+
+    def getDCDocument(self, SDSFile):
+        """
+        def MongoManager::getDCDocument
+        Returns a Dublin Core metadata document corresponding to a file
+        """
+
+        return self.findOne(DC_COLLECTION, {"fileId": SDSFile.filename})
 
     def setMetadataDocument(self, document):
         """
