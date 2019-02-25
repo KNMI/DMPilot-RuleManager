@@ -21,6 +21,10 @@ class RuleFunctions():
         pass
 
     def purge(self, options, SDSFile):
+        """
+        Function RuleFunctions::purge
+        Handler for the temporary archive purge rule.
+        """
 
         # We can check time modified etc etc..
         if SDSFile.created > (datetime.now() - timedelta(days=7)):
@@ -37,7 +41,6 @@ class RuleFunctions():
         """
 
         print(psdCollector.process(SDSFile))
-
 
     def waveformMetadata(self, options, SDSFile):
         """
