@@ -20,6 +20,8 @@ from configuration import config
 # MongoDB driver for Python
 from pymongo import MongoClient
 
+METADATA_COLLECTION = 'daily_streams'
+
 
 class MongoManager():
     """
@@ -79,15 +81,16 @@ class MongoManager():
         Saves a waveform metadata document
         """
 
-        self.save("daily_streams", document)
+        self.save(METADATA_COLLECTION, document)
 
     def getMetadataDocument(self, SDSFile):
         """
         def MongoManager::getMetadataDocument
-        Returns a waveform metadata document
+        Returns a waveform metadata document corresponding to a file
         """
 
-        return self.findOne("daily_streams", {"fileId": SDSFile.filename})
+        return self.findOne(METADATA_COLLECTION, {"fileId": SDSFile.filename})
+
 
 mongoSession = MongoManager()
 mongoSession.connect()
