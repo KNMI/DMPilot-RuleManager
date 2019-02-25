@@ -65,7 +65,7 @@ class MongoManager():
         Finds a document in a collection
         """
 
-        self.database[collection].find_one(query)
+        return self.database[collection].find_one(query)
 
     def save(self, collection, document):
         """
