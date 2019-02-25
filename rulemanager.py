@@ -70,7 +70,6 @@ class RuleManager():
                     "Python rule for configured sequence item %s is not callable." %
                     item)
 
-
     def getRule(self, rule):
         """
         Def RuleManager.getRule
@@ -80,10 +79,15 @@ class RuleManager():
         # Bind the rule options to the function call
         return partial(getattr(self.rules, rule["name"]), rule["options"])
 
-
     def sequence(self, files):
         """
         Def RuleManager.sequence
+        Runs the sequence of rules on the given file list.
+
+        Parameters
+        ----------
+        files
+            An iterable collection of `SDSFile` objects.
         """
 
         for SDSFile in files:
@@ -91,7 +95,6 @@ class RuleManager():
             for ruleCall in map(self.getRule, self.ruleSequence):
                 # Rule options are bound to the call
                 ruleCall(SDSFile)
-
 
     def initialize(self):
         """

@@ -76,9 +76,11 @@ class IRODSManager():
         self.session.cleanup()
 
     def getCollection(self, path):
+        """Returns the collection named `path`."""
         return self.session.collections.get(path)
 
     def createCollection(self, collection):
+        """Creates a collection in the iRODS catalog. Does nothing if it is already there."""
         self.session.collections.create(collection)
 
     def getDataObjects(self, path):
