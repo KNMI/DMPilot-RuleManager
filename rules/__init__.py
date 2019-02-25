@@ -5,9 +5,9 @@ from irodsmanager import irodsSession
 from mongomanager import mongoSession
 from wfcatalog import collector
 from dublincore import DublinCore
+from psdcollector import psdCollector
 
 logger = logging.getLogger(__name__)
-
 
 class RuleFunctions():
 
@@ -27,6 +27,16 @@ class RuleFunctions():
 
         # Some other configurable rules
         print(irodsSession.purgeTemporaryFile(SDSFile))
+
+    def psdMetadata(self, options, SDSFile):
+        """
+        Function RuleFunctions::wfcatalog
+        Handler for the WFCatalog metadata rule
+        TODO XXX
+        """
+
+        print(psdCollector.process(SDSFile))
+
 
     def waveformMetadata(self, options, SDSFile):
         """

@@ -17,6 +17,7 @@ import base64
 from datetime import datetime, timedelta
 from hashlib import sha256
 
+from obspy import read_inventory
 from configuration import config
 
 
@@ -182,6 +183,22 @@ class SDSFile():
         return base64.b64encode(checksum.digest()).decode()
 
     @property
+    def queryStringTXT(self):
+
+        return self.queryString + "&" + "&".join([
+            "format=text",
+            "level=channel"
+        ])
+
+    @property
+    def queryStringXML(self):
+
+        return self.queryString + "&" + "&".join([
+            "format=fdsnxml",
+            "level=response"
+        ])
+
+    @property
     def queryString(self):
         """
         def SDSFile::queryString
@@ -189,14 +206,12 @@ class SDSFile():
         """
 
         return "?" + "&".join([
-            "start=%s" % self.start,
-            "end=%s" % self.end,
+            "start=%s" % self.start.isoformat(),
+            "end=%s" % self.end.isoformat(),
             "network=%s" % self.net,
             "station=%s" % self.sta,
             "location=%s" % self.loc,
-            "channel=%s" % self.cha,
-            "format=text",
-            "level=channel"
+            "channel=%s" % self.cha
         ])
 
     @property
@@ -259,6 +274,22 @@ class SDSFile():
         return map(parseMSIOutput, lines[1:-1])
 
     @property
+    def inventory(self):
+        """
+        def SDSFile::inventory
+        Returns the FDSNWSXML inventory
+        """
+
+        # Query our FDSNWS Webservice for the station location
+        request = os.path.join(self.fdsnws, self.queryStringXML)
+
+        try:
+            return read_inventory(request)
+        except Exception as ex:
+            return None
+
+
+    @property
     def location(self):
         """
         def SDSFile::location
@@ -266,7 +297,7 @@ class SDSFile():
         """
 
         # Query our FDSNWS Webservice for the station location
-        request = requests.get(os.path.join(self.fdsnws, self.queryString))
+        request = requests.get(os.path.join(self.fdsnws, self.queryStringTXT))
 
         # Any error just ignore
         if request.status_code != 200:
@@ -286,6 +317,16 @@ class SDSFile():
             "latitude": float(latitude),
             "elevation": float(elevation)
         }
+
+    @property
+    def psdBins(self):
+      """
+      def SDSFile::psdBins
+      Returns 48 times starting at the start of the SDSFile
+      with 30 minute increments
+      """
+
+      return [self.start + timedelta(minutes=(30 * x)) for x in range(48)]
 
     def prune(self):
         """
