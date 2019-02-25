@@ -6,7 +6,10 @@ config = {
         "HOST": "localhost",
         "PORT": 27017,
         "USER": "user",
-        "PASS": "pass"
+        "PASS": "pass",
+        "DATABASE": "wfrepo",
+        "DC_COLLECTION": "wf_do",
+        "METADATA_COLLECTION": "daily_streams"
     },
     "IRODS": {
         "ENABLED": True,

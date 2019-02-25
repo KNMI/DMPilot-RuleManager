@@ -20,9 +20,6 @@ from configuration import config
 # MongoDB driver for Python
 from pymongo import MongoClient
 
-DC_COLLECTION = "wf_do"
-METADATA_COLLECTION = "daily_streams"
-
 
 class MongoManager():
     """
@@ -54,7 +51,7 @@ class MongoManager():
         )
 
         # Use the wfrepo database
-        self.database = self.client.wfrepo
+        self.database = self.client[config["MONGO"]["DATABASE"]]
 
         # Authenticate against the database
         if "AUTHENTICATE" in config["MONGO"] and config["MONGO"]["AUTHENTICATE"]:
@@ -82,7 +79,7 @@ class MongoManager():
         Saves a Dublin Core metadata document
         """
 
-        self.save(DC_COLLECTION, document)
+        self.save(config["MONGO"]["DC_COLLECTION"], document)
 
     def getDCDocument(self, SDSFile):
         """
@@ -90,7 +87,8 @@ class MongoManager():
         Returns a Dublin Core metadata document corresponding to a file
         """
 
-        return self.findOne(DC_COLLECTION, {"fileId": SDSFile.filename})
+        return self.findOne(config["MONGO"]["DC_COLLECTION"],
+                            {"fileId": SDSFile.filename})
 
     def setMetadataDocument(self, document):
         """
@@ -98,7 +96,7 @@ class MongoManager():
         Saves a waveform metadata document
         """
 
-        self.save(METADATA_COLLECTION, document)
+        self.save(config["MONGO"]["METADATA_COLLECTION"], document)
 
     def getMetadataDocument(self, SDSFile):
         """
@@ -106,7 +104,8 @@ class MongoManager():
         Returns a waveform metadata document corresponding to a file
         """
 
-        return self.findOne(METADATA_COLLECTION, {"fileId": SDSFile.filename})
+        return self.findOne(config["MONGO"]["METADATA_COLLECTION"],
+                            {"fileId": SDSFile.filename})
 
 
 mongoSession = MongoManager()
