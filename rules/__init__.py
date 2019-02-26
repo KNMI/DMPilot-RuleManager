@@ -4,7 +4,7 @@ import logging
 from irodsmanager import irodsSession
 from mongomanager import mongoSession
 from wfcatalog import collector
-from dublincore import DublinCore
+from dublincore import dublinCore
 from psdcollector import psdCollector
 
 logger = logging.getLogger(__name__)
@@ -133,7 +133,7 @@ class RuleFunctions():
             The file to be processed.
         """
 
-        if DublinCore.getDCMetadata(sdsFile) is not None:
+        if dublinCore.getDCMetadata(sdsFile) is not None:
             logger.info("DC metadata already exists for " + sdsFile.filename)
             return
 

@@ -68,7 +68,7 @@ class PSDCollector():
         Converts values to single byte array
         """
 
-        return Binary("".join([pack("B", b) for b in array]))
+        return Binary(b"".join([pack("B", b) for b in array]))
 
     def __getFrequencyOffset(self, segment, mask):
         """
@@ -132,11 +132,13 @@ class PSDCollector():
 
             # XXX NOTE:
             # Modified /home/ubuntu/.local/lib/python2.7/site-packages/obspy/signal/spectral_estimation.py
+            # And /usr/local/lib/python3.5/dist-packages/obspy/signal/spectral_estimation.py
             # To set ppsd.valid as a public attribute!
             try:
                 psd_array = self.__getFrequencyOffset(segment, ppsd.valid)
                 byteAmplitudes = self.__toByteArray(psd_array)
             except Exception as ex:
+                print(ex)
                 continue
 
             psdObject = {

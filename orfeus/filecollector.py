@@ -67,7 +67,7 @@ class SDSFileCollector():
         year = date.strftime("%Y")
 
         # Filter by day and year
-        return filter(lambda x: (x.day == day and x.year == year), self.files)
+        return list(filter(lambda x: (x.day == day and x.year == year), self.files))
 
     def collectFromWildcards(self, filename):
         """
@@ -80,7 +80,7 @@ class SDSFileCollector():
             raise ValueError("An invalid expression was submitted: %s" % filename)
 
         # Take the basename and map to SDSFile
-        return filter(lambda x: fnmatch(x.filename, filename), self.files)
+        return list(filter(lambda x: fnmatch(x.filename, filename), self.files))
 
     def collectFromDateRange(self, date, days):
         """
