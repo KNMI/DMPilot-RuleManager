@@ -36,25 +36,30 @@ class RuleManager():
 
         logger.info("Initializing the Rule Manager.")
 
+        # Load the Python scripted rules
+        self.rules = RuleFunctions()
+
         # Load the configured sequence of rules
         with open("rules.json") as infile:
             self.ruleSequence = json.load(infile)
 
-        # Load the Python scripted rules
-        self.rules = RuleFunctions()
+        # Same for the rules for station metadata
+        with open("metadata-rules.json") as infile:
+            self.ruleSequenceMetadata = json.load(infile)
 
         # Check if the rules are valid
-        self.__checkRuleSequence()
+        self.__checkRuleSequence(self.ruleSequence)
+        self.__checkRuleSequence(self.ruleSequenceMetadata)
 
 
-    def __checkRuleSequence(self):
+    def __checkRuleSequence(self, sequence):
         """
         Def RuleManager.__checkRuleSequence
         Checks validity of the configured rule sequence
         """
 
         # Check each rule that it exists & is a callable Python function
-        for item in self.ruleSequence:
+        for item in sequence:
 
             # Check if the rule exists
             try:
@@ -79,22 +84,34 @@ class RuleManager():
         # Bind the rule options to the function call
         return partial(getattr(self.rules, rule["name"]), rule["options"])
 
-    def sequence(self, files):
+    def sequence(self, items, sequence):
         """
         Def RuleManager.sequence
         Runs the sequence of rules on the given file list.
 
         Parameters
         ----------
-        files
+        items
             An iterable collection of `SDSFile` objects.
+        sequence
+            An iterable collection of rules to be sequenced over
         """
 
-        for SDSFile in files:
+        # Items can be SDSFiles or metadata (XML) files
+        for item in items:
             # Get the sequence of rules to be applied
-            for ruleCall in map(self.getRule, self.ruleSequence):
+            for ruleCall in map(self.getRule, sequence):
                 # Rule options are bound to the call
-                ruleCall(SDSFile)
+                ruleCall(item)
+
+    def metadata(self):
+        """
+        Def RuleManager::metadata
+        Initializes the rule manager (for metadata)
+        """
+
+        # Empty for now
+        self.sequence([], self.ruleSequenceMetadata)
 
     def initialize(self):
         """
@@ -110,10 +127,11 @@ class RuleManager():
         files = [files[0]]
 
         # Apply the sequence of rules
-        self.sequence(files)
+        self.sequence(files, self.ruleSequence)
 
 
 if __name__ == "__main__":
 
     RM = RuleManager()
     RM.initialize()
+    RM.metadata()

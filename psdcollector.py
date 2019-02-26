@@ -138,7 +138,6 @@ class PSDCollector():
                 psd_array = self.__getFrequencyOffset(segment, ppsd.valid)
                 byteAmplitudes = self.__toByteArray(psd_array)
             except Exception as ex:
-                print(ex)
                 continue
 
             psdObject = {

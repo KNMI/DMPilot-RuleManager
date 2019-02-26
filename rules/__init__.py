@@ -122,6 +122,22 @@ class RuleFunctions():
 
         return False
 
+    def ingestionMetadata(self, options, metadataFile):
+        """
+        Ingest metadata record to the database (new collection)
+        To keep file hash, etc
+        """
+
+        return True
+
+    def psdMetadataUpdate(self, options, metadataFile):
+        """
+        Check if metadata file was updated (hash change)
+        Then re-do all PSD calculations
+        """
+
+        return True
+ 
     def dublinCore(self, options, sdsFile):
         """Process and save Dublin Core metadata of an SDS file.
 
