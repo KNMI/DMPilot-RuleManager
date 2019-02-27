@@ -7,17 +7,18 @@ class FDSNXMLFile():
     NAMESPACE = "http://www.fdsn.org/xml/station/1"
 
     def __init__(self, filepath):
+        """
+        def FDSNXMLFile::__init__
+        Initializes a FDSNXMLFile instance from a StationXML file
+        """
 
         self.filepath = filepath
         self.channels = list()
 
-        # Extract
+        # Extract all available channels
         self.parseChannels()
-        print(self.channels)
 
     def parseChannels(self):
-
-        self.channels = list()  
 
         tree = ET.parse(self.filepath)
         root = tree.getroot()
@@ -38,6 +39,12 @@ class FDSNXMLFile():
                      if channelEnd is not None:
                          channelEnd = dateutil.parser.parse(channelEnd)
 
+                     # Maybe some sanity rules
+                     channelLatitude = float(channel.find("{%s}Latitude" % self.NAMESPACE).text)
+                     channelLongitude = float(channel.find("{%s}Longitude" % self.NAMESPACE).text)
+                     channelElevation = float(channel.find("{%s}Elevation" % self.NAMESPACE).text)
+                     channelSampleRate = float(channel.find("{%s}SampleRate" % self.NAMESPACE).text)
+
                      # Get the hash of the XML string per channel
                      # The XML should be canonicalized
                      channelHash = sha256(ET.tostring(channel)).hexdigest()
@@ -48,6 +55,10 @@ class FDSNXMLFile():
                        "cha": channelCode,
                        "start": channelStart,
                        "end": channelEnd,
+                       "lat": channelLatitude,
+                       "lng": channelLongitude,
+                       "elev": channelElevation,
+                       "rate": channelSampleRate,
                        "hash": channelHash
                      })
 
