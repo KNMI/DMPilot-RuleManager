@@ -15,15 +15,7 @@
 	}
     },
     {
-	"name": "dublinCore",
-	"options": {}
-    },
-    {
-	"name": "waveformMetadata",
-	"options": {}
-    },
-    {
-	"name": "psdMetadata",
+	"name": "dcMetadata",
 	"options": {}
     }
 ]
