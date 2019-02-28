@@ -1,4 +1,6 @@
 import logging
+from time import sleep
+import signal
 import json
 
 from functools import partial
@@ -23,6 +25,14 @@ class RuleManager():
 
         self.rules = None
         self.ruleSequence = None
+
+    def __signalHandler(self):
+        """
+        Collector.__signalHandler
+        Raise an exception when a signal SIGALRM was received
+        """
+
+        raise TimeoutError("Metric calculation has timed out.")
 
     def loadRules(self, ruleModule, ruleMapFile):
         """Loads the rules.
@@ -92,5 +102,18 @@ class RuleManager():
         for item in items:
             # Get the sequence of rules to be applied
             for ruleCall in map(self.getRule, self.ruleSequence):
+
+                # Set a signal (hardcoded at 2min for now)
+                signal.signal(signal.SIGALRM, self.__signalHandler)
+                signal.alarm(120)
+
                 # Rule options are bound to the call
-                ruleCall(item)
+                # Capture exceptions (e.g. TimeoutError)
+                try:
+                    ruleCall(item)
+                except Exception as Ex:
+                    logging.info("Timeout calling rule!")
+                    pass
+                finally:
+                    signal.alarm(0)
+
