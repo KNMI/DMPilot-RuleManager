@@ -1,7 +1,7 @@
 from datetime import datetime
 import logging
 
-from mongomanager import mongoSession
+from modules.mongomanager import mongoSession
 
 logger = logging.getLogger(__name__)
 

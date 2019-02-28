@@ -9,13 +9,27 @@ Every rule should be implemented as a module funcion with exactly two arguments:
 import logging
 from datetime import datetime, timedelta
 
-from irodsmanager import irodsSession
-from mongomanager import mongoSession
-from wfcatalog import collector
-from dublincore import dublinCore
+from modules.irodsmanager import irodsSession
+from modules.mongomanager import mongoSession
+from modules.wfcatalog import collector
+from modules.dublincore import dublinCore
+from modules.psdcollector import psdCollector
 
 logger = logging.getLogger(__name__)
 
+def psdMetadata(self, options, SDSFile):
+    """Handler for PSD calculation.
+    TODO XXX
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    print(psdCollector.process(SDSFile))
 
 def ingestion(options, SDSFile):
     """Handler for the ingestion rule.

@@ -4,7 +4,6 @@ from datetime import datetime
 
 from obspy.signal.quality_control import MSEEDMetadata
 
-
 class Collector():
     """
     Class Collector
