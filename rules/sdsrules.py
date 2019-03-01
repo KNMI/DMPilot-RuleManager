@@ -78,7 +78,7 @@ def isIngested(SDSFile):
     TODO XXX
     """
 
-    return False
+    return irodsSession.exists(SDSFile)
 
 
 def purge(options, SDSFile):

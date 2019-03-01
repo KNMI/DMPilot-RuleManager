@@ -76,7 +76,7 @@ class IRODSManager():
         self.session.cleanup()
 
     def getCollection(self, path):
-        """Returns the collection named `path`."""
+        """Returns the collection named by `path`."""
         return self.session.collections.get(path)
 
     def createCollection(self, collection):
@@ -116,6 +116,7 @@ class IRODSManager():
 
             # Checksum of file did not change vs. iRODS checksum
             if dataObject.checksum == "sha2:%s" % SDSFile.checksum:
+                logger.info("File already registered, cancelling ingestion.")
                 return
 
         # Some put options
@@ -155,6 +156,10 @@ class IRODSManager():
             return self.session.data_objects.get(SDSFile.irodsPath)
         except DataObjectDoesNotExist:
             return None
+
+    def exists(self, SDSFile):
+        """Check whether the file is registered in iRODS."""
+        return self.session.data_objects.exists(SDSFile.irodsPath)
 
 
 irodsSession = IRODSManager()
