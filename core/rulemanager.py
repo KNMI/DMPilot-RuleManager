@@ -20,8 +20,8 @@ class RuleManager():
             level=logging.INFO,
             format="%(asctime)s %(name)s %(levelname)s %(message)s"
         )
-        logger = logging.getLogger(__name__)
-        logger.info("Initializing the Rule Manager.")
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Initializing the Rule Manager.")
 
         self.rules = None
         self.ruleSequence = None
@@ -98,8 +98,13 @@ class RuleManager():
             An iterable collection of objects that can be processed by the loaded rules.
         """
 
+        total = len(items)
+        i = 0
+        
         # Items can be SDSFiles or metadata (XML) files
         for item in items:
+            i += 1
+            self.logger.info("Processing item %d/%d.", i, total)
             # Get the sequence of rules to be applied
             for ruleCall in map(self.getRule, self.ruleSequence):
 
@@ -111,9 +116,11 @@ class RuleManager():
                 # Capture exceptions (e.g. TimeoutError)
                 try:
                     ruleCall(item)
-                except Exception as Ex:
+                except TimeoutError:
                     logging.info("Timeout calling rule!")
                     pass
+                except Exception as Ex:
+                    logging.error(Ex)
                 finally:
                     signal.alarm(0)
 

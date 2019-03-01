@@ -49,6 +49,8 @@ def ingestion(options, SDSFile):
         The file to be processed.
     """
 
+    logger.info("Ingesting file: " + SDSFile.filename)
+    
     # Check the modification time of the file
     if SDSFile.modified < (datetime.now() - timedelta(days=100)):
         return
@@ -62,7 +64,10 @@ def ingestion(options, SDSFile):
         logger.info("Prune is requested.")
 
     # Attempt to ingest to iRODS
-    irodsSession.createDataObject(SDSFile, rescName="compResc", registerChecksum=True)
+    irodsSession.createDataObject(SDSFile,
+                                  rescName="compResc",
+                                  purgeCache=True,
+                                  registerChecksum=True)
 
     # Check if checksum is saved
     logger.info(irodsSession.getDataObject(SDSFile).checksum)
