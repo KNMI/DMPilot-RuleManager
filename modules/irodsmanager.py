@@ -99,11 +99,11 @@ class IRODSManager():
         ----------
         SDSFile : `SDSFile`
             An SDS file descriptor.
-        rescName : `str`
+        rescName : `str`, optional
             Name of the resource to save the data object.
-        purgeCache : `bool`
+        purgeCache : `bool`, optional
             Whether or not to purge the cache, in case the resource is compound.
-        registerChecksum : `bool`
+        registerChecksum : `bool`, optional
             Whether or not to register the SHA256 checksum of the object in iCAT.
         """
 
@@ -129,6 +129,42 @@ class IRODSManager():
         # Add the data object
         self.session.data_objects.put(SDSFile.filepath, SDSFile.irodsPath, **options)
 
+    def remotePut(self, SDSFile, rootCollection,
+                  rescName="demoResc",
+                  purgeCache=False,
+                  registerChecksum=False):
+        """
+        Inserts an SDS data object into iRODS at a collection rooted at `rootCollection`.
+
+        Parameters
+        ----------
+        SDSFile : `SDSFile`
+            An SDS file descriptor.
+        rootCollection : `str`
+            The root collection to save the data object.
+        rescName : `str`, optional
+            Name of the resource to save the data object.
+        purgeCache : `bool`, optional
+            Whether or not to purge the cache, in case the resource is compound.
+        registerChecksum : `bool`, optional
+            Whether or not to register the SHA256 checksum of the object in iCAT.
+        """
+
+        # Create the collection if it does not exist
+        self.createCollection(SDSFile.customDirectory(rootCollection))
+
+        # Some put options
+        options = {
+            kw.RESC_NAME_KW: rescName,
+            kw.PURGE_CACHE_KW: purgeCache,
+            kw.REG_CHKSUM_KW: registerChecksum
+        }
+
+        # Add the data object
+        self.session.data_objects.put(SDSFile.filepath,
+                                      SDSFile.customPath(rootCollection),
+                                      **options)
+
     def purgeTemporaryFile(self, SDSFile):
         """
         def IRODSManager::purgeTemporaryFile
@@ -144,22 +180,37 @@ class IRODSManager():
         # Yeah let's be careful with this..
         # os.remove(SDSFile.filepath)
 
-    def getDataObject(self, SDSFile):
+    def getDataObject(self, SDSFile, rootCollection=None):
         """
         def IRODSManager::createDataObject
         Retrieves a data object from iRODS and returns None if it does not exist
+
+        Parameters
+        ----------
+        rootCollection : `str`, optional
+            The archive's root collection.
         """
 
         # Attempt to get the file from iRODS
         # If it does not exists an exception is raised and we return None
         try:
-            return self.session.data_objects.get(SDSFile.irodsPath)
+            if rootCollection is None:
+                return self.session.data_objects.get(SDSFile.irodsPath)
+            return self.session.data_objects.get(SDSFile.customPath(rootCollection))
         except DataObjectDoesNotExist:
             return None
 
-    def exists(self, SDSFile):
-        """Check whether the file is registered in iRODS."""
-        return self.session.data_objects.exists(SDSFile.irodsPath)
+    def exists(self, SDSFile, rootCollection=None):
+        """Check whether the file is registered in iRODS.
+
+        Parameters
+        ----------
+        rootCollection : `str`, optional
+            The archive's root collection.
+        """
+        if rootCollection is None:
+            return self.session.data_objects.exists(SDSFile.irodsPath)
+        return self.session.data_objects.exists(SDSFile.customPath(rootCollection))
 
 
 irodsSession = IRODSManager()

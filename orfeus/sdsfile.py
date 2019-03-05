@@ -77,6 +77,10 @@ class SDSFile():
     def irodsPath(self):
         return os.path.join(self.irodsDirectory, self.filename)
 
+    # Returns custom filepath for a given file
+    def customPath(self, root):
+        return os.path.join(self.customDirectory(root), self.filename)
+
     # Returns the stream identifier
     @property
     def id(self):
@@ -101,6 +105,12 @@ class SDSFile():
     def irodsDirectory(self):
         return os.path.join(
             self.irodsRoot,
+            self.subDirectory
+        )
+
+    def customDirectory(self, root):
+        return os.path.join(
+            root,
             self.subDirectory
         )
 

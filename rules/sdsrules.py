@@ -17,6 +17,7 @@ from modules.psdcollector import psdCollector
 
 logger = logging.getLogger(__name__)
 
+
 def psdMetadata(self, options, SDSFile):
     """Handler for PSD calculation.
     TODO XXX
@@ -30,6 +31,7 @@ def psdMetadata(self, options, SDSFile):
     """
 
     print(psdCollector.process(SDSFile))
+
 
 def ingestion(options, SDSFile):
     """Handler for the ingestion rule.
@@ -50,13 +52,15 @@ def ingestion(options, SDSFile):
     """
 
     logger.info("Ingesting file: " + SDSFile.filename)
-    
+
     # Check the modification time of the file
-    if SDSFile.modified < (datetime.now() - timedelta(days=100)):
+    if SDSFile.modified < (datetime.now() - timedelta(days=options["days"])):
+        logger.info("File too old, cancelling ingestion.")
         return
 
     # The file was already ingested by iRODS
     if isIngested(SDSFile):
+        logger.info("File already present, cancelling ingestion.")
         return
 
     # A prune is requested
@@ -71,6 +75,28 @@ def ingestion(options, SDSFile):
 
     # Check if checksum is saved
     logger.info(irodsSession.getDataObject(SDSFile).checksum)
+
+
+def federatedIngestion(options, SDSFile):
+    """Handler for a federated ingestion rule. Puts the object in a given
+    root collection, potentially in a federated zone.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``remoteRoot``: Name of the root collection to put the object (`str`)
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.info("Ingesting file: " + SDSFile.customPath(options["remoteRoot"]))
+
+    # Attempt to ingest to iRODS
+    irodsSession.remotePut(SDSFile,
+                           options["remoteRoot"],
+                           purgeCache=True,
+                           registerChecksum=True)
 
 
 def isIngested(SDSFile):
@@ -112,6 +138,8 @@ def dcMetadata(options, sdsFile):
     SDSFile : `SDSFile`
         The file to be processed.
     """
+
+    logger.info("Dublin Core metadata for " + sdsFile.filename)
 
     if dublinCore.getDCMetadata(sdsFile) is not None:
         logger.info("DC metadata already exists for " + sdsFile.filename)
