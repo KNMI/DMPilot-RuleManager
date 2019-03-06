@@ -8,8 +8,8 @@ config = {
         "USER": "user",
         "PASS": "pass",
         "DATABASE": "wfrepo",
-        "DC_COLLECTION": "wf_do",
-        "METADATA_COLLECTION": "daily_streams"
+        "DC_METADATA_COLLECTION": "wf_do",
+        "WF_METADATA_COLLECTION": "daily_streams"
     },
     "IRODS": {
         "ENABLED": True,

@@ -79,7 +79,7 @@ class MongoManager():
         Saves a Dublin Core metadata document
         """
 
-        self.save(config["MONGO"]["DC_COLLECTION"], document)
+        self.save(config["MONGO"]["DC_METADATA_COLLECTION"], document)
 
     def getDCDocument(self, SDSFile):
         """
@@ -87,7 +87,7 @@ class MongoManager():
         Returns a Dublin Core metadata document corresponding to a file
         """
 
-        return self.findOne(config["MONGO"]["DC_COLLECTION"],
+        return self.findOne(config["MONGO"]["DC_METADATA_COLLECTION"],
                             {"fileId": SDSFile.filename})
 
     def setMetadataDocument(self, document):
@@ -96,7 +96,7 @@ class MongoManager():
         Saves a waveform metadata document
         """
 
-        self.save(config["MONGO"]["METADATA_COLLECTION"], document)
+        self.save(config["MONGO"]["WF_METADATA_COLLECTION"], document)
 
     def getMetadataDocument(self, SDSFile):
         """
@@ -104,7 +104,7 @@ class MongoManager():
         Returns a waveform metadata document corresponding to a file
         """
 
-        return self.findOne(config["MONGO"]["METADATA_COLLECTION"],
+        return self.findOne(config["MONGO"]["WF_METADATA_COLLECTION"],
                             {"fileId": SDSFile.filename})
 
 
