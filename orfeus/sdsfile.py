@@ -361,7 +361,7 @@ class SDSFile():
         """
         def SDSFile::prune
         Uses IRIS dataselect to prune a file on the sample level
-        and sets the quality indicator to Q (modified)
+        and sets the quality indicator to Q 
 
         QUALITIES:
         D - The state of quality control of the data is indeterminate
@@ -370,7 +370,7 @@ class SDSFile():
         M - Data center modified, time-series values have not been changed.
         """
 
-        # Record length within bounds
+        # Record length within some bounds
         if recordLength < 512 and recordLength > 65536:
             raise ValueError("Record length is invalid")
 
@@ -378,11 +378,11 @@ class SDSFile():
         if recordLength & (recordLength - 1) != 0:
             raise ValueError("Record length is not is a power of two")
 
-        # Create a phantom SDSFile with a different idenfier
+        # Create a phantom SDSFile with a different quality idenfier
         qualityFile = SDSFile(self.filename)
         qualityFile.quality = "Q"
 
-        # Create directories
+        # Create directories for the pruned file (quality Q)
         if not os.path.exists(qualityFile.directory):
             os.makedirs(qualityFile.directory)
 
@@ -406,7 +406,7 @@ class SDSFile():
         ] + neighbours, stdout=subprocess.PIPE)
 
         # Open a msrepack process and connect stdin to dataselect stdout
-        # -R repack record size to 4096
+        # -R repack record size to recordLength
         # -o output file for pruned data
         # - read from STDIN
         msrepack = subprocess.Popen([

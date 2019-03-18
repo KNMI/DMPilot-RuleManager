@@ -1,10 +1,8 @@
 import logging
-from time import sleep
 import signal
 import json
 
 from functools import partial
-
 
 class RuleManager():
 
@@ -12,6 +10,8 @@ class RuleManager():
     Class RuleManager
     Main manager class for rule functions
     """
+
+    RULE_TIMEOUT_SECONDS = 120
 
     def __init__(self):
 
@@ -99,18 +99,16 @@ class RuleManager():
         """
 
         total = len(items)
-        i = 0
         
         # Items can be SDSFiles or metadata (XML) files
-        for item in items:
-            i += 1
+        for i, item in enumerate(items):
             self.logger.info("Processing item %d/%d.", i, total)
             # Get the sequence of rules to be applied
             for ruleCall in map(self.getRule, self.ruleSequence):
 
                 # Set a signal (hardcoded at 2min for now)
                 signal.signal(signal.SIGALRM, self.__signalHandler)
-                signal.alarm(120)
+                signal.alarm(self.RULE_TIMEOUT_SECONDS)
 
                 # Rule options are bound to the call
                 # Capture exceptions (e.g. TimeoutError)

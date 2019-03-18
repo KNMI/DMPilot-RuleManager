@@ -15,6 +15,17 @@ but is also able to transparently apply a sequence of policies to a
 collection of data items of different types, as long as the policies
 accept these types.
 
+## Dependencies
+
+The Rule Manager uses many data tools from IRIS that need to be compiled and
+added to `$PATH`. These programs include:
+
+- IRIS Dataselect (https://github.com/iris-edu/dataselect)
+- IRIS MSRepack (https://github.com/iris-edu/libmseed)
+- IRIS MSI (https://github.com/iris-edu/msi)
+
+Source compilation instructions can be found on the respective pages.
+
 ## Running the SDS policy manager
 
 1) Edit the `configuration.py` file with options needed to run the script, e.g.,
