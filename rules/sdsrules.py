@@ -116,14 +116,14 @@ def purge(options, SDSFile):
         The file to be processed.
     """
 
+    # Files with size 0 need to be deleted regardless
+    if options["deleteEmptyFiles"] and SDSFile.size == 0:
+        return irodsSession.purgeTemporaryFile(SDSFile)
+
     # We can check time modified etc etc..
     if SDSFile.created > (datetime.now() - timedelta(days=7)):
         return
 
-    # Files with size 0 need to be deleted
-    if not options["deleteEmptyFiles"] and SDSFile.size != 0:
-        return
-    
     # Some other configurable rules
     logger.info("Purging file: " + SDSFile.filename)
     irodsSession.purgeTemporaryFile(SDSFile)
