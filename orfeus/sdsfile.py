@@ -77,6 +77,17 @@ class SDSFile():
             self.day])
 
 
+    @property
+    def pruned(self):
+        return SDSFile(".".join([self.net,
+            self.sta,
+            self.loc,
+            self.cha,
+            "Q",
+            self.year,
+            self.day]))
+
+
     # Returns filepath for a given file
     @property
     def filepath(self):
@@ -346,7 +357,7 @@ class SDSFile():
 
         return [self.start + timedelta(minutes=(30 * x)) for x in range(48)]
 
-    def prune(self):
+    def prune(self, recordLength=4096):
         """
         def SDSFile::prune
         Uses IRIS dataselect to prune a file on the sample level
@@ -359,7 +370,23 @@ class SDSFile():
         M - Data center modified, time-series values have not been changed.
         """
 
-        # Get neighbours BEFORE changing the quality indicator
+        # Record length within bounds
+        if recordLength < 512 and recordLength > 65536:
+            raise ValueError("Record length is invalid")
+
+        # Confirm record length is power of two
+        if recordLength & (recordLength - 1) != 0:
+            raise ValueError("Record length is not is a power of two")
+
+        # Create a phantom SDSFile with a different idenfier
+        qualityFile = SDSFile(self.filename)
+        qualityFile.quality = "Q"
+
+        # Create directories
+        if not os.path.exists(qualityFile.directory):
+            os.makedirs(qualityFile.directory)
+
+        # Get neighbours 
         neighbours = list(map(lambda x: x.filepath, self.neighbours))
 
         # Create a dataselect process
@@ -378,17 +405,14 @@ class SDSFile():
             "-o", "-",
         ] + neighbours, stdout=subprocess.PIPE)
 
-        qualityFile = SDSFile(self.filename)
-        qualityFile.quality = "Q"
-
         # Open a msrepack process and connect stdin to dataselect stdout
         # -R repack record size to 4096
         # -o output file for pruned data
         # - read from STDIN
         msrepack = subprocess.Popen([
            "msrepack",
-           "-R", "4096",
-           "-o", os.path.join("/data/temp_archive/pruned", qualityFile.filename),
+           "-R", str(recordLength),
+           "-o", qualityFile.filepath, 
            "-"
         ], stdin=dataselect.stdout, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 

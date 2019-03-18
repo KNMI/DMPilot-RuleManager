@@ -1,17 +1,23 @@
 [
     {
+	"name": "prune",
+	"options": {
+	    "repackRecordSize": 4096,
+            "qualities": ["D"]
+        }
+    },
+    {
 	"name": "ingestion",
 	"options": {
-	    "days": 100,
-	    "prune": true,
-	    "repackRecordSize": 4096,
-	    "daysIgnoreOlderThan": 700
+            "days": 100,
+            "qualities": ["Q", "E"]
 	}
     },
     {
 	"name": "purge",
 	"options": {
-	    "daysPurgeAfter": 7
+	    "daysPurgeAfter": 7,
+            "deleteEmptyFiles": true
 	}
     },
     {

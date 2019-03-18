@@ -33,6 +33,14 @@ def psdMetadata(self, options, SDSFile):
     print(psdCollector.process(SDSFile))
 
 
+def prune(options, SDSFile):
+
+    if SDSFile.quality not in options["qualities"]:
+        return
+
+    # Prune the file
+    SDSFile.prune(options["repackRecordSize"])
+
 def ingestion(options, SDSFile):
     """Handler for the ingestion rule.
 
@@ -51,21 +59,19 @@ def ingestion(options, SDSFile):
         The file to be processed.
     """
 
+    # Check if qualities need to be checked
+    if SDSFile.quality not in options["qualities"]:
+        return
+
     logger.info("Ingesting file: " + SDSFile.filename)
 
     # Check the modification time of the file
     if SDSFile.modified < (datetime.now() - timedelta(days=options["days"])):
-        logger.info("File too old, cancelling ingestion.")
-        return
+        return logger.info("File too old, cancelling ingestion.")
 
     # The file was already ingested by iRODS
     if irodsSession.exists(SDSFile):
-        logger.info("File already present, cancelling ingestion.")
-        return
-
-    # A prune is requested
-    if options["prune"]:
-        SDSFile.prune()
+        return logger.info("File already present, cancelling ingestion.")
 
     # Attempt to ingest to iRODS
     irodsSession.createDataObject(SDSFile,
@@ -114,6 +120,10 @@ def purge(options, SDSFile):
     if SDSFile.created > (datetime.now() - timedelta(days=7)):
         return
 
+    # Files with size 0 need to be deleted
+    if not options["deleteEmptyFiles"] and SDSFile.size != 0:
+        return
+    
     # Some other configurable rules
     logger.info("Purging file: " + SDSFile.filename)
     irodsSession.purgeTemporaryFile(SDSFile)
