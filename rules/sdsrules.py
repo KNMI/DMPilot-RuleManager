@@ -59,13 +59,13 @@ def ingestion(options, SDSFile):
         return
 
     # The file was already ingested by iRODS
-    if isIngested(SDSFile):
+    if irodsSession.exists(SDSFile):
         logger.info("File already present, cancelling ingestion.")
         return
 
     # A prune is requested
     if options["prune"]:
-        logger.info("Prune is requested.")
+        SDSFile.prune()
 
     # Attempt to ingest to iRODS
     irodsSession.createDataObject(SDSFile,
@@ -75,7 +75,6 @@ def ingestion(options, SDSFile):
 
     # Check if checksum is saved
     logger.info(irodsSession.getDataObject(SDSFile).checksum)
-
 
 def federatedIngestion(options, SDSFile):
     """Handler for a federated ingestion rule. Puts the object in a given
@@ -97,14 +96,6 @@ def federatedIngestion(options, SDSFile):
                            options["remoteRoot"],
                            purgeCache=True,
                            registerChecksum=True)
-
-
-def isIngested(SDSFile):
-    """Stateless check to see if the file exists in iRODS?
-    TODO XXX
-    """
-
-    return irodsSession.exists(SDSFile)
 
 
 def purge(options, SDSFile):

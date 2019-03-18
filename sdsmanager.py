@@ -10,12 +10,18 @@ from core.rulemanager import RuleManager
 from orfeus.sdscollector import SDSFileCollector
 import rules.sdsrules as sdsrules
 
-if __name__ == "__main__":
+def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", help="directory containing the files to process")
     parser.add_argument("--rulemap", help="set custom rule map file")
     parsedargs = vars(parser.parse_args())
+
+    # Check parameters
+    if parsedargs["dir"] is None:
+        return print("A directory needs to be specified using --dir")
+    if parsedargs["rulemap"] is None:
+        return print("A rulemap needs to be specified using --rulemap")
 
     # Set up rules
     RM = RuleManager()
@@ -27,3 +33,6 @@ if __name__ == "__main__":
 
     # Apply the sequence of rules on files
     RM.sequence(files)
+
+if __name__ == "__main__":
+    main()

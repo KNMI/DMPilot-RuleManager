@@ -56,8 +56,6 @@ class SDSFile():
         Create a filestream from a given filename
         """
 
-        self.filename = filename
-
         # Extract stream identification
         (self.net,
          self.sta,
@@ -66,6 +64,18 @@ class SDSFile():
          self.quality,
          self.year,
          self.day) = filename.split(".")
+
+    # Returns the filename
+    @property
+    def filename(self):
+        return ".".join([self.net,
+            self.sta,
+            self.loc,
+            self.cha,
+            self.quality,
+            self.year,
+            self.day])
+
 
     # Returns filepath for a given file
     @property
@@ -189,7 +199,7 @@ class SDSFile():
         with open(self.filepath, "rb") as f:
             for block in iter(lambda: f.read(0x10000), b""):
                 checksum.update(block)
-        return base64.b64encode(checksum.digest()).decode()
+        return "sha2:" + base64.b64encode(checksum.digest()).decode()
 
     @property
     def queryStringTXT(self):
@@ -341,20 +351,49 @@ class SDSFile():
         def SDSFile::prune
         Uses IRIS dataselect to prune a file on the sample level
         and sets the quality indicator to Q (modified)
+
+        QUALITIES:
+        D - The state of quality control of the data is indeterminate
+        R - Raw Waveform Data with no Quality Control
+        Q - Quality Controlled Data, some processes have been applied to the data.
+        M - Data center modified, time-series values have not been changed.
         """
 
-        # Set quality indicator
-        self.quality = "Q"
+        # Get neighbours BEFORE changing the quality indicator
+        neighbours = list(map(lambda x: x.filepath, self.neighbours))
 
-        # Write pruned data to /dev/null for now
-        subprocess.call([
+        # Create a dataselect process
+        # -Ps prunes to sample level
+        # -Q set quality indicator to Q
+        # -ts, -te are start & end time of sample respectively (INCLUSIVE)
+        # -szs remove records with 0 samples (may result in empty pruned files)
+        # -o - write to stdout
+        dataselect = subprocess.Popen([
             "dataselect",
             "-Ps",
-            "-Q Q",
+            "-Q", "Q",
             "-ts", self.sampleStart,
             "-te", self.sampleEnd,
-            "-o", "/dev/null"
-        ] + map(lambda x: x.filepath, self.neighbours))
+            "-szs",
+            "-o", "-",
+        ] + neighbours, stdout=subprocess.PIPE)
+
+        qualityFile = SDSFile(self.filename)
+        qualityFile.quality = "Q"
+
+        # Open a msrepack process and connect stdin to dataselect stdout
+        # -R repack record size to 4096
+        # -o output file for pruned data
+        # - read from STDIN
+        msrepack = subprocess.Popen([
+           "msrepack",
+           "-R", "4096",
+           "-o", os.path.join("/data/temp_archive/pruned", qualityFile.filename),
+           "-"
+        ], stdin=dataselect.stdout, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # Not sure why we need this
+        dataselect.stdout.close()
 
     def __getAdjacentFile(self, direction):
         """
