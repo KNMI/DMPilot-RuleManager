@@ -129,12 +129,14 @@ def purge(options, SDSFile):
     options : `dict`
         The rule's options.
         - ``daysPurgeAfter``: Number of days after which the file should be deleted (`int`)
+        - ``deleteEmptyFiles``: Whether to delete files with no samples regardless of age (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
 
     # Files with size 0 need to be deleted regardless
     if options["deleteEmptyFiles"] and SDSFile.size == 0:
+        logger.info("Purging empty file: " + SDSFile.filename)
         return irodsSession.purgeTemporaryFile(SDSFile)
 
     # We can check time modified etc etc..
