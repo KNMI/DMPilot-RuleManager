@@ -115,7 +115,7 @@ class IRODSManager():
         if dataObject is not None:
 
             # Checksum of file did not change vs. iRODS checksum
-            if dataObject.checksum == "sha2:%s" % SDSFile.checksum:
+            if dataObject.checksum == SDSFile.checksum:
                 logger.info("File already registered, cancelling ingestion.")
                 return
 

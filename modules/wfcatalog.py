@@ -37,9 +37,9 @@ class Collector():
         except Exception as Ex:
             return None
 
-        return self.extractDatabaseDocument(metadata.meta)
+        return self.extractDatabaseDocument(SDSFile, metadata.meta)
 
-    def extractDatabaseDocument(self, trace):
+    def extractDatabaseDocument(self, SDSFile, trace):
         """
         Collect.extractDatabaseDocument
         Document parser for daily and hourly granules
@@ -51,11 +51,12 @@ class Collector():
         # Source document for granules
         source = {
             "created": datetime.now(),
+            "checksum": SDSFile.checksum,
             "collector": "XXXTODO",
             "warnings": trace["warnings"],
             "status": "open",
             "format": "mSEED",
-            "fileId": "XXXTODO",
+            "fileId": SDSFile.filename,
             "type": "seismic",
             "nseg": nSegments,
             "cont": trace["num_gaps"] == 0,

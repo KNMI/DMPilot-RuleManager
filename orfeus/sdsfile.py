@@ -192,7 +192,7 @@ class SDSFile():
     def checksum(self):
         """
         def SDSFile::checksum
-        Calculates the SHA256 checksum for a given file
+        Calculates the SHA256 checksum for a given file prepended with sha2:
         """
 
         checksum = sha256()
@@ -315,7 +315,10 @@ class SDSFile():
         """
 
         # Query our FDSNWS Webservice for the station location
-        request = requests.get(os.path.join(self.fdsnws, self.queryStringTXT))
+        try:
+            request = requests.get(os.path.join(self.fdsnws, self.queryStringTXT))
+        except Exception as ex:
+            return None
 
         # Any error just ignore
         if request.status_code != 200:

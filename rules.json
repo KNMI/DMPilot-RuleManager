@@ -15,17 +15,23 @@
 	}
     },
     {
-	"name": "purge",
-	"options": {
-		"daysPurgeAfter": 7,
-		"deleteEmptyFiles": true,
-		"qualities": ["Q"]
-	}
+        "name": "waveformMetadata",
+        "options": {
+                "qualities": ["Q"]
+        }
     },
     {
-	"name": "dcMetadata",
+        "name": "dcMetadata",
+        "options": {
+                "qualities": ["Q"]
+        }
+    },
+    {
+	"name": "purge",
 	"options": {
-		"qualities": ["Q"]
+		"daysPurgeAfter": 30,
+		"deleteEmptyFiles": true,
+		"qualities": ["R", "E", "M", "D", "Q"]
 	}
     }
 ]
