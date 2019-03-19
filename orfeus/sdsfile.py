@@ -47,11 +47,10 @@ class SDSFile():
     """
 
     # Save some configuration to the class
-    archiveRoot = config["ARCHIVE_ROOT"]
     irodsRoot = config["IRODS_ROOT"]
     fdsnws = config["FDSNWS_ADDRESS"]
 
-    def __init__(self, filename):
+    def __init__(self, filename, archiveRoot):
         """
         Create a filestream from a given filename
         """
@@ -65,28 +64,28 @@ class SDSFile():
          self.year,
          self.day) = filename.split(".")
 
+        self.archiveRoot = archiveRoot
+
     # Returns the filename
     @property
     def filename(self):
         return ".".join([self.net,
-            self.sta,
-            self.loc,
-            self.cha,
-            self.quality,
-            self.year,
-            self.day])
-
+                         self.sta,
+                         self.loc,
+                         self.cha,
+                         self.quality,
+                         self.year,
+                         self.day])
 
     @property
     def pruned(self):
         return SDSFile(".".join([self.net,
-            self.sta,
-            self.loc,
-            self.cha,
-            "Q",
-            self.year,
-            self.day]))
-
+                                 self.sta,
+                                 self.loc,
+                                 self.cha,
+                                 "Q",
+                                 self.year,
+                                 self.day]))
 
     # Returns filepath for a given file
     @property
@@ -361,7 +360,7 @@ class SDSFile():
         """
         def SDSFile::prune
         Uses IRIS dataselect to prune a file on the sample level
-        and sets the quality indicator to Q 
+        and sets the quality indicator to Q
 
         QUALITIES:
         D - The state of quality control of the data is indeterminate
@@ -386,7 +385,7 @@ class SDSFile():
         if not os.path.exists(qualityFile.directory):
             os.makedirs(qualityFile.directory)
 
-        # Get neighbours 
+        # Get neighbours
         neighbours = list(map(lambda x: x.filepath, self.neighbours))
 
         # Check if overlap needs to be removed
@@ -418,7 +417,7 @@ class SDSFile():
         msrepack = subprocess.Popen([
            "msrepack",
            "-R", str(recordLength),
-           "-o", qualityFile.filepath, 
+           "-o", qualityFile.filepath,
            "-"
         ], stdin=dataselect.stdout, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 

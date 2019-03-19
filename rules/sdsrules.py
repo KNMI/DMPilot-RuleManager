@@ -206,3 +206,5 @@ def waveformMetadata(options, SDSFile):
 def testPrint(options, sdsFile):
     """Prints the filename."""
     logger.info(sdsFile.filename)
+    logger.info(sdsFile.directory)
+    logger.info(sdsFile.irodsDirectory)

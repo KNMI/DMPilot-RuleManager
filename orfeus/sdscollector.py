@@ -9,8 +9,9 @@
 """
 
 from fnmatch import fnmatch
-
 from datetime import datetime, timedelta
+from itertools import repeat
+
 from orfeus.sdsfile import SDSFile
 from orfeus.filecollector import FileCollector
 
@@ -37,7 +38,7 @@ class SDSFileCollector(FileCollector):
         Returns all files in the SDS archive
         """
 
-        return map(SDSFile, self.files)
+        return map(SDSFile, self.files, repeat(self.archiveDir))
 
     def collectFromDate(self, date):
         """
