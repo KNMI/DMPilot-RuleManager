@@ -51,7 +51,7 @@ def prune(options, SDSFile):
         return
 
     # Prune the file
-    SDSFile.prune(repackRecordSize=options["repackRecordSize"],
+    SDSFile.prune(recordLength=options["repackRecordSize"],
                   removeOverlap=options["removeOverlap"])
 
 

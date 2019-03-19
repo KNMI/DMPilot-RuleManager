@@ -77,16 +77,6 @@ class SDSFile():
                          self.year,
                          self.day])
 
-    @property
-    def pruned(self):
-        return SDSFile(".".join([self.net,
-                                 self.sta,
-                                 self.loc,
-                                 self.cha,
-                                 "Q",
-                                 self.year,
-                                 self.day]))
-
     # Returns filepath for a given file
     @property
     def filepath(self):
@@ -378,7 +368,7 @@ class SDSFile():
             raise ValueError("Record length is not is a power of two")
 
         # Create a phantom SDSFile with a different quality idenfier
-        qualityFile = SDSFile(self.filename)
+        qualityFile = SDSFile(self.filename, self.archiveRoot)
         qualityFile.quality = "Q"
 
         # Create directories for the pruned file (quality Q)
@@ -446,4 +436,4 @@ class SDSFile():
             newDay
         ])
 
-        return SDSFile(newFilename)
+        return SDSFile(newFilename, self.archiveRoot)

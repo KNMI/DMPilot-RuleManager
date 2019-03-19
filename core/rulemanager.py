@@ -11,7 +11,7 @@ class RuleManager():
     Main manager class for rule functions
     """
 
-    RULE_TIMEOUT_SECONDS = 120
+    RULE_TIMEOUT_SECONDS = 1
 
     def __init__(self):
 
@@ -26,7 +26,7 @@ class RuleManager():
         self.rules = None
         self.ruleSequence = None
 
-    def __signalHandler(self):
+    def __signalHandler(self, signum, frame):
         """
         Collector.__signalHandler
         Raise an exception when a signal SIGALRM was received
@@ -115,8 +115,7 @@ class RuleManager():
                 try:
                     ruleCall(item)
                 except TimeoutError:
-                    logging.info("Timeout calling rule!")
-                    pass
+                    logging.info("Timeout calling rule %s." % ruleCall.func.__name__)
                 except Exception as Ex:
                     logging.error(Ex)
                 finally:

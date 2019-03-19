@@ -3,7 +3,7 @@
 	"name": "prune",
 	"options": {
 		"repackRecordSize": 4096,
-                "removeOverlap": true,
+		"removeOverlap": true,
 		"qualities": ["D"]
         }
     },
@@ -11,18 +11,21 @@
 	"name": "ingestion",
 	"options": {
 		"days": 100,
-		"qualities": ["Q", "E"]
+		"qualities": ["Q"]
 	}
     },
     {
 	"name": "purge",
 	"options": {
 		"daysPurgeAfter": 7,
-		"deleteEmptyFiles": true
+		"deleteEmptyFiles": true,
+		"qualities": ["Q"]
 	}
     },
     {
 	"name": "dcMetadata",
-	"options": {}
+	"options": {
+		"qualities": ["Q"]
+	}
     }
 ]
