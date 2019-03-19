@@ -71,7 +71,7 @@ def ingestion(options, SDSFile):
     """
 
     # Check if qualities need to be checked
-    if "qualities" in options and SDSFile.quality not in options["qualities"]:
+    if SDSFile.quality not in options["qualities"]:
         return
 
     logger.info("Ingesting file: " + SDSFile.filename)
@@ -109,7 +109,7 @@ def federatedIngestion(options, SDSFile):
     """
 
     # Check if qualities need to be checked
-    if "qualities" in options and SDSFile.quality not in options["qualities"]:
+    if SDSFile.quality not in options["qualities"]:
         return
 
     logger.info("Ingesting file: " + SDSFile.customPath(options["remoteRoot"]))
@@ -161,7 +161,7 @@ def dcMetadata(options, SDSFile):
     """
 
     # Check if qualities need to be checked
-    if "qualities" in options and SDSFile.quality not in options["qualities"]:
+    if SDSFile.quality not in options["qualities"]:
         return
 
     logger.info("Dublin Core metadata for " + SDSFile.filename)
@@ -192,7 +192,7 @@ def waveformMetadata(options, SDSFile):
     """
 
     # Check if qualities need to be checked
-    if "qualities" in options and SDSFile.quality not in options["qualities"]:
+    if SDSFile.quality not in options["qualities"]:
         return
 
     if mongoSession.getMetadataDocument(SDSFile) is not None:
