@@ -357,7 +357,7 @@ class SDSFile():
 
         return [self.start + timedelta(minutes=(30 * x)) for x in range(48)]
 
-    def prune(self, recordLength=4096):
+    def prune(self, recordLength=4096, removeOverlap=True):
         """
         def SDSFile::prune
         Uses IRIS dataselect to prune a file on the sample level
@@ -389,6 +389,12 @@ class SDSFile():
         # Get neighbours 
         neighbours = list(map(lambda x: x.filepath, self.neighbours))
 
+        # Check if overlap needs to be removed
+        if removeOverlap:
+            pruneFlag = "-Ps"
+        else:
+            pruneFlag = "-Pe"
+
         # Create a dataselect process
         # -Ps prunes to sample level
         # -Q set quality indicator to Q
@@ -397,7 +403,7 @@ class SDSFile():
         # -o - write to stdout
         dataselect = subprocess.Popen([
             "dataselect",
-            "-Ps",
+            pruneFlag,
             "-Q", "Q",
             "-ts", self.sampleStart,
             "-te", self.sampleEnd,

@@ -50,7 +50,8 @@ def prune(options, SDSFile):
         return
 
     # Prune the file
-    SDSFile.prune(options["repackRecordSize"])
+    SDSFile.prune(repackRecordSize=options["repackRecordSize"],
+                  removeOverlap=options["removeOverlap"])
 
 
 def ingestion(options, SDSFile):

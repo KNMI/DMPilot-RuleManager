@@ -3,6 +3,7 @@
 	"name": "prune",
 	"options": {
 		"repackRecordSize": 4096,
+                "removeOverlap": true,
 		"qualities": ["D"]
         }
     },
