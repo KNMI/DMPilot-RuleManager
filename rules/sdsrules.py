@@ -41,6 +41,7 @@ def prune(options, SDSFile):
     options : `dict`
         The rule's options.
         - ``repackRecordSize``: The new record size (`int`)
+        - ``removeOverlap``: Whether or not to remove overlaps (`bool`)
         - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
     SDSFile : `SDSFile`
         The file to be processed.
