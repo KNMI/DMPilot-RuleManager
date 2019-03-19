@@ -34,12 +34,24 @@ def psdMetadata(self, options, SDSFile):
 
 
 def prune(options, SDSFile):
+    """Handler for the file pruning/repacking rule.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``repackRecordSize``: The new record size (`int`)
+        - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
 
     if SDSFile.quality not in options["qualities"]:
         return
 
     # Prune the file
     SDSFile.prune(options["repackRecordSize"])
+
 
 def ingestion(options, SDSFile):
     """Handler for the ingestion rule.
@@ -49,18 +61,17 @@ def ingestion(options, SDSFile):
     options : `dict`
         The rule's options.
         - ``days``: Maximum age of the file to be ingested (`int`)
-        - ``prune``: Whether or not to prune the file (`bool`)
-        - ``repackRecordSize``: (`int`)
         - ``daysIgnoreOlderThan``: (`int`)
         - ``rescName``: Name of the iRODS resource to save the object (`str`)
         - ``purgeCache``: Whether or not to purge the cache,
                           in case the resource is compound (`bool`)
+        - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
 
     # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
+    if "qualities" in options and SDSFile.quality not in options["qualities"]:
         return
 
     logger.info("Ingesting file: " + SDSFile.filename)
@@ -82,6 +93,7 @@ def ingestion(options, SDSFile):
     # Check if checksum is saved
     logger.info(irodsSession.getDataObject(SDSFile).checksum)
 
+
 def federatedIngestion(options, SDSFile):
     """Handler for a federated ingestion rule. Puts the object in a given
     root collection, potentially in a federated zone.
@@ -91,9 +103,14 @@ def federatedIngestion(options, SDSFile):
     options : `dict`
         The rule's options.
         - ``remoteRoot``: Name of the root collection to put the object (`str`)
+        - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
+
+    # Check if qualities need to be checked
+    if "qualities" in options and SDSFile.quality not in options["qualities"]:
+        return
 
     logger.info("Ingesting file: " + SDSFile.customPath(options["remoteRoot"]))
 
@@ -129,29 +146,34 @@ def purge(options, SDSFile):
     irodsSession.purgeTemporaryFile(SDSFile)
 
 
-def dcMetadata(options, sdsFile):
+def dcMetadata(options, SDSFile):
     """Process and save Dublin Core metadata of an SDS file.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
+        - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
 
-    logger.info("Dublin Core metadata for " + sdsFile.filename)
-
-    if dublinCore.getDCMetadata(sdsFile) is not None:
-        logger.info("DC metadata already exists for " + sdsFile.filename)
+    # Check if qualities need to be checked
+    if "qualities" in options and SDSFile.quality not in options["qualities"]:
         return
 
-    document = dublinCore.extractDCMetadata(sdsFile)
+    logger.info("Dublin Core metadata for " + SDSFile.filename)
+
+    if dublinCore.getDCMetadata(SDSFile) is not None:
+        logger.info("DC metadata already exists for " + SDSFile.filename)
+        return
+
+    document = dublinCore.extractDCMetadata(SDSFile)
 
     # Save to the database
     if document:
         mongoSession.saveDCDocument(document)
-        logger.info("Saved DC metadata for " + sdsFile.filename)
+        logger.info("Saved DC metadata for " + SDSFile.filename)
 
 
 def waveformMetadata(options, SDSFile):
@@ -162,9 +184,15 @@ def waveformMetadata(options, SDSFile):
     ----------
     options : `dict`
         The rule's options.
+        - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
+
+    # Check if qualities need to be checked
+    if "qualities" in options and SDSFile.quality not in options["qualities"]:
+        return
+
     if mongoSession.getMetadataDocument(SDSFile) is not None:
         return
 
