@@ -35,6 +35,7 @@ class DublinCore:
         document = {
             "_cls": "eudat.models.mongo.wf_do",
             "fileId": SDSFile.filename,
+            "checksum": SDSFile.checksum,
             "dc_identifier": "TODO_PID",
             "dc_title": "INGV_Repository",
             "dc_subject": "mSEED, waveform, quality",

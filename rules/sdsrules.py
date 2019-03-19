@@ -76,7 +76,7 @@ def ingestion(options, SDSFile):
     if SDSFile.quality not in options["qualities"]:
         return
 
-    logger.info("Ingesting file %s " % SDSFile.filename)
+    logger.info("Ingesting file %s." % SDSFile.filename)
 
     # Check the modification time of the file
     if SDSFile.modified < (datetime.now() - timedelta(days=options["days"])):
@@ -114,7 +114,7 @@ def federatedIngestion(options, SDSFile):
     if SDSFile.quality not in options["qualities"]:
         return
 
-    logger.info("Ingesting file: " + SDSFile.customPath(options["remoteRoot"]))
+    logger.info("Ingesting file %s." % SDSFile.customPath(options["remoteRoot"]))
 
     # Attempt to ingest to iRODS
     irodsSession.remotePut(SDSFile,
@@ -166,19 +166,21 @@ def dcMetadata(options, SDSFile):
     if SDSFile.quality not in options["qualities"]:
         return
 
-    logger.info("Dublin Core metadata for " + SDSFile.filename)
+    logger.info("Dublin Core metadata for %s." % SDSFile.filename)
 
-    # We need to compare checksums too to detect changes
-    if dublinCore.getDCMetadata(SDSFile) is not None:
-        logger.info("DC metadata already exists for " + SDSFile.filename)
-        return
+    # Get the existing Dublin Core Object
+    dublinCoreObject = dublinCore.getDCMetadata(SDSFile)
+
+    if dublinCoreObject is not None:
+        if dublinCoreObject["checksum"] == SDSFile.checksum:
+            return logger.info("DC metadata already exists for %s." % SDSFile.filename)
 
     document = dublinCore.extractDCMetadata(SDSFile)
 
     # Save to the database
     if document:
         mongoSession.saveDCDocument(document)
-        logger.info("Saved DC metadata for " + SDSFile.filename)
+        logger.info("Saved DC metadata for %s." % SDSFile.filename)
 
 
 def waveformMetadata(options, SDSFile):
