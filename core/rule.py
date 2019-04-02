@@ -35,4 +35,9 @@ class Rule():
         # Go over each configured policy and assert the policy evaluates to True
         for policy in self.policies:
             if not policy(SDSFile):
-                raise AssertionError(policy.func.__name__)
+
+                # If a __wrapped__ attribut exists the function was inverted
+                if "__wrapped__" in dir(policy.func):
+                  raise AssertionError("!%s" % policy.func.__name__)
+                else:
+                  raise AssertionError(policy.func.__name__)

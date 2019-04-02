@@ -2,7 +2,7 @@ import logging
 import signal
 import json
 
-from functools import partial
+from functools import partial, wraps
 from core.rule import Rule
 
 class RuleManager():
@@ -89,7 +89,18 @@ class RuleManager():
         Def RuleManager.bindOptions
         Binds options to a function call
         """
-        return partial(getattr(definitions, item["name"]), item["options"])
+
+        def invert(f):
+            @wraps(f)
+            def g(*args, **kwargs):
+                return not f(*args, **kwargs)
+            return g
+
+        # Invert the boolean result from the policy
+        if (definitions == self.policies) and item["name"].startswith("!"):
+          return partial(invert(getattr(definitions, item["name"][1:])), item["options"])
+        else:
+          return partial(getattr(definitions, item["name"]), item["options"])
 
     def getRule(self, rule):
         """
@@ -125,6 +136,7 @@ class RuleManager():
             # Get the sequence of rules to be applied
             for rule in map(self.getRule, self.ruleSequence):
 
+                name = rule.call.func.__name__
                 # Set a signal (hardcoded at 2min for now)
                 signal.signal(signal.SIGALRM, self.__signalHandler)
                 signal.alarm(rule.TIMEOUT_SECONDS)
@@ -142,8 +154,8 @@ class RuleManager():
                     logging.info("Not executing rule %s. Rule did not pass policy %s." % (rule.call.func.__name__, e))
 
                 # Other exceptions
-                except Exception as Ex:
-                    logging.error("Rule execution %s failed: %s" % (rule.call.func.__name__, Ex))
+                except Exception as e:
+                    logging.error("Rule execution %s failed: %s" % (rule.call.func.__name__, e))
 
                 # Disable the alarm
                 finally:
