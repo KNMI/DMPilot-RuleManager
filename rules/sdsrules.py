@@ -33,7 +33,7 @@ def psdMetadata(self, options, SDSFile):
     print(psdCollector.process(SDSFile))
 
 
-def prune(options, SDSFile):
+def prune(rule, SDSFile):
     """Handler for the file pruning/repacking rule.
 
     Parameters
@@ -46,9 +46,6 @@ def prune(options, SDSFile):
     SDSFile : `SDSFile`
         The file to be processed.
     """
-
-    if SDSFile.quality not in options["qualities"]:
-        return
 
     # Prune the file to a .Q quality file in the temporary archive
     SDSFile.prune(recordLength=options["repackRecordSize"],
@@ -71,10 +68,6 @@ def ingestion(options, SDSFile):
     SDSFile : `SDSFile`
         The file to be processed.
     """
-
-    # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
-        return
 
     logger.info("Ingesting file %s." % SDSFile.filename)
 
@@ -109,10 +102,6 @@ def federatedIngestion(options, SDSFile):
     SDSFile : `SDSFile`
         The file to be processed.
     """
-
-    # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
-        return
 
     logger.info("Ingesting file %s." % SDSFile.customPath(options["remoteRoot"]))
 
@@ -162,10 +151,6 @@ def dcMetadata(options, SDSFile):
         The file to be processed.
     """
 
-    # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
-        return
-
     logger.info("Dublin Core metadata for %s." % SDSFile.filename)
 
     # Get the existing Dublin Core Object
@@ -195,10 +180,6 @@ def waveformMetadata(options, SDSFile):
     SDSFile : `SDSFile`
         The file to be processed.
     """
-
-    # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
-        return
 
     dataObject = irodsSession.getDataObject(SDSFile)
 

@@ -3,35 +3,60 @@
 	"name": "prune",
 	"options": {
 		"repackRecordSize": 4096,
-		"removeOverlap": true,
-		"qualities": ["D"]
-        }
+		"removeOverlap": true
+        },
+        "policies": [{
+            "name": "assertQualityPolicy",
+            "options": {
+                "qualities": ["D"]
+            }
+        }],
     },
     {
 	"name": "ingestion",
+        "policies": [{
+            "name": "assertQualityPolicy",
+            "options": {
+                "qualities": ["D"]
+            }
+        }],
 	"options": {
 		"days": 100,
-		"qualities": ["Q"]
 	}
     },
     {
         "name": "waveformMetadata",
+        "policies": [{
+            "name": "assertQualityPolicy",
+            "options": {
+                "qualities": ["D"]
+            }
+        }],
         "options": {
-                "qualities": ["Q"]
         }
     },
     {
         "name": "dcMetadata",
+        "policies": [{
+            "name": "assertQualityPolicy",
+            "options": {
+                "qualities": ["D"]
+            }
+        }],
         "options": {
-                "qualities": ["Q"]
         }
     },
     {
 	"name": "purge",
+        "policies": [{
+            "name": "assertQualityPolicy",
+            "options": {
+                "qualities": ["R", "E", "M", "D", "Q"]
+            }
+        }],
 	"options": {
 		"daysPurgeAfter": 30,
-		"deleteEmptyFiles": true,
-		"qualities": ["R", "E", "M", "D", "Q"]
+		"deleteEmptyFiles": true
 	}
     }
 ]
