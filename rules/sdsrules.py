@@ -71,14 +71,6 @@ def ingestion(options, SDSFile):
 
     logger.info("Ingesting file %s." % SDSFile.filename)
 
-    # Check the modification time of the file
-    if SDSFile.modified < (datetime.now() - timedelta(days=options["days"])):
-        return logger.info("File too old, cancelling ingestion.")
-
-    # The file was already ingested by iRODS
-    if irodsSession.exists(SDSFile):
-        return logger.info("File already present, cancelling ingestion.")
-
     # Attempt to ingest to iRODS
     irodsSession.createDataObject(SDSFile,
                                   rescName="compResc",
@@ -130,10 +122,6 @@ def purge(options, SDSFile):
         logger.info("Purging empty file %s." % SDSFile.filename)
         return irodsSession.purgeTemporaryFile(SDSFile)
 
-    # Check if the file modification date is after the configured limit and must be kept
-    if SDSFile.created > (datetime.now() - timedelta(days=options["daysPurgeAfter"])):
-        return
-
     # Some other configurable rules
     logger.info("Purging file %s." % SDSFile.filename)
     irodsSession.purgeTemporaryFile(SDSFile)
@@ -154,12 +142,6 @@ def dcMetadata(options, SDSFile):
     logger.info("Dublin Core metadata for %s." % SDSFile.filename)
 
     # Get the existing Dublin Core Object
-    dublinCoreObject = dublinCore.getDCMetadata(SDSFile)
-
-    if dublinCoreObject is not None:
-        if dublinCoreObject["checksum"] == SDSFile.checksum:
-            return logger.info("DC metadata already exists for %s." % SDSFile.filename)
-
     document = dublinCore.extractDCMetadata(SDSFile)
 
     # Save to the database
@@ -181,18 +163,7 @@ def waveformMetadata(options, SDSFile):
         The file to be processed.
     """
 
-    dataObject = irodsSession.getDataObject(SDSFile)
-
-    # There is no data object available in iRODS
-    if dataObject is None:
-        return logger.info("IRODS Data Object does not exist.")
-
-    # Check checksum of SDSFile against what is in the database
-    metadataObject = mongoSession.getMetadataDocument(SDSFile)
-    if metadataObject is not None:
-        if metadataObject["checksum"] == SDSFile.checksum:
-            return logger.info("Metadata already exists and hash did not change.")
-
+    # Get waveform metadata
     document = collector.getMetadata(SDSFile)
     if document is None:
       return logger.error("Could not get the waveform metadata.")

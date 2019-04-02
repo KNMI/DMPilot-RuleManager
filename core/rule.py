@@ -4,6 +4,8 @@ class Rule():
     Container for a single rule with a rule and policies to be asserted
     """
 
+    TIMEOUT_SECONDS = 10
+
     def __init__(self, call, policies):
         """
         Rule.__init__ 
@@ -17,11 +19,12 @@ class Rule():
         Rule.apply
         Applies a given rule and policies to a file
         """
+
         # Assert the policies
-        rule.assertPolicies(item)
+        self.assertPolicies(SDSFile)
 
         # Call the rule
-        rule.call(item)
+        self.call(SDSFile)
 
     def assertPolicies(self, SDSFile):
         """
@@ -32,4 +35,4 @@ class Rule():
         # Go over each configured policy and assert the policy evaluates to True
         for policy in self.policies:
             if not policy(SDSFile):
-                raise AssertionError("The policy failed for %s." % policy.func.__name__)
+                raise AssertionError(policy.func.__name__)

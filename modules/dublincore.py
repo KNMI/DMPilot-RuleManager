@@ -25,8 +25,8 @@ class DublinCore:
         # Determine coordinates
         location = SDSFile.location
         if location is None:
-            logger.info("Impossible to locate " + SDSFile.filename)
-            return None
+            raise ValueError("Impossible to locate %s." % SDSFile.filename)
+
         lon = location["longitude"]
         lat = location["latitude"]
         ele = location["elevation"]

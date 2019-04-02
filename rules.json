@@ -1,62 +1,103 @@
 [
     {
-	"name": "prune",
-	"options": {
-		"repackRecordSize": 4096,
-		"removeOverlap": true
+        "name": "prune",
+        "options": {
+            "removeOverlap": true,
+            "repackRecordSize": 4096
         },
-        "policies": [{
-            "name": "assertQualityPolicy",
-            "options": {
-                "qualities": ["D"]
+        "policies": [
+            {
+                "name": "assertQualityPolicy",
+                "options": {
+                    "qualities": ["D"]
+                }
             }
-        }],
+        ]
     },
     {
-	"name": "ingestion",
-        "policies": [{
-            "name": "assertQualityPolicy",
-            "options": {
-                "qualities": ["D"]
+        "name": "ingestion",
+        "options": {},
+        "policies": [
+            {
+                "name": "assertQualityPolicy",
+                "options": {
+                    "qualities": ["D"]
+                }
+            },
+            {
+                "name": "assertModificationTimeYoungerThan",
+                "options": {
+                    "days": 100
+                }
+            },
+            {
+                "name": "assertIRODSNotExistPolicy",
+                "options": {}
             }
-        }],
-	"options": {
-		"days": 100,
-	}
+        ]
     },
     {
         "name": "waveformMetadata",
-        "policies": [{
-            "name": "assertQualityPolicy",
-            "options": {
-                "qualities": ["D"]
+        "options": {},
+        "policies": [
+            {
+                "name": "assertQualityPolicy",
+                "options": {
+                    "qualities": [
+                        "D"
+                    ]
+                }
+            }, {
+                "name": "assertWFCatalogNotExistsPolicy",
+                "options": {}
             }
-        }],
-        "options": {
-        }
+        ]
     },
     {
         "name": "dcMetadata",
-        "policies": [{
-            "name": "assertQualityPolicy",
-            "options": {
-                "qualities": ["D"]
+        "options": {},
+        "policies": [
+            {
+                "name": "assertQualityPolicy",
+                "options": {
+                    "qualities": ["D"]
+                }
+            }, {
+                "name": "assertDCMetadataNotExistsPolicy",
+                "options": {}
             }
-        }],
-        "options": {
-        }
+        ]
     },
     {
-	"name": "purge",
-        "policies": [{
-            "name": "assertQualityPolicy",
-            "options": {
-                "qualities": ["R", "E", "M", "D", "Q"]
+        "name": "purge",
+        "options": {
+            "deleteEmptyFiles": true
+        },
+        "policies": [
+            {
+                "name": "assertQualityPolicy",
+                "options": {
+                    "qualities": ["R", "E", "M", "D", "Q"]
+                }
+            },
+            {
+                "name": "assertIRODSExistsPolicy",
+                "options": {}
+            },
+            {
+                "name": "assertWFCatalogExistsPolicy",
+                "options": {}
+            },
+            {
+                "name": "assertDCMetadataExistsPolicy",
+                "options": {}
+            },
+            {
+                "name": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 30
+                }
             }
-        }],
-	"options": {
-		"daysPurgeAfter": 30,
-		"deleteEmptyFiles": true
-	}
+        ]
     }
 ]

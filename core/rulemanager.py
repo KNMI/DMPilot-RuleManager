@@ -12,8 +12,6 @@ class RuleManager():
     Main manager class for rule functions
     """
 
-    RULE_TIMEOUT_SECONDS = 1
-
     def __init__(self):
 
         # Initialize logger
@@ -47,7 +45,7 @@ class RuleManager():
             The path for a JSON file defining which rules to run, their order, and their options.
         """
 
-        # Load the Python scripted rules
+        # Load the Python scripted rules and policies
         self.rules = ruleModule
         self.policies = policyModule
 
@@ -81,7 +79,7 @@ class RuleManager():
             # TODO check policies
 
             # The rule must be callable (function) too
-            if not callable(rule["rule"]):
+            if not callable(rule.call):
                 raise ValueError(
                     "Python rule for configured sequence item %s is not callable." %
                     item)
@@ -122,22 +120,31 @@ class RuleManager():
         # Items can be SDSFiles or metadata (XML) files
         for i, item in enumerate(items):
 
-            self.logger.info("Processing item %d/%d.", i, total)
+            self.logger.info("Processing item %s (%d/%d)." % (item.filename, i, total))
 
             # Get the sequence of rules to be applied
             for rule in map(self.getRule, self.ruleSequence):
 
                 # Set a signal (hardcoded at 2min for now)
                 signal.signal(signal.SIGALRM, self.__signalHandler)
-                signal.alarm(self.RULE_TIMEOUT_SECONDS)
+                signal.alarm(rule.TIMEOUT_SECONDS)
 
                 # Rule options are bound to the call
-                # Capture exceptions (e.g. TimeoutError)
                 try:
                     rule.apply(item)
+
+                # The rule was timed out
                 except TimeoutError:
                     logging.info("Timeout calling rule %s." % rule.call.func.__name__)
+
+                # Policy assertion errors
+                except AssertionError as e:
+                    logging.info("Not executing rule %s. Rule did not pass policy %s." % (rule.call.func.__name__, e))
+
+                # Other exceptions
                 except Exception as Ex:
-                    logging.error(Ex)
+                    logging.error("Rule execution %s failed: %s" % (rule.call.func.__name__, Ex))
+
+                # Disable the alarm
                 finally:
                     signal.alarm(0)
