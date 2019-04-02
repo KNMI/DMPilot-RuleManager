@@ -33,7 +33,7 @@ def psdMetadata(self, options, SDSFile):
     print(psdCollector.process(SDSFile))
 
 
-def prune(rule, SDSFile):
+def prune(options, SDSFile):
     """Handler for the file pruning/repacking rule.
 
     Parameters

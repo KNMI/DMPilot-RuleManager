@@ -70,8 +70,6 @@ class RuleManager():
         # Check each rule that it exists & is a callable Python function
         for item in sequence:
 
-            self.__checkPolicies(item["policies"])
-
             # Check if the rule exists
             try:
                 rule = self.getRule(item)
@@ -79,6 +77,8 @@ class RuleManager():
                 raise NotImplementedError(
                     "Python rule for configured sequence item %s does not exist." %
                     item)
+
+            # TODO check policies
 
             # The rule must be callable (function) too
             if not callable(rule["rule"]):
