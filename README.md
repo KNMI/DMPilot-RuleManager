@@ -15,6 +15,10 @@ but is also able to transparently apply a sequence of policies to a
 collection of data items of different types, as long as the policies
 accept these types.
 
+## Schematic Overview
+
+![Schematic Overview of RDSA Rule Manager](rule-manager.png)
+
 ## Dependencies
 
 The Rule Manager uses many data tools from IRIS that need to be compiled and
