@@ -70,7 +70,7 @@ class PSDCollector():
 
         return Binary(b"".join([pack("B", b) for b in array]))
 
-    def __getFrequencyOffset(self, segment, mask):
+    def __getFrequencyOffset(self, segment, mask, isInfrasound):
         """
         def __getFrequencyOffset
         Detects the first frequency and uses this offset
@@ -83,19 +83,27 @@ class PSDCollector():
             if not boolean:
                 counter += 1
             else:
-                return [counter - 1] + [self.__reduce(int(x)) for x in segment]
+                return [counter] + [self.__reduce(x, isInfrasound) for x in segment]
 
-    def __reduce(self, x):
+    def __reduce(self, x, isInfrasound):
         """
         def PSDCollector::__reduce
-        Keeps values within single byte bounds
-        (ObsPy PSD values are negative)
+        Keeps values within single byte bounds (ObsPy PSD values are negative)
         """
 
-        if -255 <= x and x <= 0:
-            return x + 255
+        # Infrasound is shifted downward by value 100
+        if isInfrasound:
+          x = int(x) - 100
         else:
+          x = int(x)
+
+        # Value is bound within one byte
+        if x < -255:
+            return 0
+        if x > 0:
             return 255
+        else:
+            return x + 255
 
     def process(self, SDSFile):
 
@@ -118,9 +126,13 @@ class PSDCollector():
         # Try creating the PPSD
         try:
 
+            # Set handling to hydrophone if using pressure data
+            handling = "hydrophone" if SDSFile.isInfrasound else None
+
             ppsd = PPSD(data[0].stats,
                         inventory,
-                        period_limits=self.PERIOD_LIMIT_TUPLE)
+                        period_limits=self.PERIOD_LIMIT_TUPLE,
+                        special_handling=handling)
 
             # Add the waveform
             ppsd.add(data)
@@ -135,13 +147,14 @@ class PSDCollector():
             # And /usr/local/lib/python3.5/dist-packages/obspy/signal/spectral_estimation.py
             # To set ppsd.valid as a public attribute!
             try:
-                psd_array = self.__getFrequencyOffset(segment, ppsd.valid)
+                psd_array = self.__getFrequencyOffset(segment, ppsd.valid, SDSFile.isInfrasound)
                 byteAmplitudes = self.__toByteArray(psd_array)
             except Exception as ex:
                 continue
 
             psdObject = {
                 "net": SDSFile.net,
+                "infra": SDSFile.isInfrasound,
                 "file": SDSFile.filename,
                 "sta": SDSFile.sta,
                 "loc": SDSFile.loc,

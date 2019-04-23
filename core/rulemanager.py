@@ -136,7 +136,6 @@ class RuleManager():
             # Get the sequence of rules to be applied
             for rule in map(self.getRule, self.ruleSequence):
 
-                name = rule.call.func.__name__
                 # Set a signal (hardcoded at 2min for now)
                 signal.signal(signal.SIGALRM, self.__signalHandler)
                 signal.alarm(rule.TIMEOUT_SECONDS)

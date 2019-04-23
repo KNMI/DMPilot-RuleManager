@@ -293,6 +293,15 @@ class SDSFile():
         return map(parseMSIOutput, lines[1:-1])
 
     @property
+    def isInfrasound(self):
+        """
+        def SDSFile::isInfrasound
+        Returns true when the channel is an infrasound channel
+        """
+
+        return self.cha.endswith("DF")
+
+    @property
     def inventory(self):
         """
         def SDSFile::inventory
