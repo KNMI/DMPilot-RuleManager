@@ -11,8 +11,6 @@ from orfeus.sdscollector import SDSFileCollector
 import rules.sdsrules as sdsrules
 import policies.sdspolicies as sdspolicies
 
-from modules.psdcollector import psdCollector
-
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()

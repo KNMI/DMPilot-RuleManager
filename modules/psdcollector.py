@@ -1,9 +1,9 @@
+import base64
+
 from bson.binary import Binary
 from datetime import timedelta
 from struct import pack
 from hashlib import sha256
-
-import base64
 
 # ObsPy imports
 from obspy.signal import PPSD
