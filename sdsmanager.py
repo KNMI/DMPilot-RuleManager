@@ -11,6 +11,8 @@ from orfeus.sdscollector import SDSFileCollector
 import rules.sdsrules as sdsrules
 import policies.sdspolicies as sdspolicies
 
+from modules.psdcollector import psdCollector
+
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
@@ -30,7 +32,7 @@ def main():
 
     # Collect files
     fileCollector = SDSFileCollector(parsedargs["dir"])
-    files = fileCollector.collectFromWildcards("*.*.*.*.*.*.*")
+    files = fileCollector.collectFromWildcards("*.*.*.BHZ.*.*.022")
 
     # Apply the sequence of rules on files
     RM.sequence(files)

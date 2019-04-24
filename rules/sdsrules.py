@@ -30,7 +30,12 @@ def psdMetadata(self, options, SDSFile):
         The file to be processed.
     """
 
-    print(psdCollector.process(SDSFile))
+    if SDSFile.isInfrasound:
+      # Store in psd.seismic
+      print(psdCollector.process(SDSFile))
+    else:
+      # Store in psd.infra
+      print(psdCollector.process(SDSFile))
 
 
 def prune(options, SDSFile):

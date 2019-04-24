@@ -189,6 +189,14 @@ class SDSFile():
         return datetime.fromtimestamp(self.stats.st_mtime)
 
     @property
+    def checksumTruncated(self):
+        """
+        def SDSFile::checksumTrunc
+        Returns truncated checksum value (8 base-64 characters)
+        """
+        return self.checksum[5:13]
+
+    @property
     def checksum(self):
         """
         def SDSFile::checksum
