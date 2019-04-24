@@ -30,7 +30,12 @@ def psdMetadata(self, options, SDSFile):
         The file to be processed.
     """
 
-    print(psdCollector.process(SDSFile))
+    if SDSFile.isInfrasound:
+      # Store in psd.seismic
+      print(psdCollector.process(SDSFile))
+    else:
+      # Store in psd.infra
+      print(psdCollector.process(SDSFile))
 
 
 def prune(options, SDSFile):
@@ -46,9 +51,6 @@ def prune(options, SDSFile):
     SDSFile : `SDSFile`
         The file to be processed.
     """
-
-    if SDSFile.quality not in options["qualities"]:
-        return
 
     # Prune the file to a .Q quality file in the temporary archive
     SDSFile.prune(recordLength=options["repackRecordSize"],
@@ -72,19 +74,7 @@ def ingestion(options, SDSFile):
         The file to be processed.
     """
 
-    # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
-        return
-
     logger.info("Ingesting file %s." % SDSFile.filename)
-
-    # Check the modification time of the file
-    if SDSFile.modified < (datetime.now() - timedelta(days=options["days"])):
-        return logger.info("File too old, cancelling ingestion.")
-
-    # The file was already ingested by iRODS
-    if irodsSession.exists(SDSFile):
-        return logger.info("File already present, cancelling ingestion.")
 
     # Attempt to ingest to iRODS
     irodsSession.createDataObject(SDSFile,
@@ -109,10 +99,6 @@ def federatedIngestion(options, SDSFile):
     SDSFile : `SDSFile`
         The file to be processed.
     """
-
-    # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
-        return
 
     logger.info("Ingesting file %s." % SDSFile.customPath(options["remoteRoot"]))
 
@@ -141,10 +127,6 @@ def purge(options, SDSFile):
         logger.info("Purging empty file %s." % SDSFile.filename)
         return irodsSession.purgeTemporaryFile(SDSFile)
 
-    # Check if the file modification date is after the configured limit and must be kept
-    if SDSFile.created > (datetime.now() - timedelta(days=options["daysPurgeAfter"])):
-        return
-
     # Some other configurable rules
     logger.info("Purging file %s." % SDSFile.filename)
     irodsSession.purgeTemporaryFile(SDSFile)
@@ -162,19 +144,9 @@ def dcMetadata(options, SDSFile):
         The file to be processed.
     """
 
-    # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
-        return
-
     logger.info("Dublin Core metadata for %s." % SDSFile.filename)
 
     # Get the existing Dublin Core Object
-    dublinCoreObject = dublinCore.getDCMetadata(SDSFile)
-
-    if dublinCoreObject is not None:
-        if dublinCoreObject["checksum"] == SDSFile.checksum:
-            return logger.info("DC metadata already exists for %s." % SDSFile.filename)
-
     document = dublinCore.extractDCMetadata(SDSFile)
 
     # Save to the database
@@ -196,22 +168,7 @@ def waveformMetadata(options, SDSFile):
         The file to be processed.
     """
 
-    # Check if qualities need to be checked
-    if SDSFile.quality not in options["qualities"]:
-        return
-
-    dataObject = irodsSession.getDataObject(SDSFile)
-
-    # There is no data object available in iRODS
-    if dataObject is None:
-        return logger.info("IRODS Data Object does not exist.")
-
-    # Check checksum of SDSFile against what is in the database
-    metadataObject = mongoSession.getMetadataDocument(SDSFile)
-    if metadataObject is not None:
-        if metadataObject["checksum"] == SDSFile.checksum:
-            return logger.info("Metadata already exists and hash did not change.")
-
+    # Get waveform metadata
     document = collector.getMetadata(SDSFile)
     if document is None:
       return logger.error("Could not get the waveform metadata.")

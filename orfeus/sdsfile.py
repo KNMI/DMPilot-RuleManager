@@ -189,6 +189,14 @@ class SDSFile():
         return datetime.fromtimestamp(self.stats.st_mtime)
 
     @property
+    def checksumTruncated(self):
+        """
+        def SDSFile::checksumTrunc
+        Returns truncated checksum value (8 base-64 characters)
+        """
+        return self.checksum[5:13]
+
+    @property
     def checksum(self):
         """
         def SDSFile::checksum
@@ -291,6 +299,15 @@ class SDSFile():
 
         # Skip first header & final line
         return map(parseMSIOutput, lines[1:-1])
+
+    @property
+    def isInfrasound(self):
+        """
+        def SDSFile::isInfrasound
+        Returns true when the channel is an infrasound channel
+        """
+
+        return self.cha.endswith("DF")
 
     @property
     def inventory(self):

@@ -2,7 +2,8 @@ import logging
 import signal
 import json
 
-from functools import partial
+from functools import partial, wraps
+from core.rule import Rule
 
 class RuleManager():
 
@@ -10,8 +11,6 @@ class RuleManager():
     Class RuleManager
     Main manager class for rule functions
     """
-
-    RULE_TIMEOUT_SECONDS = 1
 
     def __init__(self):
 
@@ -24,6 +23,7 @@ class RuleManager():
         self.logger.info("Initializing the Rule Manager.")
 
         self.rules = None
+        self.policies = None
         self.ruleSequence = None
 
     def __signalHandler(self, signum, frame):
@@ -34,7 +34,7 @@ class RuleManager():
 
         raise TimeoutError("Metric calculation has timed out.")
 
-    def loadRules(self, ruleModule, ruleMapFile):
+    def loadRules(self, ruleModule, policyModule, ruleMapFile):
         """Loads the rules.
 
         Parameters
@@ -45,12 +45,16 @@ class RuleManager():
             The path for a JSON file defining which rules to run, their order, and their options.
         """
 
-        # Load the Python scripted rules
+        # Load the Python scripted rules and policies
         self.rules = ruleModule
+        self.policies = policyModule
 
         # Load the configured sequence of rules
-        with open(ruleMapFile) as infile:
-            self.ruleSequence = json.load(infile)
+        try:
+            with open(ruleMapFile) as infile:
+                self.ruleSequence = json.load(infile)
+        except IOError:
+            raise IOError("The rulemap %s could not be found." % ruleMapFile)
 
         # Check if the rules are valid
         self.__checkRuleSequence(self.ruleSequence)
@@ -68,15 +72,35 @@ class RuleManager():
             try:
                 rule = self.getRule(item)
             except AttributeError:
-                raise AttributeError(
+                raise NotImplementedError(
                     "Python rule for configured sequence item %s does not exist." %
                     item)
 
+            # TODO check policies
+
             # The rule must be callable (function) too
-            if not callable(rule):
+            if not callable(rule.call):
                 raise ValueError(
                     "Python rule for configured sequence item %s is not callable." %
                     item)
+
+    def bindOptions(self, definitions, item):
+        """
+        Def RuleManager.bindOptions
+        Binds options to a function call
+        """
+
+        def invert(f):
+            @wraps(f)
+            def g(*args, **kwargs):
+                return not f(*args, **kwargs)
+            return g
+
+        # Invert the boolean result from the policy
+        if (definitions == self.policies) and item["name"].startswith("!"):
+          return partial(invert(getattr(definitions, item["name"][1:])), item["options"])
+        else:
+          return partial(getattr(definitions, item["name"]), item["options"])
 
     def getRule(self, rule):
         """
@@ -85,7 +109,11 @@ class RuleManager():
         """
 
         # Bind the rule options to the function call
-        return partial(getattr(self.rules, rule["name"]), rule["options"])
+        # There may be multiple policies defined per rule
+        return Rule(
+            self.bindOptions(self.rules, rule),
+            map(lambda x: self.bindOptions(self.policies, x), rule["policies"])
+        )
 
     def sequence(self, items):
         """
@@ -102,22 +130,32 @@ class RuleManager():
         
         # Items can be SDSFiles or metadata (XML) files
         for i, item in enumerate(items):
-            self.logger.info("Processing item %d/%d.", i, total)
+
+            self.logger.info("Processing item %s (%d/%d)." % (item.filename, i, total))
+
             # Get the sequence of rules to be applied
-            for ruleCall in map(self.getRule, self.ruleSequence):
+            for rule in map(self.getRule, self.ruleSequence):
 
                 # Set a signal (hardcoded at 2min for now)
                 signal.signal(signal.SIGALRM, self.__signalHandler)
-                signal.alarm(self.RULE_TIMEOUT_SECONDS)
+                signal.alarm(rule.TIMEOUT_SECONDS)
 
                 # Rule options are bound to the call
-                # Capture exceptions (e.g. TimeoutError)
                 try:
-                    ruleCall(item)
+                    rule.apply(item)
+
+                # The rule was timed out
                 except TimeoutError:
-                    logging.info("Timeout calling rule %s." % ruleCall.func.__name__)
-                except Exception as Ex:
-                    logging.error(Ex)
+                    logging.info("Timeout calling rule %s." % rule.call.func.__name__)
+
+                # Policy assertion errors
+                except AssertionError as e:
+                    logging.info("Not executing rule %s. Rule did not pass policy %s." % (rule.call.func.__name__, e))
+
+                # Other exceptions
+                except Exception as e:
+                    logging.error("Rule execution %s failed: %s" % (rule.call.func.__name__, e))
+
+                # Disable the alarm
                 finally:
                     signal.alarm(0)
-

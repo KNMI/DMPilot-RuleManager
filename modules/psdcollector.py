@@ -1,11 +1,13 @@
+import base64
+
 from bson.binary import Binary
 from datetime import timedelta
 from struct import pack
+from hashlib import sha256
 
 # ObsPy imports
 from obspy.signal import PPSD
 from obspy import read, read_inventory, Stream, UTCDateTime
-
 
 class PSDCollector():
 
@@ -21,6 +23,27 @@ class PSDCollector():
 
     def __init__(self):
         pass
+
+    def __getResponseHash(self, inventory):
+        """
+        def PSDCollector::__getResponseHash
+        Returns SHA256 hash for instrument response
+        """
+
+        response = inventory[0][0][0].response
+
+        samplingRate = self.__getSamplingRate(response.response_stages)
+
+        # Evaluate the response
+        resp, _ = response.get_evalresp_response(
+            1.0 / samplingRate,
+            1E3 * samplingRate
+        )
+
+        # Create checksum from the response
+        checksum = sha256()
+        checksum.update(resp)
+        return "sha2:" + base64.b64encode(checksum.digest()).decode()
 
     def __prepareData(self, SDSFile):
         """
@@ -38,20 +61,20 @@ class PSDCollector():
                       nearest_sample=False,
                       format="MSEED")
 
-        # Concatenate all traces
-        for tr in st:
-            if tr.stats.npts != 0:
-                ObspyStream.extend([tr])
+            # Concatenate all traces
+            for tr in st:
+                if tr.stats.npts != 0:
+                    ObspyStream.extend([tr])
 
         # No data
         if not ObspyStream:
             return None
 
-        if len(ObspyStream) > 1:
-            return None
-
         # Concatenate all traces with a fill of zeros
         ObspyStream.merge(0, fill_value=0)
+
+        if len(ObspyStream) > 1:
+            return None
 
         # Cut to the appropriate end and start
         ObspyStream.trim(starttime=UTCDateTime(SDSFile.start),
@@ -70,12 +93,11 @@ class PSDCollector():
 
         return Binary(b"".join([pack("B", b) for b in array]))
 
-    def __getFrequencyOffset(self, segment, mask):
+    def __getFrequencyOffset(self, segment, mask, isInfrasound):
         """
         def __getFrequencyOffset
         Detects the first frequency and uses this offset
         """
-
         # Determine the first occurrence of True
         # from the Boolean mask, this will be the offset
         counter = 0
@@ -83,19 +105,35 @@ class PSDCollector():
             if not boolean:
                 counter += 1
             else:
-                return [counter - 1] + [self.__reduce(int(x)) for x in segment]
+                return [counter] + [self.__reduce(x, isInfrasound) for x in segment]
 
-    def __reduce(self, x):
+    def __reduce(self, x, isInfrasound):
         """
         def PSDCollector::__reduce
-        Keeps values within single byte bounds
-        (ObsPy PSD values are negative)
+        Keeps values within single byte bounds (ObsPy PSD values are negative)
         """
 
-        if -255 <= x and x <= 0:
-            return x + 255
+        # Infrasound is shifted downward by value 100
+        if isInfrasound:
+          x = int(x) - 100
         else:
+          x = int(x)
+
+        # Value is bound within one byte
+        if x < -255:
+            return 0
+        if x > 0:
             return 255
+        else:
+            return x + 255
+
+    def __getSamplingRate(self, stages):
+
+        for stage in stages[::-1]:
+            if stage.decimation_input_sample_rate is not None and stage.decimation_factor is not None:
+                return stage.decimation_input_sample_rate / stage.decimation_factor
+
+        return None
 
     def process(self, SDSFile):
 
@@ -105,22 +143,27 @@ class PSDCollector():
 
         inventory = SDSFile.inventory
 
-        # Could not be read
+        # Inventory could not be read: return empty spectra
         if inventory is None:
             return spectra
 
         # And the prepared data
         data = self.__prepareData(SDSFile)
 
+        # Data could not be read: return empty spectra
         if data is None:
             return spectra
 
         # Try creating the PPSD
         try:
 
+            # Set handling to hydrophone if using pressure data
+            handling = "hydrophone" if SDSFile.isInfrasound else None
+            
             ppsd = PPSD(data[0].stats,
                         inventory,
-                        period_limits=self.PERIOD_LIMIT_TUPLE)
+                        period_limits=self.PERIOD_LIMIT_TUPLE,
+                        special_handling=handling)
 
             # Add the waveform
             ppsd.add(data)
@@ -135,12 +178,16 @@ class PSDCollector():
             # And /usr/local/lib/python3.5/dist-packages/obspy/signal/spectral_estimation.py
             # To set ppsd.valid as a public attribute!
             try:
-                psd_array = self.__getFrequencyOffset(segment, ppsd.valid)
+                psd_array = self.__getFrequencyOffset(segment, ppsd.valid, SDSFile.isInfrasound)
                 byteAmplitudes = self.__toByteArray(psd_array)
             except Exception as ex:
                 continue
 
+            # XXX TODO:
+            # Add hash of the metadata? This is a hard problem to solve
             psdObject = {
+                "hash": SDSFile.checksum,
+                "hashI": self.__getResponseHash(inventory),
                 "net": SDSFile.net,
                 "file": SDSFile.filename,
                 "sta": SDSFile.sta,
