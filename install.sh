@@ -31,7 +31,7 @@ makelib () {
 		# Make and redirect stdout to /dev/null
 		case ${lib} in
 			"dataselect-3.21")
-				make -C ${dir} clean $1 > /dev/null
+				make -C ${dir} $1 > /dev/null
 			;;
 			"libmseed-2.19.6")
 				make -C ${dir}/example $1 > /dev/null
