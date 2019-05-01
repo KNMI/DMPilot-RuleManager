@@ -12,32 +12,35 @@
 # 	./install.sh clean
 #
 
+build () {
+	# Make and redirect make stdout to /dev/null
+	make -C $1 $2 > /dev/null
+}
+
 makelib () {
 
 	# Create or remove bin directory
 	if [ ! -d "bin" ]; then
-		mkdir bin
+		mkdir "bin"
 	elif [ "$1" = "clean" ]; then
-		rm -r bin
+		rm -r "bin"
 	fi
 
 	# Go over all IRIS libs
 	for dir in lib/*; do
-	
-	        lib=$(basename ${dir})
+
+		lib=$(basename ${dir})
 	
 		echo "Building ${lib} $1."
 	
-		# Make and redirect stdout to /dev/null
 		case ${lib} in
-			"dataselect-3.21")
-				make -C ${dir} $1 > /dev/null
+			# Build dataselect & MSI
+			"dataselect-3.21"|"msi-3.8")
+				build "${dir}" "$1"
 			;;
+			# MSRepack is included in libmseed example folder
 			"libmseed-2.19.6")
-				make -C ${dir}/example $1 > /dev/null
-			;;
-			"msi-3.8")
-				make -C ${dir} $1 > /dev/null
+				build "${dir}/example" "$1"
 			;;
 		esac
 	
@@ -57,13 +60,13 @@ makelib () {
 	        # Copy executables to the bin directory
 	        case ${lib} in
 	                "dataselect-3.21")
-	                        cp ${dir}/dataselect bin
+	                        cp "${dir}/dataselect" "bin"
 	                ;;
 	                "libmseed-2.19.6")
-	                        cp ${dir}/example/msrepack bin
+	                        cp "${dir}/example/msrepack" "bin"
 	                ;;
 	                "msi-3.8")
-	                        cp ${dir}/msi bin
+	                        cp "${dir}/msi" "bin"
 	                ;;
 	        esac
 	
@@ -74,11 +77,11 @@ makelib () {
 # Command line options
 case $1 in
         "clean")
-                makelib clean
+                makelib "clean"
 		echo "Done cleaning."
         ;;
         *)
-                makelib all
+                makelib "all"
 		echo "Done building IRIS tools. Add ./bin to \$PATH."
         ;;
 esac
