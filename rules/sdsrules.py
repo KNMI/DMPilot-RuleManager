@@ -30,7 +30,7 @@ def psdMetadata(self, options, SDSFile):
         The file to be processed.
     """
 
-    if SDSFile.isInfrasound:
+    if SDSFile.isPressureChannel:
       # Store in psd.seismic
       print(psdCollector.process(SDSFile))
     else:

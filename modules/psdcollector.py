@@ -14,25 +14,69 @@ class PSDCollector():
     """
     Class PSDCollector
     Uses ObsPy PPSD to extract PSD information
-    XXX THIS SHOULD BE REVIEWED!
+
+    Additional information:
+    This needs to be installed under ObsPy 1.2.0 for some fixes
+    Uses default ObsPy options to calculate PSDs
+
+    We use 50% overlap and hourly segments. This means we get 48 segments per day!
+
+             END
+              | 
+            [~~~] (NOT IN "DAY" BUT REQUIRED FOR OVERLAP)
+          [~~~] (1 HOUR SEGMENT)
+        ... (46 SEGMENTS NOT SHOWN)
+      [~~~] (1 HOUR SEGMENT)
+    [~~~] (NOT IN "DAY" BUT REQUIRED FOR OVERLAP)
+      |     
+    START
+
+    To get the segment for a single day, we need access to the "before" and "after" file
+    to guarantee the overlap is present. Otherwise we will introduce boundary effects when
+    calculating the PSDs. A PSD will start at 00:00 and end at 00:30.. take overlap through following day.
+
+    Database storage:
+    The PSD is continuous across the frequency spectrum and generally has a value between 0 and -255 dB
+    We represent the dB value as a single 8-bit integer and save the "offset" on the frequency axis.
+    Low sampling rates do not have data for high frequencies but we wish to represent the PSD data
+    as single 8-bit array of values. This offset is stored as another 8-bit integer at index 0.
+
+    e.g.  [57, 120, 120, 120, .., 120] 
+
+    means a frequency offset of 57 steps. The steps are defined by ObsPy giving the period limit tuple
+    0.01 - 1000 and are always the same starting at 0.01. Increase is per 1/8th octave (factor of 0.125).
+
+    e.g.
+
+    [0] = 0.01s
+    [1] = 0.01090507732s (0.01 * 2 ** 0.125)
+    [2] = 0.01189207114s (0.01 * (2 ** 0.125) ** 2)
+    [~] = ...
+    [133] = 1010.70328654s (0.01 * (2 ** 0.125) ** 133)
+
+    It stops after going over 1000 as we configured.
+
+    From this we can reconstruct the period (frequency) the first value belongs to.
+    Then we proceed continuously across the spectrum (add a negative sign to the power) in the webservice.
     """
 
-    # Period limits
-    # XXX TO FIX
+    # Period limits 100Hz should be enough and 0.001Hz a low enough frequency
+    # In case of 200Hz sampled data this is the nyquist frequency
     PERIOD_LIMIT_TUPLE = (0.01, 1000)
 
     def __init__(self):
         pass
 
-    def __getResponseHash(self, inventory):
+    def __getResponseChecksum(self, inventory):
+
         """
-        def PSDCollector::__getResponseHash
-        Returns SHA256 hash for instrument response
+        def PSDCollector::__getResponseChecksum
+        Returns SHA256 hash of the instrument response
         """
 
+        # Get the ObsPy response object and channel sampling rate
         response = inventory[0][0][0].response
-
-        samplingRate = self.__getSamplingRate(response.response_stages)
+        samplingRate = inventory[0][0][0].sample_rate
 
         # Evaluate the response
         resp, _ = response.get_evalresp_response(
@@ -40,20 +84,25 @@ class PSDCollector():
             1E3 * samplingRate
         )
 
-        # Create checksum from the response
+        # Create checksum from the array of response values
         checksum = sha256()
         checksum.update(resp)
+
+        # Return in the same format as the SDSFile.checksum (compatible with iRODS)
         return "sha2:" + base64.b64encode(checksum.digest()).decode()
 
     def __prepareData(self, SDSFile):
+
         """
         def PSDCollector::__prepareData
         Prepares the correct data for plotting
         """
 
-        # Create an empty stream
+        # Create an empty stream to fill
         ObspyStream = Stream()
 
+        # Read neighbouring files is necessary to get the boundary overlapping data
+        # Of the next day.. the previous day was already "done" with the previous file
         for neighbour in SDSFile.neighbours:
             st = read(neighbour.filepath,
                       starttime=UTCDateTime(SDSFile.start),
@@ -66,19 +115,34 @@ class PSDCollector():
                 if tr.stats.npts != 0:
                     ObspyStream.extend([tr])
 
-        # No data
+        # No data found
         if not ObspyStream:
             return None
 
-        # Concatenate all traces with a fill of zeros
+        # Concatenate all traces with a fill of zeros. Otherwise some segments may be skipped
+        # Data from multiple files will be in two different traces by default
         ObspyStream.merge(0, fill_value=0)
 
+        # More than a single stream cannot be handled
         if len(ObspyStream) > 1:
             return None
 
-        # Cut to the appropriate end and start
+        # Cut to the appropriate end and start (start & end are both inclusive).
+        # Therefore subtract 1E-6 from the endtime
+        # Here is some code to illustrate:
+
+        # from obspy import Trace, UTCDateTime
+        # import numpy as np
+        # 
+        # tr = Trace(data=np.arange(0, 86401))
+        # tr.trim(starttime=UTCDateTime("1970-01-01"), endtime=UTCDateTime("1970-01-02"), nearest_sample=False)
+        # >>> ... | 1970-01-01T00:00:00.000000Z - 1970-01-02T00:00:00.000000Z | 1.0 Hz, 86401 samples
+        # tr.trim(starttime=UTCDateTime("1970-01-01"), endtime=UTCDateTime("1970-01-02") - 1E-6, nearest_sample=False)
+        # >>> ... | 1970-01-01T00:00:00.000000Z - 1970-01-01T23:59:59.000000Z | 1.0 Hz, 86400 samples
+
+        # Pad start & end with zeros if necessary and fill with zeros
         ObspyStream.trim(starttime=UTCDateTime(SDSFile.start),
-                         endtime=UTCDateTime(SDSFile.end + timedelta(minutes=30)),
+                         endtime=UTCDateTime(SDSFile.end + timedelta(minutes=30)) - 1E-6,
                          pad=True,
                          fill_value=0,
                          nearest_sample=False)
@@ -86,18 +150,23 @@ class PSDCollector():
         return ObspyStream
 
     def __toByteArray(self, array):
+
         """
         def PSDCollector::__toByteArray
-        Converts values to single byte array
+        Converts values to single byte array we pack the values to a string of single bytes
         """
 
         return Binary(b"".join([pack("B", b) for b in array]))
 
-    def __getFrequencyOffset(self, segment, mask, isInfrasound):
+    def __getFrequencyOffset(self, segment, mask, isPressureChannel):
+
         """
         def __getFrequencyOffset
         Detects the first frequency and uses this offset
+        The passed property "mask" is a boolean mask that marks which values are "valid" e.g. exist
+        and are above the nyquist frequency. We check the first occurence of True: that means the frequency offset
         """
+
         # Determine the first occurrence of True
         # from the Boolean mask, this will be the offset
         counter = 0
@@ -105,19 +174,21 @@ class PSDCollector():
             if not boolean:
                 counter += 1
             else:
-                return [counter] + [self.__reduce(x, isInfrasound) for x in segment]
+                return [counter] + [self.__reduce(x, isPressureChannel) for x in segment]
 
-    def __reduce(self, x, isInfrasound):
+    def __reduce(self, x, isPressureChannel):
+
         """
         def PSDCollector::__reduce
         Keeps values within single byte bounds (ObsPy PSD values are negative)
         """
 
-        # Infrasound is shifted downward by value 100
-        if isInfrasound:
-          x = int(x) - 100
+        # Infrasound is shifted downward by 100dB
+        # They use a normalized pressure of 20 micropascals which shifts our PSD out of range
+        if isPressureChannel:
+            x = int(x) - 100
         else:
-          x = int(x)
+            x = int(x)
 
         # Value is bound within one byte
         if x < -255:
@@ -127,15 +198,12 @@ class PSDCollector():
         else:
             return x + 255
 
-    def __getSamplingRate(self, stages):
-
-        for stage in stages[::-1]:
-            if stage.decimation_input_sample_rate is not None and stage.decimation_factor is not None:
-                return stage.decimation_input_sample_rate / stage.decimation_factor
-
-        return None
-
     def process(self, SDSFile):
+
+        """
+        def PSDCollector::process
+        Processes a single SDSFile to extract PSDs and store them in the DB
+        """
 
         # Create an empty spectra list that can be preemptively
         # returned to the calling procedure
@@ -158,7 +226,8 @@ class PSDCollector():
         try:
 
             # Set handling to hydrophone if using pressure data
-            handling = "hydrophone" if SDSFile.isInfrasound else None
+            # This is a bit hacky but the process should be the same for infrasound data
+            handling = "hydrophone" if SDSFile.isPressureChannel else None
             
             ppsd = PPSD(data[0].stats,
                         inventory,
@@ -178,23 +247,24 @@ class PSDCollector():
             # And /usr/local/lib/python3.5/dist-packages/obspy/signal/spectral_estimation.py
             # To set ppsd.valid as a public attribute!
             try:
-                psd_array = self.__getFrequencyOffset(segment, ppsd.valid, SDSFile.isInfrasound)
+                psd_array = self.__getFrequencyOffset(segment, ppsd.valid, SDSFile.isPressureChannel)
                 byteAmplitudes = self.__toByteArray(psd_array)
             except Exception as ex:
                 continue
 
-            # XXX TODO:
-            # Add hash of the metadata? This is a hard problem to solve
+            # Add hash of the data & metadata (first 8 hex digits)
+            # Saving 64 bytes * 2 makes our database pretty big and this should be sufficient to 
+            # detect changes
             psdObject = {
-                "hash": SDSFile.checksum,
-                "hashI": self.__getResponseHash(inventory),
+                "checksum": SDSFile.checksum[:13],
+                "checksumInventory": self.__getResponseChecksum(inventory)[:13],
                 "net": SDSFile.net,
-                "file": SDSFile.filename,
                 "sta": SDSFile.sta,
                 "loc": SDSFile.loc,
                 "cha": SDSFile.cha,
-                "ts": SDSFile.start,
-                "te": SDSFile.start + timedelta(minutes=60),
+                "quality": SDSFile.quality,
+                "ts": time.datetime,
+                "te": (time + timedelta(minutes=60)).datetime,
                 "bin": byteAmplitudes
             }
 

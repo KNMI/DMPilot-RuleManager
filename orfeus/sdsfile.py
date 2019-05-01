@@ -301,9 +301,9 @@ class SDSFile():
         return map(parseMSIOutput, lines[1:-1])
 
     @property
-    def isInfrasound(self):
+    def isPressureChannel(self):
         """
-        def SDSFile::isInfrasound
+        def SDSFile::isPressureChannel
         Returns true when the channel is an infrasound channel
         """
 
@@ -364,7 +364,7 @@ class SDSFile():
         with 30 minute increments
         """
 
-        return [self.start + timedelta(minutes=(30 * x)) for x in range(48)]
+        return map(UTCDateTime, map(lambda x: self.start + timedelta(minutes=(30 * x)), range(48)))
 
     def prune(self, recordLength=4096, removeOverlap=True):
         """
