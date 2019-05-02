@@ -24,7 +24,7 @@ class RuleManager():
         self.logger.info("Initializing the Rule Manager.")
 
         self.rules = None
-        self.policies = None
+        self.conditions = None
         self.ruleSequence = None
 
     def __signalHandler(self, signum, frame):
@@ -35,7 +35,7 @@ class RuleManager():
 
         raise TimeoutError("Metric calculation has timed out.")
 
-    def loadRules(self, ruleModule, policyModule, ruleMapFile, ruleSequenceFile):
+    def loadRules(self, ruleModule, conditionModule, ruleMapFile, ruleSequenceFile):
         """Loads the rules.
 
         Parameters
@@ -46,9 +46,9 @@ class RuleManager():
             The path for a JSON file defining which rules to run, their order, and their options.
         """
 
-        # Load the Python scripted rules and policies
+        # Load the Python scripted rules and conditions
         self.rules = ruleModule
-        self.policies = policyModule
+        self.conditions = conditionModule
 
         # Load the configured sequence of rules
         rule_desc = None    # Rule configuration
@@ -93,8 +93,6 @@ class RuleManager():
                     "Python rule for configured sequence item %s does not exist." %
                     item)
 
-            # TODO check policies
-
             # The rule must be callable (function) too
             if not callable(rule.call):
                 raise ValueError(
@@ -114,7 +112,7 @@ class RuleManager():
             return g
 
         # Invert the boolean result from the policy
-        if (definitions == self.policies) and item["functionName"].startswith("!"):
+        if (definitions == self.conditions) and item["functionName"].startswith("!"):
             return partial(invert(getattr(definitions, item["functionName"][1:])), item["options"])
         else:
             return partial(getattr(definitions, item["functionName"]), item["options"])
@@ -126,10 +124,10 @@ class RuleManager():
         """
 
         # Bind the rule options to the function call
-        # There may be multiple policies defined per rule
+        # There may be multiple conditions defined per rule
         return Rule(
             self.bindOptions(self.rules, rule),
-            map(lambda x: self.bindOptions(self.policies, x), rule["policies"])
+            map(lambda x: self.bindOptions(self.conditions, x), rule["conditions"])
         )
 
     def sequence(self, items):

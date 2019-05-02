@@ -5,8 +5,8 @@
 			"removeOverlap": true,
 			"repackRecordSize": 4096
 		},
-		"policies": [{
-			"functionName": "assertQualityPolicy",
+		"conditions": [{
+			"functionName": "assertQualityCondition",
 			"options": {
 				"qualities": ["D"]
 			}
@@ -15,8 +15,8 @@
 	"INGESTION": {
 		"functionName": "ingestionRule",
 		"options": {},
-		"policies": [{
-				"functionName": "assertQualityPolicy",
+		"conditions": [{
+				"functionName": "assertQualityCondition",
 				"options": {
 					"qualities": ["D"]
 				}
@@ -28,7 +28,7 @@
 				}
 			},
 			{
-				"functionName": "assertIRODSNotExistPolicy",
+				"functionName": "assertIRODSNotExistCondition",
 				"options": {}
 			}
 		]
@@ -36,28 +36,28 @@
 	"METADATA": {
 		"functionName": "waveformMetadataRule",
 		"options": {},
-		"policies": [{
-			"functionName": "assertQualityPolicy",
+		"conditions": [{
+			"functionName": "assertQualityCondition",
 			"options": {
 				"qualities": [
 					"D"
 				]
 			}
 		}, {
-			"functionName": "assertWFCatalogNotExistsPolicy",
+			"functionName": "assertWFCatalogNotExistsCondition",
 			"options": {}
 		}]
 	},
 	"DCAT": {
 		"functionName": "dcMetadataRule",
 		"options": {},
-		"policies": [{
-			"functionName": "assertQualityPolicy",
+		"conditions": [{
+			"functionName": "assertQualityCondition",
 			"options": {
 				"qualities": ["D"]
 			}
 		}, {
-			"functionName": "assertDCMetadataNotExistsPolicy",
+			"functionName": "assertDCMetadataNotExistsCondition",
 			"options": {}
 		}]
 	},
@@ -66,22 +66,22 @@
 		"options": {
 			"deleteEmptyFiles": true
 		},
-		"policies": [{
-				"functionName": "assertQualityPolicy",
+		"conditions": [{
+				"functionName": "assertQualityCondition",
 				"options": {
 					"qualities": ["R", "E", "M", "D", "Q"]
 				}
 			},
 			{
-				"functionName": "assertIRODSExistsPolicy",
+				"functionName": "assertIRODSExistsCondition",
 				"options": {}
 			},
 			{
-				"functionName": "assertWFCatalogExistsPolicy",
+				"functionName": "assertWFCatalogExistsCondition",
 				"options": {}
 			},
 			{
-				"functionName": "assertDCMetadataExistsPolicy",
+				"functionName": "assertDCMetadataExistsCondition",
 				"options": {}
 			},
 			{

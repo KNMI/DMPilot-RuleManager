@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Installation script for IRIS Seed tools
 #
 # 	dataselect-3.21 (https://github.com/iris-edu/dataselect/releases)

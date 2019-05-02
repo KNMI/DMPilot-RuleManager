@@ -9,7 +9,7 @@ import argparse
 from core.rulemanager import RuleManager
 from orfeus.sdscollector import SDSFileCollector
 import rules.sdsrules as sdsrules
-import policies.sdspolicies as sdspolicies
+import conditions.sdsconditions as sdsconditions
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
 
     # Set up rules
     RM = RuleManager()
-    RM.loadRules(sdsrules, sdspolicies, parsedargs["rulemap"], parsedargs["ruleseq"])
+    RM.loadRules(sdsrules, sdsconditions, parsedargs["rulemap"], parsedargs["ruleseq"])
 
     # Collect files
     fileCollector = SDSFileCollector(parsedargs["dir"])

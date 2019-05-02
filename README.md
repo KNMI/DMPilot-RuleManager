@@ -28,7 +28,10 @@ added to `$PATH`. These programs include:
 - IRIS MSRepack (https://github.com/iris-edu/libmseed)
 - IRIS MSI (https://github.com/iris-edu/msi)
 
-Source compilation instructions can be found on the respective pages.
+The source code for these packages is included in the ./lib directory and can
+be automatically compiled using the installation script using:
+
+    ./install.sh
 
 ## Running the SDS policy manager
 
@@ -58,12 +61,21 @@ To include the new `exampleRule` in the execution, add a new object to the list
 in the JSON rule map, mentioning the rule, and defining its options, like so:
 ```
 {
-    'name': 'exampleRule',
+    'functionName': 'exampleRule',
     'options': { ... }
 }
 ```
 
 Note that the `'options'` attribute is mandatory, even if empty.
+
+## Implementing a new conditional for an existing manager
+
+Rules are subject to conditions before being executed. These so called conditionals are
+defined in rules.json and have a name like `assertQualityPolicy`. The result of the operation
+can be negated by adding an exclamation in front of the function name e.g. `!assertQualityPolicy`.
+
+These function names refer to conditions defined in the policies directory and should be loaded during
+the initialization of the rule manager.
 
 ## Implementing a new manager
 
