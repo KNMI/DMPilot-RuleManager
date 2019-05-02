@@ -18,7 +18,7 @@ from modules.psdcollector import psdCollector
 logger = logging.getLogger(__name__)
 
 
-def psdMetadata(self, options, SDSFile):
+def psdMetadataRule(self, options, SDSFile):
     """Handler for PSD calculation.
     TODO XXX
 
@@ -38,7 +38,7 @@ def psdMetadata(self, options, SDSFile):
       print(psdCollector.process(SDSFile))
 
 
-def prune(options, SDSFile):
+def pruneRule(options, SDSFile):
     """Handler for the file pruning/repacking rule.
 
     Parameters
@@ -57,7 +57,7 @@ def prune(options, SDSFile):
                   removeOverlap=options["removeOverlap"])
 
 
-def ingestion(options, SDSFile):
+def ingestionRule(options, SDSFile):
     """Handler for the ingestion rule.
 
     Parameters
@@ -86,7 +86,7 @@ def ingestion(options, SDSFile):
     logger.info(irodsSession.getDataObject(SDSFile).checksum)
 
 
-def federatedIngestion(options, SDSFile):
+def federatedIngestionRule(options, SDSFile):
     """Handler for a federated ingestion rule. Puts the object in a given
     root collection, potentially in a federated zone.
 
@@ -109,7 +109,7 @@ def federatedIngestion(options, SDSFile):
                            registerChecksum=True)
 
 
-def purge(options, SDSFile):
+def purgeRule(options, SDSFile):
     """Handler for the temporary archive purge rule.
 
     Parameters
@@ -132,7 +132,7 @@ def purge(options, SDSFile):
     irodsSession.purgeTemporaryFile(SDSFile)
 
 
-def dcMetadata(options, SDSFile):
+def dcMetadataRule(options, SDSFile):
     """Process and save Dublin Core metadata of an SDS file.
 
     Parameters
@@ -155,7 +155,7 @@ def dcMetadata(options, SDSFile):
         logger.info("Saved DC metadata for %s." % SDSFile.filename)
 
 
-def waveformMetadata(options, SDSFile):
+def waveformMetadataRule(options, SDSFile):
     """Handler for the WFCatalog metadata rule.
     TODO XXX
 

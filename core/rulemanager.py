@@ -67,10 +67,11 @@ class RuleManager():
             raise IOError("The rule sequence file %s could not be found." % ruleSequenceFile)
 
         # Get the rule from the map
-        self.ruleSequence = map(lambda x: rule_desc.get(x), rule_seq)
-
-        if None in self.ruleSequence:
-            raise ValueError("A rule sequence parameter could not be found in the rule map.")
+        try:
+            self.ruleSequence = [rule_desc[x] for x in rule_seq]
+        except KeyError as exception:
+            raise ValueError("The rule %s could not be found in the configured rule map %s." % 
+                (exception.args[0], ruleMapFile))
 
         # Check if the rules are valid
         self.__checkRuleSequence(self.ruleSequence)
@@ -113,10 +114,10 @@ class RuleManager():
             return g
 
         # Invert the boolean result from the policy
-        if (definitions == self.policies) and item["name"].startswith("!"):
-            return partial(invert(getattr(definitions, item["name"][1:])), item["options"])
+        if (definitions == self.policies) and item["functionName"].startswith("!"):
+            return partial(invert(getattr(definitions, item["functionName"][1:])), item["options"])
         else:
-            return partial(getattr(definitions, item["name"]), item["options"])
+            return partial(getattr(definitions, item["functionName"]), item["options"])
 
     def getRule(self, rule):
         """
