@@ -1,103 +1,95 @@
-[
-    {
-        "name": "prune",
-        "options": {
-            "removeOverlap": true,
-            "repackRecordSize": 4096
-        },
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": ["D"]
-                }
-            }
-        ]
-    },
-    {
-        "name": "ingestion",
-        "options": {},
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": ["D"]
-                }
-            },
-            {
-                "name": "assertModificationTimeYoungerThan",
-                "options": {
-                    "days": 100
-                }
-            },
-            {
-                "name": "assertIRODSNotExistPolicy",
-                "options": {}
-            }
-        ]
-    },
-    {
-        "name": "waveformMetadata",
-        "options": {},
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": [
-                        "D"
-                    ]
-                }
-            }, {
-                "name": "assertWFCatalogNotExistsPolicy",
-                "options": {}
-            }
-        ]
-    },
-    {
-        "name": "dcMetadata",
-        "options": {},
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": ["D"]
-                }
-            }, {
-                "name": "assertDCMetadataNotExistsPolicy",
-                "options": {}
-            }
-        ]
-    },
-    {
-        "name": "purge",
-        "options": {
-            "deleteEmptyFiles": true
-        },
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": ["R", "E", "M", "D", "Q"]
-                }
-            },
-            {
-                "name": "assertIRODSExistsPolicy",
-                "options": {}
-            },
-            {
-                "name": "assertWFCatalogExistsPolicy",
-                "options": {}
-            },
-            {
-                "name": "assertDCMetadataExistsPolicy",
-                "options": {}
-            },
-            {
-                "name": "assertModificationTimeOlderThan",
-                "options": {
-                    "days": 30
-                }
-            }
-        ]
-    }
-]
+{
+	"PRUNE": {
+		"name": "prune",
+		"options": {
+			"removeOverlap": true,
+			"repackRecordSize": 4096
+		},
+		"policies": [{
+			"name": "assertQualityPolicy",
+			"options": {
+				"qualities": ["D"]
+			}
+		}]
+	},
+	"INGESTION": {
+		"name": "ingestion",
+		"options": {},
+		"policies": [{
+				"name": "assertQualityPolicy",
+				"options": {
+					"qualities": ["D"]
+				}
+			},
+			{
+				"name": "assertModificationTimeYoungerThan",
+				"options": {
+					"days": 100
+				}
+			},
+			{
+				"name": "assertIRODSNotExistPolicy",
+				"options": {}
+			}
+		]
+	},
+	"METADATA": {
+		"name": "waveformMetadata",
+		"options": {},
+		"policies": [{
+			"name": "assertQualityPolicy",
+			"options": {
+				"qualities": [
+					"D"
+				]
+			}
+		}, {
+			"name": "assertWFCatalogNotExistsPolicy",
+			"options": {}
+		}]
+	},
+	"DCAT": {
+		"name": "dcMetadata",
+		"options": {},
+		"policies": [{
+			"name": "assertQualityPolicy",
+			"options": {
+				"qualities": ["D"]
+			}
+		}, {
+			"name": "assertDCMetadataNotExistsPolicy",
+			"options": {}
+		}]
+	},
+	"PURGE": {
+		"name": "purge",
+		"options": {
+			"deleteEmptyFiles": true
+		},
+		"policies": [{
+				"name": "assertQualityPolicy",
+				"options": {
+					"qualities": ["R", "E", "M", "D", "Q"]
+				}
+			},
+			{
+				"name": "assertIRODSExistsPolicy",
+				"options": {}
+			},
+			{
+				"name": "assertWFCatalogExistsPolicy",
+				"options": {}
+			},
+			{
+				"name": "assertDCMetadataExistsPolicy",
+				"options": {}
+			},
+			{
+				"name": "assertModificationTimeOlderThan",
+				"options": {
+					"days": 30
+				}
+			}
+		]
+	}
+}

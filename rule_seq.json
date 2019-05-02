@@ -1,6 +1,7 @@
 [
-    "prune",
-    "ingestion",
-    "dcMetadata",
-    "waveformMetadata"
+    "PRUNE",
+    "INGESTION",
+    "METADATA",
+    "DCAT",
+    "PURGE"
 ]

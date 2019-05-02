@@ -66,11 +66,11 @@ class RuleManager():
         except IOError:
             raise IOError("The rule sequence file %s could not be found." % ruleSequenceFile)
 
-        # Sort rule_desc according to rule_order
-        self.ruleSequence = sorted(
-            [rule for rule in rule_desc if rule["name"] in rule_seq],
-            key=lambda rule: rule_seq.index(rule["name"])
-        )
+        # Get the rule from the map
+        self.ruleSequence = map(lambda x: rule_desc.get(x), rule_seq)
+
+        if None in self.ruleSequence:
+            raise ValueError("A rule sequence parameter could not be found in the rule map.")
 
         # Check if the rules are valid
         self.__checkRuleSequence(self.ruleSequence)
