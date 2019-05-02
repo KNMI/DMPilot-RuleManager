@@ -1,103 +1,95 @@
-[
-    {
-        "name": "prune",
-        "options": {
-            "removeOverlap": true,
-            "repackRecordSize": 4096
-        },
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": ["D"]
-                }
-            }
-        ]
-    },
-    {
-        "name": "ingestion",
-        "options": {},
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": ["D"]
-                }
-            },
-            {
-                "name": "assertModificationTimeYoungerThan",
-                "options": {
-                    "days": 100
-                }
-            },
-            {
-                "name": "assertIRODSNotExistPolicy",
-                "options": {}
-            }
-        ]
-    },
-    {
-        "name": "waveformMetadata",
-        "options": {},
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": [
-                        "D"
-                    ]
-                }
-            }, {
-                "name": "assertWFCatalogNotExistsPolicy",
-                "options": {}
-            }
-        ]
-    },
-    {
-        "name": "dcMetadata",
-        "options": {},
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": ["D"]
-                }
-            }, {
-                "name": "assertDCMetadataNotExistsPolicy",
-                "options": {}
-            }
-        ]
-    },
-    {
-        "name": "purge",
-        "options": {
-            "deleteEmptyFiles": true
-        },
-        "policies": [
-            {
-                "name": "assertQualityPolicy",
-                "options": {
-                    "qualities": ["R", "E", "M", "D", "Q"]
-                }
-            },
-            {
-                "name": "assertIRODSExistsPolicy",
-                "options": {}
-            },
-            {
-                "name": "assertWFCatalogExistsPolicy",
-                "options": {}
-            },
-            {
-                "name": "assertDCMetadataExistsPolicy",
-                "options": {}
-            },
-            {
-                "name": "assertModificationTimeOlderThan",
-                "options": {
-                    "days": 30
-                }
-            }
-        ]
-    }
-]
+{
+	"PRUNE": {
+		"functionName": "pruneRule",
+		"options": {
+			"removeOverlap": true,
+			"repackRecordSize": 4096
+		},
+		"policies": [{
+			"functionName": "assertQualityPolicy",
+			"options": {
+				"qualities": ["D"]
+			}
+		}]
+	},
+	"INGESTION": {
+		"functionName": "ingestionRule",
+		"options": {},
+		"policies": [{
+				"functionName": "assertQualityPolicy",
+				"options": {
+					"qualities": ["D"]
+				}
+			},
+			{
+				"functionName": "assertModificationTimeYoungerThan",
+				"options": {
+					"days": 100
+				}
+			},
+			{
+				"functionName": "assertIRODSNotExistPolicy",
+				"options": {}
+			}
+		]
+	},
+	"METADATA": {
+		"functionName": "waveformMetadataRule",
+		"options": {},
+		"policies": [{
+			"functionName": "assertQualityPolicy",
+			"options": {
+				"qualities": [
+					"D"
+				]
+			}
+		}, {
+			"functionName": "assertWFCatalogNotExistsPolicy",
+			"options": {}
+		}]
+	},
+	"DCAT": {
+		"functionName": "dcMetadataRule",
+		"options": {},
+		"policies": [{
+			"functionName": "assertQualityPolicy",
+			"options": {
+				"qualities": ["D"]
+			}
+		}, {
+			"functionName": "assertDCMetadataNotExistsPolicy",
+			"options": {}
+		}]
+	},
+	"PURGE": {
+		"functionName": "purgeRule",
+		"options": {
+			"deleteEmptyFiles": true
+		},
+		"policies": [{
+				"functionName": "assertQualityPolicy",
+				"options": {
+					"qualities": ["R", "E", "M", "D", "Q"]
+				}
+			},
+			{
+				"functionName": "assertIRODSExistsPolicy",
+				"options": {}
+			},
+			{
+				"functionName": "assertWFCatalogExistsPolicy",
+				"options": {}
+			},
+			{
+				"functionName": "assertDCMetadataExistsPolicy",
+				"options": {}
+			},
+			{
+				"functionName": "assertModificationTimeOlderThan",
+				"options": {
+					"days": 30
+				}
+			}
+		]
+	}
+}
