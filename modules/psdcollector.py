@@ -35,7 +35,11 @@ class PSDCollector():
     to guarantee the overlap is present. Otherwise we will introduce boundary effects when
     calculating the PSDs. A PSD will start at 00:00 and end at 00:30.. take overlap through following day.
 
+    Gaps are filled with 0's to make sure that we always have a full day of data with no gaps.. which makes
+    the calculation more consistent.
+
     Database storage:
+
     The PSD is continuous across the frequency spectrum and generally has a value between 0 and -255 dB
     We represent the dB value as a single 8-bit integer and save the "offset" on the frequency axis.
     Low sampling rates do not have data for high frequencies but we wish to represent the PSD data
@@ -45,6 +49,7 @@ class PSDCollector():
 
     means a frequency offset of 57 steps. The steps are defined by ObsPy giving the period limit tuple
     0.01 - 1000 and are always the same starting at 0.01. Increase is per 1/8th octave (factor of 0.125).
+    The current database runs from 0.001 to 1000 but that's probably not necessary.
 
     e.g.
 
@@ -123,7 +128,17 @@ class PSDCollector():
         # Data from multiple files will be in two different traces by default
         ObspyStream.merge(0, fill_value=0)
 
-        # More than a single stream cannot be handled
+        # More than a single stream cannot be handled.. should not be the case after merging
+        # but there may be some crappy mixed data in the archive:
+        #
+        # msi -T /data/storage/orfeus/SDS/2013/II/AAK/BHZ.D/II.AAK.00.BHZ.D.2013.249
+        #
+        # ...
+        # II_AAK_00_BHZ     2013,249,23:59:46.719500 2013,250,00:00:07.569500 20  418
+        # II_AAK_10_BHZ     2013,249,00:05:16.069500 2013,249,00:24:14.319500 40  45531
+        # ...
+        #
+        # How 'bout dat?
         if len(ObspyStream) > 1:
             return None
 
@@ -140,7 +155,7 @@ class PSDCollector():
         # tr.trim(starttime=UTCDateTime("1970-01-01"), endtime=UTCDateTime("1970-01-02") - 1E-6, nearest_sample=False)
         # >>> ... | 1970-01-01T00:00:00.000000Z - 1970-01-01T23:59:59.000000Z | 1.0 Hz, 86400 samples
 
-        # Pad start & end with zeros if necessary and fill with zeros
+        # Pad start & end with zeros if necessary and fill with zeros in case we do not cover the full day range
         ObspyStream.trim(starttime=UTCDateTime(SDSFile.start),
                          endtime=UTCDateTime(SDSFile.end + timedelta(minutes=30)) - 1E-6,
                          pad=True,
@@ -245,15 +260,16 @@ class PSDCollector():
             # XXX NOTE:
             # Modified /home/ubuntu/.local/lib/python2.7/site-packages/obspy/signal/spectral_estimation.py
             # And /usr/local/lib/python3.5/dist-packages/obspy/signal/spectral_estimation.py
-            # To set ppsd.valid as a public attribute!
+            # To set ppsd.valid as a public attribute! We need this to determine the offset on the frequency axis
             try:
                 psd_array = self.__getFrequencyOffset(segment, ppsd.valid, SDSFile.isPressureChannel)
                 byteAmplitudes = self.__toByteArray(psd_array)
+            # This may fail in multiple ways.. try the next segment
             except Exception as ex:
                 continue
 
             # Add hash of the data & metadata (first 8 hex digits)
-            # Saving 64 bytes * 2 makes our database pretty big and this should be sufficient to 
+            # Saving 64 bytes * 2 makes (checksums) our database pretty big and this should be sufficient to 
             # detect changes
             psdObject = {
                 "checksum": SDSFile.checksum[:13],
@@ -271,6 +287,5 @@ class PSDCollector():
             spectra.append(psdObject)
 
         return spectra
-
 
 psdCollector = PSDCollector()
