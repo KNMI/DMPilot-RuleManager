@@ -17,7 +17,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", help="directory containing the files to process")
     parser.add_argument("--rulemap", help="set custom rule map file")
-    parser.add_argument("--ruleseq", help="set custom rule order file")
+    parser.add_argument("--ruleseq", help="set custom rule sequence file")
     parsedargs = vars(parser.parse_args())
 
     # Check parameters

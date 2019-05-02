@@ -1,0 +1,6 @@
+[
+    "prune",
+    "ingestion",
+    "dcMetadata",
+    "waveformMetadata"
+]

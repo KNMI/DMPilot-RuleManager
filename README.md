@@ -36,10 +36,12 @@ Source compilation instructions can be found on the respective pages.
 the location of the files, and the information to connect to iRODS and the Mongo
 database.
 
-2) Edit your JSON rule map file specifying which rules to run, in what order, and
-with which options. The rules available are the ones in `rules.sdsrules`.
+2) Edit your JSON rule map file specifying the options for each
+rule. The rules available are the ones in `rules.sdsrules`.
 
-3) Run `python3 sdsmanager.py --dir /path/to/archive --rulemap rules.json`.
+3) Edit your JSON rule sequence file specifying which rules to run and in what order.
+
+4) Run `python3 sdsmanager.py --dir /path/to/archive --rulemap rules.json --ruleseq rule_seq.json`.
 
 ## Implementing a new rule for an existing manager
 
