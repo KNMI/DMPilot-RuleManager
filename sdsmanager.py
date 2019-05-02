@@ -11,11 +11,13 @@ from orfeus.sdscollector import SDSFileCollector
 import rules.sdsrules as sdsrules
 import policies.sdspolicies as sdspolicies
 
+
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", help="directory containing the files to process")
     parser.add_argument("--rulemap", help="set custom rule map file")
+    parser.add_argument("--ruleseq", help="set custom rule order file")
     parsedargs = vars(parser.parse_args())
 
     # Check parameters
@@ -23,10 +25,12 @@ def main():
         return print("A directory needs to be specified using --dir")
     if parsedargs["rulemap"] is None:
         return print("A rulemap needs to be specified using --rulemap")
+    if parsedargs["ruleseq"] is None:
+        return print("A rule sequence needs to be specified using --ruleseq")
 
     # Set up rules
     RM = RuleManager()
-    RM.loadRules(sdsrules, sdspolicies, parsedargs["rulemap"])
+    RM.loadRules(sdsrules, sdspolicies, parsedargs["rulemap"], parsedargs["ruleseq"])
 
     # Collect files
     fileCollector = SDSFileCollector(parsedargs["dir"])
@@ -34,6 +38,7 @@ def main():
 
     # Apply the sequence of rules on files
     RM.sequence(files)
+
 
 if __name__ == "__main__":
     main()

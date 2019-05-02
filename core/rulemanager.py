@@ -5,6 +5,7 @@ import json
 from functools import partial, wraps
 from core.rule import Rule
 
+
 class RuleManager():
 
     """
@@ -34,7 +35,7 @@ class RuleManager():
 
         raise TimeoutError("Metric calculation has timed out.")
 
-    def loadRules(self, ruleModule, policyModule, ruleMapFile):
+    def loadRules(self, ruleModule, policyModule, ruleMapFile, ruleSequenceFile):
         """Loads the rules.
 
         Parameters
@@ -50,11 +51,26 @@ class RuleManager():
         self.policies = policyModule
 
         # Load the configured sequence of rules
+        rule_desc = None    # Rule configuration
+        rule_seq = None     # Rule order
+
         try:
-            with open(ruleMapFile) as infile:
-                self.ruleSequence = json.load(infile)
+            with open(ruleMapFile) as rule_file:
+                rule_desc = json.load(rule_file)
         except IOError:
             raise IOError("The rulemap %s could not be found." % ruleMapFile)
+
+        try:
+            with open(ruleSequenceFile) as order_file:
+                rule_seq = json.load(order_file)
+        except IOError:
+            raise IOError("The rule sequence file %s could not be found." % ruleSequenceFile)
+
+        # Sort rule_desc according to rule_order
+        self.ruleSequence = sorted(
+            [rule for rule in rule_desc if rule["name"] in rule_seq],
+            key=lambda rule: rule_seq.index(rule["name"])
+        )
 
         # Check if the rules are valid
         self.__checkRuleSequence(self.ruleSequence)
@@ -98,9 +114,9 @@ class RuleManager():
 
         # Invert the boolean result from the policy
         if (definitions == self.policies) and item["name"].startswith("!"):
-          return partial(invert(getattr(definitions, item["name"][1:])), item["options"])
+            return partial(invert(getattr(definitions, item["name"][1:])), item["options"])
         else:
-          return partial(getattr(definitions, item["name"]), item["options"])
+            return partial(getattr(definitions, item["name"]), item["options"])
 
     def getRule(self, rule):
         """
@@ -127,7 +143,7 @@ class RuleManager():
         """
 
         total = len(items)
-        
+
         # Items can be SDSFiles or metadata (XML) files
         for i, item in enumerate(items):
 
