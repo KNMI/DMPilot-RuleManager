@@ -15,7 +15,7 @@ class Collector():
 
         # Initialize logger
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Initializing WFCatalog Collector.")
+        self.logger.debug("Initializing WFCatalog Collector.")
 
     def getMetadata(self, SDSFile):
         """

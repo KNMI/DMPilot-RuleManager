@@ -36,7 +36,7 @@ class MongoManager():
 
         # Initialize logger
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Initializing a new Mongo Session.")
+        self.logger.debug("Initializing a new Mongo Session.")
 
         self.client = None
         self.database = None
@@ -44,13 +44,11 @@ class MongoManager():
     def connect(self):
         """
         def MongoManager.connect
-        Opens connection to the database
+        Creates a connection to the database
         """
 
         if self.client is not None:
             return
-
-        self.logger.debug("Connecting to Mongo DB.")
 
         self.client = MongoClient(
             config["MONGO"]["HOST"],

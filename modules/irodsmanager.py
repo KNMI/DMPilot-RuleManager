@@ -40,7 +40,7 @@ class IRODSManager():
 
         # Initialize logger
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Initializing a new iRODS Session.")
+        self.logger.debug("Initializing a new iRODS Session.")
 
         self.session = None
         self.connect()
@@ -48,13 +48,11 @@ class IRODSManager():
     def connect(self):
         """
         def IRODSManager::connect
-        Connects an iRODSSession
+        Creates a iRODSSession to connect to iRODS
         """
 
         if self.session is not None:
             return
-
-        self.logger.debug("Connecting the iRODS Session.")
 
         # Open a session
         self.session = iRODSSession(
@@ -120,7 +118,7 @@ class IRODSManager():
 
             # Checksum of file did not change vs. iRODS checksum
             if dataObject.checksum == SDSFile.checksum:
-                self.logger.info("File already registered, cancelling ingestion.")
+                self.logger.debug("File already registered, cancelling ingestion.")
                 return
 
         # Some put options

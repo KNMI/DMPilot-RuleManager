@@ -46,10 +46,11 @@ def ini_logger():
     logger = logging.getLogger(__name__)
 
     # Disable matplotlib and irods DEBUG logging (too verbose!)
-    logging.getLogger("matplotlib").setLevel(logging.INFO)
-    logging.getLogger("irods").setLevel(logging.INFO)
+    if level <= logging.DEBUG:
+        logging.getLogger("matplotlib").setLevel(logging.INFO)
+        logging.getLogger("irods").setLevel(logging.INFO)
 
-    logger.info("Initialized logger.")
+    logger.debug("Initialized logger.")
 
 # Initialize main logger
 ini_logger()

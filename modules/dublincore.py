@@ -12,7 +12,7 @@ class DublinCore:
 
         # Initialize logger
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Initializing DublinCore Collector.")
+        self.logger.debug("Initializing DublinCore Collector.")
 
     def getDCMetadata(self, SDSFile):
         """Returns the stored metadata for the file described by
