@@ -1,4 +1,5 @@
 import base64
+import logging
 
 from bson.binary import Binary
 from datetime import timedelta
@@ -70,7 +71,10 @@ class PSDCollector():
     PERIOD_LIMIT_TUPLE = (0.01, 1000)
 
     def __init__(self):
-        pass
+
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Initializing PSD Collector.")
 
     def __getResponseChecksum(self, inventory):
 

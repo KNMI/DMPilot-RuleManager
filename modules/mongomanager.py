@@ -15,6 +15,7 @@ mongoSession.save("collection_name", document)
 ```
 """
 
+import logging
 from configuration import config
 
 # MongoDB driver for Python
@@ -33,6 +34,10 @@ class MongoManager():
         Initializes the class
         """
 
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Initializing a new Mongo Session.")
+
         self.client = None
         self.database = None
 
@@ -44,6 +49,8 @@ class MongoManager():
 
         if self.client is not None:
             return
+
+        self.logger.debug("Connecting to Mongo DB.")
 
         self.client = MongoClient(
             config["MONGO"]["HOST"],

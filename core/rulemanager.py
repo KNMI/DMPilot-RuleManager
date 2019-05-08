@@ -16,10 +16,6 @@ class RuleManager():
     def __init__(self):
 
         # Initialize logger
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s %(name)s %(levelname)s %(message)s"
-        )
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initializing the Rule Manager.")
 
@@ -161,15 +157,15 @@ class RuleManager():
 
                 # The rule was timed out
                 except TimeoutError:
-                    logging.info("Timeout calling rule %s." % rule.call.func.__name__)
+                    self.logger.warning("%s: Timeout calling rule %s." % (item.filename, rule.call.func.__name__))
 
                 # Policy assertion errors
                 except AssertionError as e:
-                    logging.info("Not executing rule %s. Rule did not pass policy %s." % (rule.call.func.__name__, e))
+                    self.logger.info("%s: Not executing rule %s. Rule did not pass policy %s." % (item.filename, rule.call.func.__name__, e))
 
                 # Other exceptions
                 except Exception as e:
-                    logging.error("Rule execution %s failed: %s" % (rule.call.func.__name__, e))
+                    self.logger.error("%s: Rule execution %s failed: %s" % (item.filename, rule.call.func.__name__, e), exc_info=True)
 
                 # Disable the alarm
                 finally:

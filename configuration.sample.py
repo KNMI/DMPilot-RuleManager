@@ -16,5 +16,9 @@ config = {
         "USER": "username",
         "PASS": "password",
         "ZONE": "ZoneA"
+    },
+    "LOGGING": {
+        "LEVEL": "INFO",
+        #"FILENAME": "~/log/sdsmanager.log" # optional, otherwise goes to stdout
     }
 }

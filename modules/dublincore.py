@@ -1,13 +1,18 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
 from modules.mongomanager import mongoSession
 
-logger = logging.getLogger(__name__)
 
 
 class DublinCore:
     """Methods for processing Dublin Core metadata."""
+
+    def __init__(self):
+
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Initializing DublinCore Collector.")
 
     def getDCMetadata(self, SDSFile):
         """Returns the stored metadata for the file described by
