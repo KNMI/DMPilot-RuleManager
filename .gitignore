@@ -4,3 +4,5 @@ __pycache__/
 *.log
 *.log.*
 configuration.py
+*.swp
+*.swo

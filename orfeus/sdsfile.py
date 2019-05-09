@@ -55,14 +55,17 @@ class SDSFile():
         Create a filestream from a given filename
         """
 
-        # Extract stream identification
-        (self.net,
-         self.sta,
-         self.loc,
-         self.cha,
-         self.quality,
-         self.year,
-         self.day) = filename.split(".")
+        try:
+            # Extract stream identification
+            (self.net,
+             self.sta,
+             self.loc,
+             self.cha,
+             self.quality,
+             self.year,
+             self.day) = filename.split(".")
+        except ValueError:
+            raise ValueError("Invalid SDS file submitted.")
 
         self.archiveRoot = archiveRoot
 

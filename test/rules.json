@@ -1,0 +1,8 @@
+{
+	"TIMEOUT": {
+                "timeout": 1,
+		"functionName": "timeoutRule",
+		"options": { },
+		"conditions": [ ]
+	}
+}
