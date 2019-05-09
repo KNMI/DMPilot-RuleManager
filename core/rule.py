@@ -1,24 +1,24 @@
 class Rule():
     """
     Class Rule
-    Container for a single rule with a rule and policies to be asserted
+    Container for a single rule with a rule and conditions to be asserted
     """
 
-    def __init__(self, call, policies):
+    def __init__(self, call, conditions):
         """
         Rule.__init__ 
         Initializes a rule with a rule and policy
         """
         self.call = call
-        self.policies = policies
+        self.conditions = conditions
 
     def apply(self, SDSFile):
         """
         Rule.apply
-        Applies a given rule and policies to a file
+        Applies a given rule and conditions to a file
         """
 
-        # Assert the policies
+        # Assert the conditions
         self.assertPolicies(SDSFile)
 
         # Call the rule
@@ -27,11 +27,11 @@ class Rule():
     def assertPolicies(self, SDSFile):
         """
         Rule.assertPolicies
-        Asserts whether all policies evaluate to True
+        Asserts whether all conditions evaluate to True
         """
 
         # Go over each configured policy and assert the policy evaluates to True
-        for policy in self.policies:
+        for policy in self.conditions:
             if not policy(SDSFile):
 
                 # If a __wrapped__ attribut exists the function was inverted
