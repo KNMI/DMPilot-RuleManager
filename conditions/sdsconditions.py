@@ -1,5 +1,5 @@
 """
-Collection of policies that either return True or False
+Collection of conditions that either return True or False
 depending on whether conditions are met
 """
 

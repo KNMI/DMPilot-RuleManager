@@ -74,7 +74,7 @@ Rules are subject to conditions before being executed. These so called condition
 defined in rules.json and have a name like `assertQualityPolicy`. The result of the operation
 can be negated by adding an exclamation in front of the function name e.g. `!assertQualityPolicy`.
 
-These function names refer to conditions defined in the policies directory and should be loaded during
+These function names refer to conditions defined in the conditions directory and should be loaded during
 the initialization of the rule manager.
 
 ## Implementing a new manager
