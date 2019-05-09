@@ -177,7 +177,10 @@ class SDSFile():
 
     @property
     def stats(self):
-        return os.stat(self.filepath)
+        try:
+            return os.stat(self.filepath)
+        except FileNotFoundError:
+            return None
 
     @property
     def size(self):
