@@ -128,10 +128,7 @@ class RuleManager():
         )
 
         # Get timeout from rule-specific config or from default value
-        try:
-            timeout = rule["timeout"]
-        except:
-            timeout = config["DEFAULT_RULE_TIMEOUT"]
+        timeout = rule.get("timeout") or config["DEFAULT_RULE_TIMEOUT"]
 
         return (rule_obj, timeout)
 
