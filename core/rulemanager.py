@@ -4,6 +4,7 @@ import json
 
 from functools import partial, wraps
 from core.rule import Rule
+from configuration import config
 
 
 class RuleManager():
@@ -83,7 +84,7 @@ class RuleManager():
 
             # Check if the rule exists
             try:
-                rule = self.getRule(item)
+                rule, timeout = self.getRule(item)
             except AttributeError:
                 raise NotImplementedError(
                     "Python rule for configured sequence item %s does not exist." %
@@ -116,15 +117,23 @@ class RuleManager():
     def getRule(self, rule):
         """
         Def RuleManager.getRule
-        Returns specific rule from name
+        Returns specific rule from name and its execution timeout
         """
 
         # Bind the rule options to the function call
         # There may be multiple conditions defined per rule
-        return Rule(
+        rule_obj = Rule(
             self.bindOptions(self.rules, rule),
             map(lambda x: self.bindOptions(self.conditions, x), rule["conditions"])
         )
+
+        # Get timeout from rule-specific config or from default value
+        try:
+            timeout = rule["timeout"]
+        except:
+            timeout = config["DEFAULT_RULE_TIMEOUT"]
+
+        return (rule_obj, timeout)
 
     def sequence(self, items):
         """
@@ -145,11 +154,11 @@ class RuleManager():
             self.logger.info("Processing item %s (%d/%d)." % (item.filename, i, total))
 
             # Get the sequence of rules to be applied
-            for rule in map(self.getRule, self.ruleSequence):
+            for rule, timeout in map(self.getRule, self.ruleSequence):
 
-                # Set a signal (hardcoded at 2min for now)
+                # Set a signal
                 signal.signal(signal.SIGALRM, self.__signalHandler)
-                signal.alarm(rule.TIMEOUT_SECONDS)
+                signal.alarm(timeout)
 
                 # Rule options are bound to the call
                 try:

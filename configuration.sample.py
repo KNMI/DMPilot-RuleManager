@@ -20,5 +20,6 @@ config = {
     "LOGGING": {
         "LEVEL": "INFO",
         #"FILENAME": "~/log/sdsmanager.log" # optional, otherwise goes to stdout
-    }
+    },
+    "DEFAULT_RULE_TIMEOUT" : 10
 }
