@@ -4,5 +4,11 @@
 		"functionName": "timeoutRule",
 		"options": { },
 		"conditions": [ ]
-	}
+	},
+        "EXCEPTION": {
+                "timeout": 5,
+                "functionName": "exceptionRule",
+                "options": { },
+                "conditions": [ ]
+        }
 }
