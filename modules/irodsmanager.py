@@ -27,8 +27,6 @@ import irods.keywords as kw
 
 from configuration import config
 
-logger = logging.getLogger(__name__)
-
 
 class IRODSManager():
     """
@@ -40,19 +38,21 @@ class IRODSManager():
 
     def __init__(self):
 
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug("Initializing a new iRODS Session.")
+
         self.session = None
         self.connect()
 
     def connect(self):
         """
         def IRODSManager::connect
-        Connects an iRODSSession
+        Creates a iRODSSession to connect to iRODS
         """
 
         if self.session is not None:
             return
-
-        logger.info("Initializing a new iRODS Session.")
 
         # Open a session
         self.session = iRODSSession(
@@ -69,6 +69,8 @@ class IRODSManager():
         The iRODSSession class is a context manager and calls this function during __exit__
         See: https://github.com/irods/python-irodsclient/blob/master/irods/session.py
         """
+
+        self.logger.debug("Disconnecting the iRODS Session.")
 
         if self.session is None:
             return
@@ -116,7 +118,7 @@ class IRODSManager():
 
             # Checksum of file did not change vs. iRODS checksum
             if dataObject.checksum == SDSFile.checksum:
-                logger.info("File already registered, cancelling ingestion.")
+                self.logger.debug("File already registered, cancelling ingestion.")
                 return
 
         # Some put options

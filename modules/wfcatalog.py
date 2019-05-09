@@ -1,3 +1,4 @@
+import logging
 import warnings
 from datetime import datetime
 
@@ -11,7 +12,10 @@ class Collector():
     """
 
     def __init__(self):
-        pass
+
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug("Initializing WFCatalog Collector.")
 
     def getMetadata(self, SDSFile):
         """

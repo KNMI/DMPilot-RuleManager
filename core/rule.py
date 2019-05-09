@@ -4,8 +4,6 @@ class Rule():
     Container for a single rule with a rule and policies to be asserted
     """
 
-    TIMEOUT_SECONDS = 10
-
     def __init__(self, call, policies):
         """
         Rule.__init__ 

@@ -52,9 +52,13 @@ def pruneRule(options, SDSFile):
         The file to be processed.
     """
 
+    logger.debug("Pruning file %s." % SDSFile.filename)
+
     # Prune the file to a .Q quality file in the temporary archive
     SDSFile.prune(recordLength=options["repackRecordSize"],
                   removeOverlap=options["removeOverlap"])
+
+    logger.debug("Pruned file %s." % SDSFile.filename)
 
 
 def ingestionRule(options, SDSFile):
@@ -74,7 +78,7 @@ def ingestionRule(options, SDSFile):
         The file to be processed.
     """
 
-    logger.info("Ingesting file %s." % SDSFile.filename)
+    logger.debug("Ingesting file %s." % SDSFile.filename)
 
     # Attempt to ingest to iRODS
     irodsSession.createDataObject(SDSFile,
@@ -83,7 +87,8 @@ def ingestionRule(options, SDSFile):
                                   registerChecksum=True)
 
     # Check if checksum is saved
-    logger.info(irodsSession.getDataObject(SDSFile).checksum)
+    logger.debug("Ingested file %s with checksum '%s'" % (
+            SDSFile.filename, strirodsSession.getDataObject(SDSFile).checksum))
 
 
 def federatedIngestionRule(options, SDSFile):
@@ -100,13 +105,15 @@ def federatedIngestionRule(options, SDSFile):
         The file to be processed.
     """
 
-    logger.info("Ingesting file %s." % SDSFile.customPath(options["remoteRoot"]))
+    logger.debug("Ingesting file %s." % SDSFile.customPath(options["remoteRoot"]))
 
     # Attempt to ingest to iRODS
     irodsSession.remotePut(SDSFile,
                            options["remoteRoot"],
                            purgeCache=True,
                            registerChecksum=True)
+
+    logger.debug("Ingested file %s" % SDSFile.customPath(options["remoteRoot"]))
 
 
 def purgeRule(options, SDSFile):
@@ -124,12 +131,15 @@ def purgeRule(options, SDSFile):
 
     # If configured: files with file size 0 need to be deleted
     if options["deleteEmptyFiles"] and SDSFile.size == 0:
-        logger.info("Purging empty file %s." % SDSFile.filename)
-        return irodsSession.purgeTemporaryFile(SDSFile)
+        logger.debug("Purging empty file %s." % SDSFile.filename)
+        result = irodsSession.purgeTemporaryFile(SDSFile)
+        logger.debug("Purged empty file %s." % SDSFile.filename)
+        return result
 
     # Some other configurable rules
-    logger.info("Purging file %s." % SDSFile.filename)
+    logger.debug("Purging file %s." % SDSFile.filename)
     irodsSession.purgeTemporaryFile(SDSFile)
+    logger.debug("Purged file %s." % SDSFile.filename)
 
 
 def dcMetadataRule(options, SDSFile):
@@ -144,7 +154,7 @@ def dcMetadataRule(options, SDSFile):
         The file to be processed.
     """
 
-    logger.info("Dublin Core metadata for %s." % SDSFile.filename)
+    logger.debug("Saving Dublin Core metadata for %s." % SDSFile.filename)
 
     # Get the existing Dublin Core Object
     document = dublinCore.extractDCMetadata(SDSFile)
@@ -152,7 +162,7 @@ def dcMetadataRule(options, SDSFile):
     # Save to the database
     if document:
         mongoSession.saveDCDocument(document)
-        logger.info("Saved DC metadata for %s." % SDSFile.filename)
+        logger.debug("Saved Dublin Core metadata for %s." % SDSFile.filename)
 
 
 def waveformMetadataRule(options, SDSFile):
@@ -173,10 +183,11 @@ def waveformMetadataRule(options, SDSFile):
     if document is None:
       return logger.error("Could not get the waveform metadata.")
 
-    logger.info("Adding new waveform metadata for %s." % SDSFile.filename)
+    logger.debug("Saving waveform metadata for %s." % SDSFile.filename)
 
     # Save the metadata document
     mongoSession.setMetadataDocument(document)
+    logger.debug("Saved waveform metadata for %s." % SDSFile.filename)
 
 
 def testPrint(options, sdsFile):

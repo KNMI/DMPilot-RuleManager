@@ -4,6 +4,7 @@ import json
 
 from functools import partial, wraps
 from core.rule import Rule
+from configuration import config
 
 
 class RuleManager():
@@ -16,12 +17,8 @@ class RuleManager():
     def __init__(self):
 
         # Initialize logger
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s %(name)s %(levelname)s %(message)s"
-        )
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Initializing the Rule Manager.")
+        self.logger.debug("Initializing the Rule Manager.")
 
         self.rules = None
         self.conditions = None
@@ -87,7 +84,7 @@ class RuleManager():
 
             # Check if the rule exists
             try:
-                rule = self.getRule(item)
+                rule, timeout = self.getRule(item)
             except AttributeError:
                 raise NotImplementedError(
                     "Python rule for configured sequence item %s does not exist." %
@@ -120,15 +117,20 @@ class RuleManager():
     def getRule(self, rule):
         """
         Def RuleManager.getRule
-        Returns specific rule from name
+        Returns specific rule from name and its execution timeout
         """
 
         # Bind the rule options to the function call
         # There may be multiple conditions defined per rule
-        return Rule(
+        rule_obj = Rule(
             self.bindOptions(self.rules, rule),
             map(lambda x: self.bindOptions(self.conditions, x), rule["conditions"])
         )
+
+        # Get timeout from rule-specific config or from default value
+        timeout = rule.get("timeout") or config["DEFAULT_RULE_TIMEOUT"]
+
+        return (rule_obj, timeout)
 
     def sequence(self, items):
         """
@@ -149,27 +151,28 @@ class RuleManager():
             self.logger.info("Processing item %s (%d/%d)." % (item.filename, i, total))
 
             # Get the sequence of rules to be applied
-            for rule in map(self.getRule, self.ruleSequence):
+            for rule, timeout in map(self.getRule, self.ruleSequence):
 
-                # Set a signal (hardcoded at 2min for now)
+                # Set a signal
                 signal.signal(signal.SIGALRM, self.__signalHandler)
-                signal.alarm(rule.TIMEOUT_SECONDS)
+                signal.alarm(timeout)
 
                 # Rule options are bound to the call
                 try:
                     rule.apply(item)
+                    self.logger.info("%s: Successfully executed rule '%s'." % (item.filename, rule.call.func.__name__))
 
                 # The rule was timed out
                 except TimeoutError:
-                    logging.info("Timeout calling rule %s." % rule.call.func.__name__)
+                    self.logger.warning("%s: Timeout calling rule '%s'." % (item.filename, rule.call.func.__name__))
 
                 # Policy assertion errors
                 except AssertionError as e:
-                    logging.info("Not executing rule %s. Rule did not pass policy %s." % (rule.call.func.__name__, e))
+                    self.logger.info("%s: Not executing rule '%s'. Rule did not pass policy '%s'." % (item.filename, rule.call.func.__name__, e))
 
                 # Other exceptions
                 except Exception as e:
-                    logging.error("Rule execution %s failed: %s" % (rule.call.func.__name__, e))
+                    self.logger.error("%s: Rule execution '%s' failed: %s" % (item.filename, rule.call.func.__name__, e), exc_info=False)
 
                 # Disable the alarm
                 finally:
