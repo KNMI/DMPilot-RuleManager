@@ -67,6 +67,22 @@ class TestRuleManager(unittest.TestCase):
         # Assert the exception
         self.assertEqual("Invalid SDS file submitted.", str(ex.exception.args[0]))
  
+    def test_rule_exception(self):
+
+        """
+        def test_rule_timeout
+        test mock timeout rule that should raise after 1 second
+        """
+
+        self.RM.loadRules(testrules, testconditions, "rules.json", "rule_seq2.json")
+
+        # Capture the log
+        with self.assertLogs("core.rulemanager", level="WARNING") as cm:
+            self.RM.sequence([self.SDSFILE])
+
+        # Assert timeout message in log
+        self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'exceptionRule' failed: Oops!"])
+
     def test_rule_timeout(self):
 
         """
