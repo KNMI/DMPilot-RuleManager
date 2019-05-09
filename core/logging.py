@@ -25,18 +25,13 @@ from configuration import config
 def ini_logger():
     """ Initialize logger """
 
-    try:
-        # Try to parse config value to logging level, if not default is INFO
-        level = getattr(logging, config["LOGGING"]["LEVEL"].upper(), 20)
-    except:
-        level = logging.INFO
+    # Try to parse config value to logging level, if not default is INFO
+    level = getattr(logging, config["LOGGING"]["LEVEL"].upper(), 20)
 
-    try:
-        # Try to get file name from config, if not use stream (stdout)
-        filename = config["LOGGING"]["FILENAME"]
+    # Try to get file name from config, if not use stream (stdout)
+    filename = config["LOGGING"]["FILENAME"]
+    if filename is not None:
         filename = os.path.expandvars(os.path.expanduser(filename))
-    except:
-        filename = None
 
     logging.basicConfig(
         format="%(asctime)s - %(module)s - %(levelname)s - %(message)s",
