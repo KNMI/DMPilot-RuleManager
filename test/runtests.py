@@ -1,6 +1,8 @@
-import unittest
+import os
 import sys
-import testconditions, testrules
+import unittest
+
+from datetime import datetime
 
 # Patch to parent folder to import code
 sys.path.append("..")
@@ -12,6 +14,20 @@ class TestRuleManager(unittest.TestCase):
 
     # Create a mock SDSFile
     SDSFILE = SDSFile("NL.HGN.02.BHZ.D.1970.001", "/data/temp_archive/SDS/")
+    
+    def loadSequence(self, sequence):
+
+        """
+        def loadSequence
+        Wrapper function to load a rule sequence to the Rule Manager instance
+        """
+
+        import testconditions
+        import testrules
+
+        sequence = os.path.join("sequences", sequence)
+
+        self.RM.loadRules(testrules, testconditions, "rules.json", sequence)
 
     def setUp(self):
 
@@ -22,9 +38,6 @@ class TestRuleManager(unittest.TestCase):
 
         # Create a rule manager class
         self.RM = RuleManager()
-
-        # Load the 
-        self.RM.loadRules(testrules, testconditions, "rules.json", "rule_seq.json")
 
     def test_sdsfile_class(self):
 
@@ -74,7 +87,8 @@ class TestRuleManager(unittest.TestCase):
         test mock timeout rule that should raise after 1 second
         """
 
-        self.RM.loadRules(testrules, testconditions, "rules.json", "rule_seq2.json")
+        # Load an exception sequence
+        self.loadSequence("rule_seq_exception.json")
 
         # Capture the log
         with self.assertLogs("core.rulemanager", level="WARNING") as cm:
@@ -83,6 +97,25 @@ class TestRuleManager(unittest.TestCase):
         # Assert timeout message in log
         self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'exceptionRule' failed: Oops!"])
 
+    def test_rule_conditions(self):
+
+        # Load the timeout sequence
+        self.loadSequence("rule_seq_conditions.json")
+
+        # Capture the log
+        with self.assertLogs("core.rulemanager", level="INFO") as cm:
+            self.RM.sequence([self.SDSFILE])
+
+        # Expected log messages
+        # First sequence should pass on condition (trueCondition) and execute rule
+        # Second sequence should fail on condition (falseCondition)
+        expected = ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'passRule'.",
+                    "INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Not executing rule 'passRule'. Rule did not pass policy 'falseCondition'."]
+
+        # Assert log messages equal but skip first processing
+        for a, b in zip(cm.output[1:], expected):
+            self.assertEqual(a, b);
+
     def test_rule_timeout(self):
 
         """
@@ -90,9 +123,17 @@ class TestRuleManager(unittest.TestCase):
         test mock timeout rule that should raise after 1 second
         """
 
+        # Load the timeout sequence
+        self.loadSequence("rule_seq_timeout.json")
+
+        start = datetime.now()
+
         # Capture the log
         with self.assertLogs("core.rulemanager", level="WARNING") as cm:
             self.RM.sequence([self.SDSFILE])
+
+        # Assert that the timeout took roughly 1s
+        self.assertAlmostEqual(1.0, (datetime.now() - start).total_seconds(), places=2)
 
         # Assert timeout message in log
         self.assertEqual(cm.output, ["WARNING:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Timeout calling rule 'timeoutRule'."])
