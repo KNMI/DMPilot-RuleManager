@@ -1,21 +1,43 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import unittest
 
 from datetime import datetime
 
-# Patch to parent folder to import code
-sys.path.append("..")
+CWD = os.path.abspath(os.path.dirname(__file__))
 
+# Patch to parent folder to import some code
+sys.path.append(os.path.dirname(CWD))
 from orfeus.sdsfile import SDSFile
 from core.rulemanager import RuleManager
+sys.path.pop()
 
 class TestRuleManager(unittest.TestCase):
 
-    # Create a mock SDSFile
-    SDSFILE = SDSFile("NL.HGN.02.BHZ.D.1970.001", os.path.abspath("data"))
-    SDSREAL = SDSFile("NL.HGN.02.BHZ.D.2019.022", os.path.abspath("data"))
+    """
+    Class TestRuleManager
+    Test suite for the RDSA Rule Manager
+    """
+
+    # Create mock and real SDSFiles
+    SDSMock = SDSFile("NL.HGN.02.BHZ.D.1970.001", os.path.join(CWD, "data"))
+    SDSReal = SDSFile("NL.HGN.02.BHZ.D.2019.022", os.path.join(CWD, "data"))
     
+    @classmethod
+    def setUpClass(cls):
+
+        """
+        def setUpClass
+        Sets up the TestRuleManager test suite
+        """
+
+        print("Setting up Rule Manager for test suite.")
+
+        # Create a rule manager class
+        cls.RM = RuleManager()
+
     def loadSequence(self, sequence):
 
         """
@@ -23,22 +45,16 @@ class TestRuleManager(unittest.TestCase):
         Wrapper function to load a rule sequence to the Rule Manager instance
         """
 
-        import testconditions
-        import testrules
+        import conditions.testconditions as testconditions
+        import rules.testrules as testrules
 
-        sequence = os.path.join("sequences", sequence)
-
-        self.RM.loadRules(testrules, testconditions, "rules.json", sequence)
-
-    def setUp(self):
-
-        """
-        def setUp
-        Sets up the TestRuleManager test suite
-        """
-
-        # Create a rule manager class
-        self.RM = RuleManager()
+        # Load sequence and rules
+        self.RM.loadRules(
+            testrules,
+            testconditions,
+            os.path.join(CWD, "rules.json"),
+            os.path.join(CWD, "sequences", sequence)
+        )
 
     def test_sdsfile_class(self):
 
@@ -48,43 +64,43 @@ class TestRuleManager(unittest.TestCase):
         """
 
         # Assert identifiers are OK
-        self.assertEqual(self.SDSFILE.net, "NL")
-        self.assertEqual(self.SDSFILE.sta, "HGN")
-        self.assertEqual(self.SDSFILE.loc, "02")
-        self.assertEqual(self.SDSFILE.cha, "BHZ")
-        self.assertEqual(self.SDSFILE.quality, "D")
-        self.assertEqual(self.SDSFILE.year, "1970")
-        self.assertEqual(self.SDSFILE.day, "001")
+        self.assertEqual(self.SDSMock.net, "NL")
+        self.assertEqual(self.SDSMock.sta, "HGN")
+        self.assertEqual(self.SDSMock.loc, "02")
+        self.assertEqual(self.SDSMock.cha, "BHZ")
+        self.assertEqual(self.SDSMock.quality, "D")
+        self.assertEqual(self.SDSMock.year, "1970")
+        self.assertEqual(self.SDSMock.day, "001")
 
         # Assert neighbouring files are OK
-        self.assertEqual(self.SDSFILE.filename, "NL.HGN.02.BHZ.D.1970.001")
-        self.assertEqual(self.SDSFILE.next.filename, "NL.HGN.02.BHZ.D.1970.002")
-        self.assertEqual(self.SDSFILE.previous.filename, "NL.HGN.02.BHZ.D.1969.365")
+        self.assertEqual(self.SDSMock.filename, "NL.HGN.02.BHZ.D.1970.001")
+        self.assertEqual(self.SDSMock.next.filename, "NL.HGN.02.BHZ.D.1970.002")
+        self.assertEqual(self.SDSMock.previous.filename, "NL.HGN.02.BHZ.D.1969.365")
 
         # Confirm FDSNWS query string for this file
-        self.assertEqual(self.SDSFILE.queryString, "?start=1970-01-01T00:00:00&end=1970-01-02T00:00:00&network=NL&station=HGN&location=02&channel=BHZ")
+        self.assertEqual(self.SDSMock.queryString, "?start=1970-01-01T00:00:00&end=1970-01-02T00:00:00&network=NL&station=HGN&location=02&channel=BHZ")
 
         # Not an infrasound channel
-        self.assertFalse(self.SDSFILE.isPressureChannel)
+        self.assertFalse(self.SDSMock.isPressureChannel)
 
         # File does not exist
-        self.assertEqual(self.SDSFILE.created, None)
-        self.assertEqual(self.SDSFILE.modified, None)
-        self.assertEqual(self.SDSFILE.size, None)
-        self.assertEqual(self.SDSFILE.checksum, None)
+        self.assertEqual(self.SDSMock.created, None)
+        self.assertEqual(self.SDSMock.modified, None)
+        self.assertEqual(self.SDSMock.size, None)
+        self.assertEqual(self.SDSMock.checksum, None)
 
         # File is real does exist in data test archive
-        self.assertEqual(self.SDSREAL.created, datetime(2019, 5, 10, 11, 30, 11, 257133))
-        self.assertEqual(self.SDSREAL.modified, datetime(2019, 5, 10, 11, 26, 26, 293895))
-        self.assertEqual(self.SDSREAL.size, 4571648)
-        self.assertEqual(self.SDSREAL.checksum, "sha2:yQQ9przMS2Pav5kyTsAtpF2F7aU/TgyRDZa2kTxg6DA=")
+        self.assertEqual(self.SDSReal.created, datetime(2019, 5, 10, 11, 30, 11, 257133))
+        self.assertEqual(self.SDSReal.modified, datetime(2019, 5, 10, 11, 26, 26, 293895))
+        self.assertEqual(self.SDSReal.size, 4571648)
+        self.assertEqual(self.SDSReal.checksum, "sha2:yQQ9przMS2Pav5kyTsAtpF2F7aU/TgyRDZa2kTxg6DA=")
 
         # Confirm dataselect trimming of file and number of samples is expected @ 40Hz
-        self.assertEqual(self.SDSREAL.samples, 40 * 86400)
+        self.assertEqual(self.SDSReal.samples, 40 * 86400)
 
         # First sample after 2019-01-22T00:00:00 and end before 2019-01-23T00:00:00
-        self.assertTrue(self.SDSREAL.traces[0]["start"] > datetime(2019, 1, 22, 0, 0, 0, 0))
-        self.assertTrue(self.SDSREAL.traces[0]["end"] < datetime(2019, 1, 23, 0, 0, 0, 0))
+        self.assertTrue(self.SDSReal.traces[0]["start"] > datetime(2019, 1, 22, 0, 0, 0, 0))
+        self.assertTrue(self.SDSReal.traces[0]["end"] < datetime(2019, 1, 23, 0, 0, 0, 0))
 
     def test_sdsfile_invalid(self):
 
@@ -112,7 +128,7 @@ class TestRuleManager(unittest.TestCase):
 
         # Capture the log
         with self.assertLogs("core.rulemanager", level="ERROR") as cm:
-            self.RM.sequence([self.SDSFILE])
+            self.RM.sequence([self.SDSMock])
 
         # Assert timeout message in log
         self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'exceptionRule' failed: Oops!"])
@@ -129,7 +145,7 @@ class TestRuleManager(unittest.TestCase):
 
         # Capture the log
         with self.assertLogs("core.rulemanager", level="INFO") as cm:
-            self.RM.sequence([self.SDSFILE])
+            self.RM.sequence([self.SDSMock])
 
         # Expected log messages
         # First sequence should pass on condition (trueCondition) and execute rule
@@ -151,7 +167,7 @@ class TestRuleManager(unittest.TestCase):
         self.loadSequence("rule_seq_condition_exception.json")
 
         with self.assertLogs("core.rulemanager", level="ERROR") as cm:
-            self.RM.sequence([self.SDSFILE])
+            self.RM.sequence([self.SDSMock])
 
         self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'passRule' failed: Oops!"])
 
@@ -167,7 +183,7 @@ class TestRuleManager(unittest.TestCase):
 
         # Will raise an exception if options are not properly passed
         with self.assertLogs("core.rulemanager", level="INFO") as cm:
-            self.RM.sequence([self.SDSFILE])
+            self.RM.sequence([self.SDSMock])
 
         self.assertEqual(cm.output[1:], ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'passRule'."])
 
@@ -183,7 +199,7 @@ class TestRuleManager(unittest.TestCase):
 
         # Will raise an exception if options are not properly passed
         with self.assertLogs("core.rulemanager", level="INFO") as cm:
-            self.RM.sequence([self.SDSFILE])
+            self.RM.sequence([self.SDSMock])
 
         self.assertEqual(cm.output[1:], ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'optionRule'."])
 
@@ -201,7 +217,7 @@ class TestRuleManager(unittest.TestCase):
 
         # Capture the log
         with self.assertLogs("core.rulemanager", level="WARNING") as cm:
-            self.RM.sequence([self.SDSFILE])
+            self.RM.sequence([self.SDSMock])
 
         # Assert that the timeout took roughly 1s
         self.assertAlmostEqual(1.0, (datetime.now() - start).total_seconds(), places=2)
