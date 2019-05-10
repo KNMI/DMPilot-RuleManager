@@ -17,8 +17,13 @@ class PSDCollector():
     Uses ObsPy PPSD to extract PSD information
 
     Additional information:
-    This needs to be installed under ObsPy 1.2.0 for some fixes
-    Uses default ObsPy options to calculate PSDs
+    This needs to be installed under ObsPy 1.2.0 for some fixes see:
+
+      https://github.com/obspy/obspy/pull/2040/files
+
+    This has been modified /usr/local/lib/python3.5/dist-packages/obspy/signal/spectral_estimation.py
+
+    We use the default ObsPy options to calculate PSDs
 
     We use 50% overlap and hourly segments. This means we get 48 segments per day!
 

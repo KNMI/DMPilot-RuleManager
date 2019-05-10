@@ -5,13 +5,20 @@ import sys
 import unittest
 
 from datetime import datetime
+from unittest.mock import patch, PropertyMock
+from obspy import read_inventory
 
 CWD = os.path.abspath(os.path.dirname(__file__))
 
 # Patch to parent folder to import some code
 sys.path.append(os.path.dirname(CWD))
-from orfeus.sdsfile import SDSFile
 from core.rulemanager import RuleManager
+
+# Modules
+from modules.psdcollector import psdCollector
+from orfeus.sdsfile import SDSFile
+
+# Cleanup
 sys.path.pop()
 
 class TestRuleManager(unittest.TestCase):
@@ -90,8 +97,8 @@ class TestRuleManager(unittest.TestCase):
         self.assertEqual(self.SDSMock.checksum, None)
 
         # File is real does exist in data test archive
-        self.assertEqual(self.SDSReal.created, datetime(2019, 5, 10, 11, 30, 11, 257133))
-        self.assertEqual(self.SDSReal.modified, datetime(2019, 5, 10, 11, 26, 26, 293895))
+        self.assertIsNotNone(self.SDSReal.created)
+        self.assertIsNotNone(self.SDSReal.modified)
         self.assertEqual(self.SDSReal.size, 4571648)
         self.assertEqual(self.SDSReal.checksum, "sha2:yQQ9przMS2Pav5kyTsAtpF2F7aU/TgyRDZa2kTxg6DA=")
 
@@ -225,6 +232,12 @@ class TestRuleManager(unittest.TestCase):
         # Assert timeout message in log
         self.assertEqual(cm.output, ["WARNING:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Timeout calling rule 'timeoutRule'."])
 
+    def testPSDModule(self):
+
+        result = psdCollector.process(self.SDSReal)
+
+        # Should return 48 segments
+        self.assertEqual(len(result), 48)
 
 if __name__ == '__main__':
     unittest.main()

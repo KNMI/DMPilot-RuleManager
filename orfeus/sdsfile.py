@@ -16,7 +16,7 @@ import base64
 from datetime import datetime, timedelta
 from hashlib import sha256
 
-from obspy import read_inventory
+from obspy import read_inventory, UTCDateTime
 from configuration import config
 
 
