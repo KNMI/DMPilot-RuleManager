@@ -8,4 +8,6 @@ def exceptionRule(SDSFile, options):
 
     raise Exception("Oops!")
 
+def passRule(SDSFile, options):
 
+    pass

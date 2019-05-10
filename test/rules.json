@@ -10,5 +10,25 @@
                 "functionName": "exceptionRule",
                 "options": { },
                 "conditions": [ ]
+        },
+        "CONDITION_FALSE": {
+                "functionName": "passRule",
+                "options": { },
+                "conditions": [
+                        {
+                                "functionName": "falseCondition",
+                                "options": {}
+                        }
+]
+        },
+        "CONDITION_TRUE": {
+                "functionName": "passRule",
+                "options": { },
+                "conditions": [
+                        {
+                                "functionName": "trueCondition",
+                                "options": {}
+                        }
+]
         }
 }
