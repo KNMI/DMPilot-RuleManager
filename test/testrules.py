@@ -1,13 +1,18 @@
 import time
 
-def timeoutRule(SDSFile, options):
+def timeoutRule(options, SDSFile):
 
     time.sleep(6)
 
-def exceptionRule(SDSFile, options):
+def exceptionRule(options, SDSFile):
 
     raise Exception("Oops!")
 
-def passRule(SDSFile, options):
+def passRule(options, SDSFile):
 
     pass
+
+def optionRule(options, SDSFile):
+
+    if options["number"] != 10 or options["string"] != "string":
+        raise Exception("Oops!")
