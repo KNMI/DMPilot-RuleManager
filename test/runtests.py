@@ -13,7 +13,8 @@ from core.rulemanager import RuleManager
 class TestRuleManager(unittest.TestCase):
 
     # Create a mock SDSFile
-    SDSFILE = SDSFile("NL.HGN.02.BHZ.D.1970.001", "/data/temp_archive/SDS/")
+    SDSFILE = SDSFile("NL.HGN.02.BHZ.D.1970.001", os.path.abspath("data"))
+    SDSREAL = SDSFile("NL.HGN.02.BHZ.D.2019.022", os.path.abspath("data"))
     
     def loadSequence(self, sequence):
 
@@ -65,6 +66,25 @@ class TestRuleManager(unittest.TestCase):
 
         # Not an infrasound channel
         self.assertFalse(self.SDSFILE.isPressureChannel)
+
+        # File does not exist
+        self.assertEqual(self.SDSFILE.created, None)
+        self.assertEqual(self.SDSFILE.modified, None)
+        self.assertEqual(self.SDSFILE.size, None)
+        self.assertEqual(self.SDSFILE.checksum, None)
+
+        # File is real does exist in data test archive
+        self.assertEqual(self.SDSREAL.created, datetime(2019, 5, 10, 11, 30, 11, 257133))
+        self.assertEqual(self.SDSREAL.modified, datetime(2019, 5, 10, 11, 26, 26, 293895))
+        self.assertEqual(self.SDSREAL.size, 4571648)
+        self.assertEqual(self.SDSREAL.checksum, "sha2:yQQ9przMS2Pav5kyTsAtpF2F7aU/TgyRDZa2kTxg6DA=")
+
+        # Confirm dataselect trimming of file and number of samples is expected @ 40Hz
+        self.assertEqual(self.SDSREAL.samples, 40 * 86400)
+
+        # First sample after 2019-01-22T00:00:00 and end before 2019-01-23T00:00:00
+        self.assertTrue(self.SDSREAL.traces[0]["start"] > datetime(2019, 1, 22, 0, 0, 0, 0))
+        self.assertTrue(self.SDSREAL.traces[0]["end"] < datetime(2019, 1, 23, 0, 0, 0, 0))
 
     def test_sdsfile_invalid(self):
 

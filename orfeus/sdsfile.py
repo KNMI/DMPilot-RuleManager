@@ -182,17 +182,30 @@ class SDSFile():
         except FileNotFoundError:
             return None
 
+    def getStat(self, enum):
+
+        # Check if none and propagate
+        if self.stats is None:
+            return None
+
+        if enum == "size":
+            return self.stats.st_size
+        elif enum == "created":
+            return datetime.fromtimestamp(self.stats.st_ctime)
+        elif enum == "modified":
+            return datetime.fromtimestamp(self.stats.st_mtime)
+     
     @property
     def size(self):
-        return self.stats.st_size
+        return self.getStat("size")
 
     @property
     def created(self):
-        return datetime.fromtimestamp(self.stats.st_ctime)
+        return self.getStat("created")
 
     @property
     def modified(self):
-        return datetime.fromtimestamp(self.stats.st_mtime)
+        return self.getStat("modified")
 
     @property
     def checksumTruncated(self):
@@ -208,6 +221,9 @@ class SDSFile():
         def SDSFile::checksum
         Calculates the SHA256 checksum for a given file prepended with sha2:
         """
+
+        if self.stats is None:
+            return None
 
         checksum = sha256()
         with open(self.filepath, "rb") as f:
@@ -285,7 +301,7 @@ class SDSFile():
             # Format for seed dates e.g. 2005,068,00:00:01.000000
             SEED_DATE_FMT = "%Y,%j,%H:%M:%S.%f"
 
-            (stream, start, end, rate, samples) = line.split()
+            (stream, start, end, rate, samples) = map(lambda x: x.decode("ascii"), line.split())
 
             # Return a simple dict with some information
             return {
@@ -295,16 +311,29 @@ class SDSFile():
                 "end": datetime.strptime(end, SEED_DATE_FMT)
             }
 
-        # Get the output of the subprocess
-        lines = subprocess.check_output([
-            "msi",
+        # Cut to day boundary on sample level
+        dataselect = subprocess.Popen([
+            "dataselect",
             "-ts", self.sampleStart,
             "-te", self.sampleEnd,
-            "-T"
-        ] + map(lambda x: x.filepath, self.neighbours)).splitlines()
+            "-Ps",
+            "-szs",
+            "-o", "-",
+        ] + list(map(lambda x: x.filepath, self.neighbours)), stdout=subprocess.PIPE)
+
+        lines = subprocess.check_output([
+            "msi", 
+            "-ts", self.sampleStart,
+            "-te", self.sampleEnd,
+            "-T",
+            "-"
+        ], stdin=dataselect.stdout, stderr=subprocess.DEVNULL).splitlines()
+
+        # Not sure why we need this
+        dataselect.stdout.close()
 
         # Skip first header & final line
-        return map(parseMSIOutput, lines[1:-1])
+        return list(map(parseMSIOutput, lines[1:-1]))
 
     @property
     def isPressureChannel(self):
