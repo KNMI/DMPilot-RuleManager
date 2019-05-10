@@ -84,20 +84,25 @@ class TestRuleManager(unittest.TestCase):
 
         """
         def test_rule_timeout
-        test mock timeout rule that should raise after 1 second
+        test mock timeout rule that raises an exception
         """
 
         # Load an exception sequence
         self.loadSequence("rule_seq_exception.json")
 
         # Capture the log
-        with self.assertLogs("core.rulemanager", level="WARNING") as cm:
+        with self.assertLogs("core.rulemanager", level="ERROR") as cm:
             self.RM.sequence([self.SDSFILE])
 
         # Assert timeout message in log
         self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'exceptionRule' failed: Oops!"])
 
     def test_rule_conditions(self):
+
+        """
+        def test_rule_conditions
+        Tests two rule conditions: one that passes and one that fails
+        """
 
         # Load the timeout sequence
         self.loadSequence("rule_seq_conditions.json")
@@ -115,6 +120,52 @@ class TestRuleManager(unittest.TestCase):
         # Assert log messages equal but skip first processing
         for a, b in zip(cm.output[1:], expected):
             self.assertEqual(a, b);
+
+    def test_rule_condition_exception(self):
+
+        """
+        def test_rule_condition_exception
+        Rule that raises an exception during execution of condition
+        """
+
+        self.loadSequence("rule_seq_condition_exception.json")
+
+        with self.assertLogs("core.rulemanager", level="ERROR") as cm:
+            self.RM.sequence([self.SDSFILE])
+
+        self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'passRule' failed: Oops!"])
+
+    def test_rule_conditions_options(self):
+
+        """
+        def test_rule_conditions_options
+        Tests whether options are properly passed to the conditions
+        """
+
+        # Load the timeout sequence
+        self.loadSequence("rule_seq_condition_options.json")
+
+        # Will raise an exception if options are not properly passed
+        with self.assertLogs("core.rulemanager", level="INFO") as cm:
+            self.RM.sequence([self.SDSFILE])
+
+        self.assertEqual(cm.output[1:], ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'passRule'."])
+
+    def test_rule_options(self):
+
+        """
+        def test_rule_options
+        Tests whether options are properly passed to the rule call
+        """
+
+        # Load the timeout sequence
+        self.loadSequence("rule_seq_options.json")
+
+        # Will raise an exception if options are not properly passed
+        with self.assertLogs("core.rulemanager", level="INFO") as cm:
+            self.RM.sequence([self.SDSFILE])
+
+        self.assertEqual(cm.output[1:], ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'optionRule'."])
 
     def test_rule_timeout(self):
 
