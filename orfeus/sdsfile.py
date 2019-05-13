@@ -332,6 +332,10 @@ class SDSFile():
         # Not sure why we need this
         dataselect.stdout.close()
 
+        # Avoid warning when status code for child process is not read (for Python 3.6):
+        # Introduced in https://github.com/python/cpython/commit/5a48e21ff163107a6f1788050b2f1ffc8bce2b6d#diff-cc136486b4a8e112e64b57436a0619eb
+        dataselect.wait()
+
         # Skip first header & final line
         return list(map(parseMSIOutput, lines[1:-1]))
 
@@ -468,6 +472,9 @@ class SDSFile():
 
         # Not sure why we need this
         dataselect.stdout.close()
+
+        # Python 3.6 (see above)
+        dataselect.wait()
 
     def __getAdjacentFile(self, direction):
         """
