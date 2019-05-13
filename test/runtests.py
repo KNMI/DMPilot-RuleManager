@@ -4,7 +4,7 @@ import os
 import sys
 import unittest
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import patch, PropertyMock
 from obspy import read_inventory
 
@@ -232,12 +232,45 @@ class TestRuleManager(unittest.TestCase):
         # Assert timeout message in log
         self.assertEqual(cm.output, ["WARNING:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Timeout calling rule 'timeoutRule'."])
 
-    def testPSDModule(self):
+    def test_PSD_Module(self):
 
-        result = psdCollector.process(self.SDSReal)
+        """
+        def test_PSD_Module
+        Tests the PSD module
+        """
+
+        def testSegment(i, segment):
+
+            """
+            def test_PSD_Module::testSegment
+            Test results for a single PSD segment
+            """
+
+            start = datetime(2019, 1, 22)
+
+            # Segment start & end
+            self.assertEqual(segment["ts"], start + timedelta(minutes=(30 * i)))
+            self.assertEqual(segment["te"], start + timedelta(minutes=(30 * i + 60)))
+
+            # Confirm seed parameters
+            self.assertEqual(segment["net"], "NL")
+            self.assertEqual(segment["sta"], "HGN")
+            self.assertEqual(segment["loc"], "02")
+            self.assertEqual(segment["cha"], "BHZ")
+
+        # Mock the inventory property to avoid HTTP request
+        with patch('orfeus.sdsfile.SDSFile.inventory', new_callable=PropertyMock) as mock_inventory:
+
+            # Read a static response file
+            mock_inventory.return_value = read_inventory("data/inventory.xml")
+
+            # Call module with mocked function
+            result = psdCollector.process(self.SDSReal)
 
         # Should return 48 segments
         self.assertEqual(len(result), 48)
+
+        map(testSegment, enumerate(result))
 
 if __name__ == '__main__':
     unittest.main()
