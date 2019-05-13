@@ -1,0 +1,31 @@
+{
+    "DELETE_METADATA": {
+	"functionName": "deleteWaveformMetadataRule",
+	"options": {
+	},
+	"conditions": [
+	]
+    },
+    "DELETE_DCAT": {
+	"functionName": "deleteDCMetadataRule",
+	"options": {
+	},
+	"conditions": [
+	]
+    },
+    "DELETE_ARCHIVE": {
+	"functionName": "deleteArchiveRule",
+	"options": {
+	},
+	"conditions": [
+	    {
+		"functionName": "!assertDCMetadataExistsCondition",
+		"options": {}
+	    },
+	    {
+		"functionName": "!assertWFCatalogExistsCondition",
+		"options": {}
+	    }
+	]
+    }
+}

@@ -131,6 +131,29 @@ class IRODSManager():
         # Add the data object
         self.session.data_objects.put(SDSFile.filepath, SDSFile.irodsPath, **options)
 
+    def deleteDataObject(self, SDSFile, force=False):
+        """
+        def IRODSManager::removeDataObject
+        Delete an SDS data object from iRODS at a collection given by
+        `SDSFile.irodsDirectory`.
+
+        Parameters
+        ----------
+        SDSFile : `SDSFile`
+            An SDS file descriptor.
+        force : `bool`
+            Whether to force the deletion.
+        """
+
+        # Attempt to get the data object
+        dataObject = self.getDataObject(SDSFile)
+        if dataObject is None:
+            self.logger.debug("File not registered, cancelling deletion.")
+            return
+
+        # Unlink the data object
+        dataObject.unlink(force=force)
+
     def remotePut(self, SDSFile, rootCollection,
                   rescName="demoResc",
                   purgeCache=False,

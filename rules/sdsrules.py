@@ -88,7 +88,27 @@ def ingestionRule(options, SDSFile):
 
     # Check if checksum is saved
     logger.debug("Ingested file %s with checksum '%s'" % (
-            SDSFile.filename, strirodsSession.getDataObject(SDSFile).checksum))
+            SDSFile.filename, irodsSession.getDataObject(SDSFile).checksum))
+
+
+def deleteArchiveRule(options, SDSFile):
+    """Handler for the rule that deletes a file from the iRODS archive.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The description of the file to be deleted.
+    """
+
+    logger.debug("Deleting file %s." % SDSFile.filename)
+
+    # Attempt to delete from iRODS
+    irodsSession.deleteDataObject(SDSFile)
+
+    # Check if checksum is saved
+    logger.debug("Deleted file %s." % SDSFile.filename)
 
 
 def federatedIngestionRule(options, SDSFile):
@@ -165,6 +185,23 @@ def dcMetadataRule(options, SDSFile):
         logger.debug("Saved Dublin Core metadata for %s." % SDSFile.filename)
 
 
+def deleteDCMetadataRule(options, SDSFile):
+    """Delete Dublin Core metadata of an SDS file.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.debug("Deleting Dublin Core metadata for %s." % SDSFile.filename)
+
+    mongoSession.deleteDCDocument(SDSFile)
+    logger.debug("Deleted Dublin Core metadata for %s." % SDSFile.filename)
+
+
 def waveformMetadataRule(options, SDSFile):
     """Handler for the WFCatalog metadata rule.
     TODO XXX
@@ -181,13 +218,30 @@ def waveformMetadataRule(options, SDSFile):
     # Get waveform metadata
     document = collector.getMetadata(SDSFile)
     if document is None:
-      return logger.error("Could not get the waveform metadata.")
+        return logger.error("Could not get the waveform metadata.")
 
     logger.debug("Saving waveform metadata for %s." % SDSFile.filename)
 
     # Save the metadata document
     mongoSession.setMetadataDocument(document)
     logger.debug("Saved waveform metadata for %s." % SDSFile.filename)
+
+
+def deleteWaveformMetadataRule(options, SDSFile):
+    """Delete waveform metadata of an SDS file.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.debug("Deleting waveform metadata for %s." % SDSFile.filename)
+
+    mongoSession.deleteMetadataDocument(SDSFile)
+    logger.debug("Deleted waveform metadata for %s." % SDSFile.filename)
 
 
 def testPrint(options, sdsFile):

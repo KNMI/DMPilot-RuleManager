@@ -29,7 +29,7 @@ def ini_logger():
     level = getattr(logging, config["LOGGING"]["LEVEL"].upper(), 20)
 
     # Try to get file name from config, if not use stream (stdout)
-    filename = config["LOGGING"]["FILENAME"]
+    filename = config["LOGGING"].get("FILENAME")
     if filename is not None:
         filename = os.path.expandvars(os.path.expanduser(filename))
 
