@@ -65,16 +65,17 @@ class SDSFileCollector(FileCollector):
         elif mode == "mod_time":
 
             # Extract start and end of the date
-            date_end = date + timedelta(days=1)
-            self.logger.debug("Searching files modified between '%s' and '%s'" % (date, date_end))
+            date_start = datetime(date.year, date.month, date.day)
+            date_end = date_start + timedelta(days=1)
+            self.logger.debug("Searching files modified between '%s' and '%s'" % (date_start, date_end))
 
             # Filter by modification time
-            files = list(filter(lambda x: (x.modified >= date and x.modified < date_end), self.files))
+            files = list(filter(lambda x: (x.modified >= date_start and x.modified < date_end), self.files))
 
         else:
             raise ValueError("Unsupported mode %s requested to find files." % mode)
 
-        self.logger.debug("Found %d files using %s." % (len(files), mode))
+        self.logger.debug("Found %d files using '%s' mode." % (len(files), mode))
 
         return files
 
@@ -98,27 +99,36 @@ class SDSFileCollector(FileCollector):
 
     def collectFromDateRange(self, date, days, mode="file_name"):
         """
-        def collectFromPast
-        Collects files from N days in the past
+        def collectFromDateRange
+        Collects files from a range of dates;
+            if days > 0: [date, date + N - 1]
+            if days == 0: nothing
+            if days < 0: [date - N, date - 1]
         """
+
+        # Parse provided date if necessary
+        if not isinstance(date, datetime):
+            date = parser.parse(date)
 
         collectedFiles = list()
 
-        # Go over every day (skip today)
-        for day in range(1, abs(days)):
-
-            if(days > 0):
-                collectedFiles += self.collectFromDate(date + timedelta(days=day), mode=mode)
-            else:
-                collectedFiles += self.collectFromDate(date - timedelta(days=day), mode=mode)
+        # Go over every day in increasing order, skipping "date" if days is negative
+        if days > 0:
+            start = 0
+            stop = start + days
+        else:
+            start = days
+            stop =  0
+        for day in range(start, stop):
+            collectedFiles += self.collectFromDate(date + timedelta(days=day), mode=mode)
 
         return collectedFiles
 
     def collectFromPastDays(self, days, mode='file_name'):
         """
-        def collectFromPast
-        Collects files from N days in the past
+        def collectFromPastDays
+        Collects files from N days in the past: [today - N, yesterday]
         """
 
-        # Negative days
+        # Negative days, skipping today
         return self.collectFromDateRange(datetime.now(), -days, mode=mode)
