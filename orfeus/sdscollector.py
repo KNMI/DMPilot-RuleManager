@@ -9,7 +9,7 @@
 """
 
 from fnmatch import fnmatch
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from itertools import repeat
 import dateutil.parser as parser
 
@@ -41,7 +41,7 @@ class SDSFileCollector(FileCollector):
 
         return list(map(SDSFile, self.files, repeat(self.archiveDir)))
 
-    def collectFromDate(self, date, mode="file_name"):
+    def collectFromDate(self, iDate, mode="file_name"):
         """
         def fileCollector.collectFromDate
         Collects SDS files for a particular date, based on file's name or on
@@ -49,14 +49,14 @@ class SDSFileCollector(FileCollector):
         """
 
         # Parse provided date if necessary
-        if not isinstance(date, datetime):
-            date = parser.parse(date)
+        if not isinstance(iDate, datetime) and not instanceof(iDate, date):
+            iDate = parser.parse(iDate)
 
         if mode == "file_name":
 
             # Extract the julian day and year
-            day = date.strftime("%j")
-            year = date.strftime("%Y")
+            day = iDate.strftime("%j")
+            year = iDate.strftime("%Y")
             self.logger.debug("Searching files whose name's date is '%s.%s'" % (year, day))
 
             # Filter by day and year
@@ -65,7 +65,7 @@ class SDSFileCollector(FileCollector):
         elif mode == "mod_time":
 
             # Extract start and end of the date
-            date_start = datetime(date.year, date.month, date.day)
+            date_start = datetime(iDate.year, iDate.month, iDate.day)
             date_end = date_start + timedelta(days=1)
             self.logger.debug("Searching files modified between '%s' and '%s'" % (date_start, date_end))
 
@@ -97,7 +97,7 @@ class SDSFileCollector(FileCollector):
         self.logger.debug("Found %d files." % len(files))
         return files
 
-    def collectFromDateRange(self, date, days, mode="file_name"):
+    def collectFromDateRange(self, iDate, days, mode="file_name"):
         """
         def collectFromDateRange
         Collects files from a range of dates;
@@ -107,8 +107,8 @@ class SDSFileCollector(FileCollector):
         """
 
         # Parse provided date if necessary
-        if not isinstance(date, datetime):
-            date = parser.parse(date)
+        if not isinstance(iDate, datetime) and not instanceof(iDate, date):
+            iDate = parser.parse(iDate)
 
         collectedFiles = list()
 
@@ -120,7 +120,7 @@ class SDSFileCollector(FileCollector):
             start = days
             stop =  0
         for day in range(start, stop):
-            collectedFiles += self.collectFromDate(date + timedelta(days=day), mode=mode)
+            collectedFiles += self.collectFromDate(iDate + timedelta(days=day), mode=mode)
 
         return collectedFiles
 
