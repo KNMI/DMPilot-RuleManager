@@ -124,14 +124,14 @@ class TestRuleManager(unittest.TestCase):
         def test_sdsfile_invalid
         expects exception to be raised when an invalid SDS filename is submitted
         """
-        
+
         # Assert that missing day is invalid
         with self.assertRaises(ValueError) as ex:
             self.createSDSFile("NL.HGN.02.BHZ.D.1970")
-        
+
         # Assert the exception
         self.assertEqual("Invalid SDS file submitted.", str(ex.exception.args[0]))
- 
+
     def test_rule_exception(self):
 
         """
@@ -352,6 +352,28 @@ class TestRuleManager(unittest.TestCase):
 
         self.assertEqual(collectedFile.start, datetime(2019, 1, 22))
         self.assertEqual(collectedFile.end, datetime(2019, 1, 23))
+
+    def test_collect_files_from_modified(self):
+
+        """
+        def test_collect_files_filename_modified
+        Tests the SDSFileCollector collecting files by date in modification time
+        """
+
+        # Mock files returned by the file collector and modified property of SDSFile
+        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files, \
+            patch('orfeus.sdsfile.SDSFile.modified', new_callable=PropertyMock) as mock_modified:
+
+            mock_files.return_value = [self.createSDSFile("NL.HGN.02.LHZ.D.2019.001")]
+            mock_modified.return_value = datetime(2020, 1, 1)
+
+            # Collect files on modification date and another date
+            filesFound = self.FC.collectFromDate("2020-01-01", mode="mod_time")
+            filesNotFound = self.FC.collectFromDate("2019-01-01", mode="mod_time")
+
+        # Assert files are properly collected
+        self.assertEqual(len(filesFound), 1)
+        self.assertEqual(len(filesNotFound), 0)
 
     def test_PSD_Module(self):
 
