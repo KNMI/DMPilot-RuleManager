@@ -6,6 +6,7 @@ Every rule should be implemented as a module funcion with exactly two arguments:
 2) the item that is subject to the rule, in this case, a `SDSFile` object.
 """
 
+import os
 import logging
 from datetime import datetime, timedelta
 
@@ -143,23 +144,19 @@ def purgeRule(options, SDSFile):
     ----------
     options : `dict`
         The rule's options.
-        - ``daysPurgeAfter``: Number of days after which the file should be deleted (`int`)
-        - ``deleteEmptyFiles``: Whether to delete files with no samples regardless of age (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
 
-    # If configured: files with file size 0 need to be deleted
-    if options["deleteEmptyFiles"] and SDSFile.size == 0:
-        logger.debug("Purging empty file %s." % SDSFile.filename)
-        result = irodsSession.purgeTemporaryFile(SDSFile)
-        logger.debug("Purged empty file %s." % SDSFile.filename)
-        return result
-
     # Some other configurable rules
-    logger.debug("Purging file %s." % SDSFile.filename)
-    irodsSession.purgeTemporaryFile(SDSFile)
-    logger.debug("Purged file %s." % SDSFile.filename)
+    logger.debug("Purging file %s from temporary archive." % SDSFile.filename)
+    try:
+        # Yeah let's be careful with this..
+        #os.remove(SDSFile.filepath)
+        pass
+    except OSError:
+        pass
+    logger.debug("Purged file %s from temporary archive." % SDSFile.filename)
 
 
 def dcMetadataRule(options, SDSFile):

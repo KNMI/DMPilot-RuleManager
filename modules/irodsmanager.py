@@ -190,21 +190,6 @@ class IRODSManager():
                                       SDSFile.customPath(rootCollection),
                                       **options)
 
-    def purgeTemporaryFile(self, SDSFile):
-        """
-        def IRODSManager::purgeTemporaryFile
-        Purges an SDSFile from the temporary archive if it exists in iRODS
-        """
-
-        dataObject = self.getDataObject(SDSFile)
-
-        # Not in iRODS: do not purge from disk
-        if dataObject is None:
-            return
-
-        # Yeah let's be careful with this..
-        # os.remove(SDSFile.filepath)
-
     def getDataObject(self, SDSFile, rootCollection=None):
         """
         def IRODSManager::createDataObject
