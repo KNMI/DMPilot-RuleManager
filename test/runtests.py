@@ -366,21 +366,26 @@ class TestRuleManager(unittest.TestCase):
         import sdsrules
         sys.path.pop()
 
-        # Make sure file is not there to start with
-        sdsrules.deleteArchiveRule(None, self.SDSReal)
-        self.assertFalse(irodsSession.exists(self.SDSReal))
+        with patch("orfeus.sdsfile.SDSFile.irodsDirectory", new_callable=PropertyMock) as mock_dir:
+            mock_dir.return_value = os.path.join(self.SDSReal.irodsRoot,
+                                                 "test",
+                                                 self.SDSReal.subDirectory)
 
-        # Archive example file
-        sdsrules.ingestionRule(None, self.SDSReal)
+            # Make sure file is not there to start with
+            sdsrules.deleteArchiveRule(None, self.SDSReal)
+            self.assertFalse(irodsSession.exists(self.SDSReal))
 
-        # Check archived file
-        self.assertTrue(irodsSession.exists(self.SDSReal))
+            # Archive example file
+            sdsrules.ingestionRule(None, self.SDSReal)
 
-        # Delete file from archive
-        sdsrules.deleteArchiveRule(None, self.SDSReal)
+            # Check archived file
+            self.assertTrue(irodsSession.exists(self.SDSReal))
 
-        # Check whether file was deleted
-        self.assertFalse(irodsSession.exists(self.SDSReal))
+            # Delete file from archive
+            sdsrules.deleteArchiveRule(None, self.SDSReal)
+
+            # Check whether file was deleted
+            self.assertFalse(irodsSession.exists(self.SDSReal))
 
 
 if __name__ == '__main__':
