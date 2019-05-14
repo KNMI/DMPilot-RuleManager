@@ -2,6 +2,7 @@
 """
 
 import os
+import logging
 from datetime import datetime
 
 
@@ -17,6 +18,10 @@ class FileCollector:
         def fileCollector.__init__
         Initializes a file collector class
         """
+
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug("Initializing the %s." % self.__class__.__name__)
 
         self._initialized = datetime.now()
         self.archiveDir = archiveDir
