@@ -253,18 +253,18 @@ class TestRuleManager(unittest.TestCase):
 
             # Fake SDS file from today, yesterday, and day before
             mock_files.return_value = [
-                todayFile,
-                todayFile.next,
+                todayFile.next.next.next,
                 todayFile.next.next,
-                todayFile.next.next.next
+                todayFile.next,
+                todayFile
             ]
 
             # Attempt to collect from the past 3 days
             files = self.FC.collectFromDateRange(now, 3)
 
         # Check if the start times of the collected files match
-        for i, file in enumerate(files):
-            self.assertEqual(file.start.date(), now + timedelta(days=(i + 1)))
+        for i, file in enumerate(sorted(files, key=lambda x: x.start)):
+            self.assertEqual(file.start.date(), now + timedelta(days=i))
 
     def test_collect_files_days_past_range(self):
 
@@ -294,7 +294,7 @@ class TestRuleManager(unittest.TestCase):
             files = self.FC.collectFromPastDays(3)
 
         # Check if the start times of the collected files match
-        for i, file in enumerate(files):
+        for i, file in enumerate(sorted(files, key=lambda x: x.start, reverse=True)):
             self.assertEqual(file.start.date(), now - timedelta(days=(i + 1)))
 
     def test_collect_files_filename_date(self):

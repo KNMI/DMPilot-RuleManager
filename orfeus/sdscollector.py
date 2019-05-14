@@ -51,7 +51,7 @@ class SDSFileCollector(FileCollector):
         """
 
         # Parse provided date if necessary
-        if not isinstance(iDate, datetime) and not instanceof(iDate, date):
+        if not isinstance(iDate, datetime) and not isinstance(iDate, date):
             iDate = parser.parse(iDate)
 
         if mode == "file_name":
@@ -109,7 +109,7 @@ class SDSFileCollector(FileCollector):
         """
 
         # Parse provided date if necessary
-        if not isinstance(iDate, datetime) and not instanceof(iDate, date):
+        if not isinstance(iDate, datetime) and not isinstance(iDate, date):
             iDate = parser.parse(iDate)
 
         collectedFiles = list()
