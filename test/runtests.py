@@ -264,7 +264,7 @@ class TestRuleManager(unittest.TestCase):
 
         # Check if the start times of the collected files match
         for i, file in enumerate(files):
-            self.assertEqual(file.start.date(), now - timedelta(days=(i + 1)))
+            self.assertEqual(file.start.date(), now + timedelta(days=(i + 1)))
 
     def test_collect_files_days_past_range(self):
 
@@ -295,7 +295,7 @@ class TestRuleManager(unittest.TestCase):
 
         # Check if the start times of the collected files match
         for i, file in enumerate(files):
-            self.assertEqual(file.start.date(), now + timedelta(days=(i + 1)))
+            self.assertEqual(file.start.date(), now - timedelta(days=(i + 1)))
 
     def test_collect_files_filename_date(self):
 
