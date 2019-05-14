@@ -10,6 +10,7 @@ import argparse
 import core.logging
 from core.rulemanager import RuleManager
 from orfeus.sdsfile import SDSFile
+from core.database import DeletionDatabase
 import rules.sdsrules as sdsrules
 import conditions.sdsconditions as sdsconditions
 
@@ -39,11 +40,28 @@ def main():
         RM = RuleManager()
         RM.loadRules(sdsrules, sdsconditions, parsedargs["rulemap"], parsedargs["ruleseq"])
 
-        # Collect files
+        # Get stored deletion status from database
+        del_db = DeletionDatabase()
+        # insert fake file to test
+        #del_db._insert_row("NL.HGN.02.BHE.D.2019.024", "to-delete")
+        prev_deletion_status = del_db.get_deletion_status()
+
+        # Collect files not previously deleted due to error
         files = []
+        filenames = []
+        for f in prev_deletion_status:
+            if f[2] == "to-delete":
+                files.append(SDSFile(f[1], None))
+                filenames.append(f[1])
+
+        # Collect new files to delete
         with open(parsedargs["delfile"]) as del_list:
             for line in del_list:
-                files.append(SDSFile(line.strip(), None))
+                if line.strip() not in filenames:
+                    files.append(SDSFile(line.strip(), None))
+                    filenames.append(line.strip())
+
+        logger.debug("Collected %d files for deletion" % len(files))
 
         # Apply the sequence of rules on files
         RM.sequence(files)

@@ -6,3 +6,4 @@ __pycache__/
 configuration.py
 *.swp
 *.swo
+deletion.db
