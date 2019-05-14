@@ -356,5 +356,32 @@ class TestRuleManager(unittest.TestCase):
 
         map(testSegment, enumerate(result))
 
+    def test_irods_ingestion_and_deletion(self):
+        """Test ingestion and deletion in iRODS archive."""
+
+        sys.path.append(os.path.dirname(CWD))
+        from modules.irodsmanager import irodsSession
+        sys.path.pop()
+        sys.path.append(os.path.join(os.path.dirname(CWD), "rules"))
+        import sdsrules
+        sys.path.pop()
+
+        # Make sure file is not there to start with
+        sdsrules.deleteArchiveRule(None, self.SDSReal)
+        self.assertFalse(irodsSession.exists(self.SDSReal))
+
+        # Archive example file
+        sdsrules.ingestionRule(None, self.SDSReal)
+
+        # Check archived file
+        self.assertTrue(irodsSession.exists(self.SDSReal))
+
+        # Delete file from archive
+        sdsrules.deleteArchiveRule(None, self.SDSReal)
+
+        # Check whether file was deleted
+        self.assertFalse(irodsSession.exists(self.SDSReal))
+
+
 if __name__ == '__main__':
     unittest.main()
