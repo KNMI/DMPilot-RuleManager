@@ -266,6 +266,43 @@ class TestRuleManager(unittest.TestCase):
         for i, file in enumerate(files):
             self.assertEqual(file.start.date(), now + timedelta(days=(i + 1)))
 
+    def test_collect_files_from_wildcards(self):
+
+        """
+        def test_collect_files_from_wildcards
+        Tests collection of SDSFiles from wildcards
+        """
+
+        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files:
+
+            # Fake SDS file from today, yesterday, and day before
+            mock_files.return_value = [
+                # Different channels
+                self.createSDSFile("NL.HGN.02.LHZ.D.2019.001"),
+                self.createSDSFile("NL.HGN.02.BHZ.D.2019.001"),
+                self.createSDSFile("NL.HGN.02.HHZ.D.2019.001"),
+                # Different days
+                self.createSDSFile("NL.OPLO.02.HHZ.D.2019.001"),
+                self.createSDSFile("NL.OPLO.02.HHZ.D.2019.010"),
+                self.createSDSFile("NL.OPLO.02.HHZ.D.2019.100"),
+                self.createSDSFile("NL.OPLO.02.HHZ.D.2019.365"),
+                # Multiple stations
+                self.createSDSFile("NL.G010..HGZ.D.2019.001"),
+                self.createSDSFile("NL.G011..HGZ.D.2019.001"),
+                self.createSDSFile("NL.G012..HGZ.D.2019.001"),
+                self.createSDSFile("NL.G013..HGZ.D.2019.001"),
+                self.createSDSFile("NL.G014..HGZ.D.2019.001"),
+            ]
+
+            filesStations = self.FC.collectFromWildcards("NL.G0*..HGZ.D.2019.001")
+            filesChannels = self.FC.collectFromWildcards("NL.HGN.02.?HZ.D.2019.001")
+            filesDays = self.FC.collectFromWildcards("NL.OPLO.02.HHZ.D.2019.*")
+
+        # Assert files are properly collected
+        self.assertEqual(len(filesStations), 5)
+        self.assertEqual(len(filesDays), 4)
+        self.assertEqual(len(filesChannels), 3)
+
     def test_collect_files_days_past_range(self):
 
         """
