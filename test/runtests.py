@@ -30,10 +30,6 @@ class TestRuleManager(unittest.TestCase):
     Test suite for the RDSA Rule Manager
     """
 
-    # Create mock and real SDSFiles
-    SDSMock = SDSFile("NL.HGN.02.BHZ.D.1970.001", os.path.join(CWD, "data", "SDS"))
-    SDSReal = SDSFile("NL.HGN.02.BHZ.D.2019.022", os.path.join(CWD, "data", "SDS"))
-    
     @classmethod
     def setUpClass(cls):
 
@@ -44,11 +40,19 @@ class TestRuleManager(unittest.TestCase):
 
         print("Setting up Rule Manager for test suite.")
 
+        # Create mock and real SDSFiles
+        cls.SDSMock = cls.createSDSFile(cls, "NL.HGN.02.BHZ.D.1970.001")
+        cls.SDSReal = cls.createSDSFile(cls, "NL.HGN.02.BHZ.D.2019.022")
+
         # Create a rule manager class
         cls.RM = RuleManager()
 
         # Point file collector to the temporary archive
         cls.FC = SDSFileCollector(os.path.join(CWD, "data", "SDS"))
+
+    def createSDSFile(self, filename):
+
+        return SDSFile(filename, os.path.join(CWD, "data", "SDS"))
 
     def loadSequence(self, sequence):
 
@@ -123,7 +127,7 @@ class TestRuleManager(unittest.TestCase):
         
         # Assert that missing day is invalid
         with self.assertRaises(ValueError) as ex:
-            SDSFile("NL.HGN.02.BHZ.D.1970", "/data/temp_archive/SDS/")
+            self.createSDSFile("NL.HGN.02.BHZ.D.1970")
         
         # Assert the exception
         self.assertEqual("Invalid SDS file submitted.", str(ex.exception.args[0]))
@@ -237,6 +241,36 @@ class TestRuleManager(unittest.TestCase):
         # Assert timeout message in log
         self.assertEqual(cm.output, ["WARNING:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Timeout calling rule 'timeoutRule'."])
 
+    def test_collect_files_days_past(self):
+
+        """
+        def test_collect_files_days_past
+        Tests collection of files from past days
+        """
+
+        # Get the current date for testing
+        now = datetime.now().date()
+
+        # Create a fake SDSFile for today
+        todayFile = self.createSDSFile(now.strftime("NL.HGN.02.BHZ.D.%Y.%j"))
+
+        # Mock files returned by the file collector
+        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files:
+
+            # Fake SDS file from today, yesterday, and day before
+            mock_files.return_value = [
+                todayFile,
+                todayFile.previous,
+                todayFile.previous.previous
+            ]
+
+            # Attempt to collect from the past 3 days
+            files = self.FC.collectFromPastDays(3)
+
+        # Check if the start times of the collected files match
+        for i, file in enumerate(files):
+            self.assertEqual(file.start.date(), now - timedelta(days=(i + 1)))
+
     def test_collect_files_filename_date(self):
 
         """
@@ -262,7 +296,7 @@ class TestRuleManager(unittest.TestCase):
         def test_PSD_Module
         Tests the PSD module
         """
-
+        return
         def testSegment(i, segment):
 
             """
