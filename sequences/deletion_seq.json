@@ -1,5 +1,6 @@
 [
     "DELETE_METADATA",
     "DELETE_DCAT",
+    "DELETE_TEMP_ARCHIVE",
     "DELETE_ARCHIVE"
 ]

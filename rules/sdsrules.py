@@ -153,10 +153,11 @@ def purgeRule(options, SDSFile):
     try:
         # Yeah let's be careful with this..
         #os.remove(SDSFile.filepath)
-        pass
-    except OSError:
-        pass
-    logger.debug("Purged file %s from temporary archive." % SDSFile.filename)
+        logger.debug("Purged file %s from temporary archive." % SDSFile.filename)
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise
+        logger.debug("File %s not present in temporary archive." % SDSFile.filename)
 
 
 def dcMetadataRule(options, SDSFile):

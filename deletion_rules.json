@@ -13,6 +13,13 @@
 	"conditions": [
 	]
     },
+    "DELETE_TEMP_ARCHIVE": {
+	"functionName": "purgeRule",
+	"options": {
+	},
+	"conditions": [
+	]
+	},
     "DELETE_ARCHIVE": {
 	"functionName": "deleteArchiveRule",
 	"options": {
