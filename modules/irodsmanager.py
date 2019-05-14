@@ -22,7 +22,7 @@ import logging
 import irods
 from irods.session import iRODSSession
 from irods.models import DataObject
-from irods.exception import DataObjectDoesNotExist
+from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
 import irods.keywords as kw
 
 from configuration import config
@@ -199,7 +199,7 @@ class IRODSManager():
             if rootCollection is None:
                 return self.session.data_objects.get(SDSFile.irodsPath)
             return self.session.data_objects.get(SDSFile.customPath(rootCollection))
-        except DataObjectDoesNotExist:
+        except (DataObjectDoesNotExist, CollectionDoesNotExist):
             return None
 
     def exists(self, SDSFile, rootCollection=None):
