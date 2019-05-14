@@ -1,0 +1,58 @@
+{
+	"TIMEOUT": {
+		"timeout": 1,
+		"functionName": "timeoutRule",
+		"options": {},
+		"conditions": []
+	},
+	"EXCEPTION": {
+		"timeout": 5,
+		"functionName": "exceptionRule",
+		"options": {},
+		"conditions": []
+	},
+	"CONDITION_FALSE": {
+		"functionName": "passRule",
+		"options": {},
+		"conditions": [{
+			"functionName": "falseCondition",
+			"options": {}
+		}]
+	},
+	"CONDITION_TRUE": {
+		"functionName": "passRule",
+		"options": {},
+		"conditions": [{
+			"functionName": "trueCondition",
+			"options": {}
+		}]
+	},
+	"CONDITION_EXCEPTION": {
+		"functionName": "passRule",
+		"options": {},
+		"conditions": [{
+			"functionName": "exceptionCondition",
+			"options": {}
+		}]
+	},
+	"OPTIONS": {
+		"functionName": "optionRule",
+		"options": {
+			"number": 10,
+			"string": "string"
+		},
+		"conditions": []
+	},
+	"CONDITION_OPTIONS": {
+		"functionName": "passRule",
+		"options": {},
+		"conditions": [{
+			"functionName": "optionCondition",
+			"options": {
+				"number": 10,
+				"string": "string"
+			}
+		}]
+	}
+
+}

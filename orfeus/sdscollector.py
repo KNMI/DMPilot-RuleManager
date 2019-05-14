@@ -24,6 +24,8 @@ class SDSFileCollector(FileCollector):
     Used for collecting files from an SDS archive based on time
     """
 
+    files = []
+
     def __init__(self, archiveDir):
         """
         def fileCollector.__init__

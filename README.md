@@ -17,7 +17,7 @@ accept these types.
 
 ## Schematic Overview
 
-![Schematic Overview of RDSA Rule Manager](rule-manager.png)
+![Schematic Overview of RDSA Rule Manager](resources/rule-manager.png)
 
 ## Dependencies
 
@@ -32,6 +32,11 @@ The source code for these packages is included in the ./lib directory and can
 be automatically compiled using the installation script using:
 
     ./install.sh
+
+## Testing
+
+The rule manager engine can be tested using the `runtests.py` script included in
+the `test` directory.
 
 ## Running the SDS policy manager
 
