@@ -14,6 +14,8 @@ CWD = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(CWD))
 from core.rulemanager import RuleManager
 
+from orfeus.sdscollector import SDSFileCollector
+
 # Modules
 from modules.psdcollector import psdCollector
 from orfeus.sdsfile import SDSFile
@@ -29,8 +31,8 @@ class TestRuleManager(unittest.TestCase):
     """
 
     # Create mock and real SDSFiles
-    SDSMock = SDSFile("NL.HGN.02.BHZ.D.1970.001", os.path.join(CWD, "data"))
-    SDSReal = SDSFile("NL.HGN.02.BHZ.D.2019.022", os.path.join(CWD, "data"))
+    SDSMock = SDSFile("NL.HGN.02.BHZ.D.1970.001", os.path.join(CWD, "data", "SDS"))
+    SDSReal = SDSFile("NL.HGN.02.BHZ.D.2019.022", os.path.join(CWD, "data", "SDS"))
     
     @classmethod
     def setUpClass(cls):
@@ -44,6 +46,9 @@ class TestRuleManager(unittest.TestCase):
 
         # Create a rule manager class
         cls.RM = RuleManager()
+
+        # Point file collector to the temporary archive
+        cls.FC = SDSFileCollector(os.path.join(CWD, "data", "SDS"))
 
     def loadSequence(self, sequence):
 
@@ -232,6 +237,26 @@ class TestRuleManager(unittest.TestCase):
         # Assert timeout message in log
         self.assertEqual(cm.output, ["WARNING:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Timeout calling rule 'timeoutRule'."])
 
+    def test_collect_files_filename_date(self):
+
+        """
+        def test_collect_files_filename_date
+        Tests the SDSFileCollector collecting files by date in filename
+        """
+
+        # Single file
+        collectedFile = self.FC.collectFromDate("2019-01-22").pop()
+
+        # Assert properties
+        self.assertEqual(collectedFile.net, "NL")
+        self.assertEqual(collectedFile.sta, "HGN")
+        self.assertEqual(collectedFile.loc, "02")
+        self.assertEqual(collectedFile.cha, "BHZ")
+
+        self.assertEqual(collectedFile.start, datetime(2019, 1, 22))
+        self.assertEqual(collectedFile.end, datetime(2019, 1, 23))
+    
+
     def test_PSD_Module(self):
 
         """
@@ -262,7 +287,7 @@ class TestRuleManager(unittest.TestCase):
         with patch('orfeus.sdsfile.SDSFile.inventory', new_callable=PropertyMock) as mock_inventory:
 
             # Read a static response file
-            mock_inventory.return_value = read_inventory("data/inventory.xml")
+            mock_inventory.return_value = read_inventory(os.path.join(CWD, "data/inventory.xml"))
 
             # Call module with mocked function
             result = psdCollector.process(self.SDSReal)
