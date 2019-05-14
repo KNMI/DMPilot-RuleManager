@@ -241,7 +241,32 @@ class TestRuleManager(unittest.TestCase):
         # Assert timeout message in log
         self.assertEqual(cm.output, ["WARNING:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Timeout calling rule 'timeoutRule'."])
 
-    def test_collect_files_days_past(self):
+    def test_collect_files_days_future_range(self):
+
+        now = datetime.now().date()
+
+        # Create a fake SDSFile for today
+        todayFile = self.createSDSFile(now.strftime("NL.HGN.02.BHZ.D.%Y.%j"))
+
+        # Mock files returned by the file collector
+        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files:
+
+            # Fake SDS file from today, yesterday, and day before
+            mock_files.return_value = [
+                todayFile,
+                todayFile.next,
+                todayFile.next.next,
+                todayFile.next.next.next
+            ]
+
+            # Attempt to collect from the past 3 days
+            files = self.FC.collectFromDateRange(now, 3)
+
+        # Check if the start times of the collected files match
+        for i, file in enumerate(files):
+            self.assertEqual(file.start.date(), now - timedelta(days=(i + 1)))
+
+    def test_collect_files_days_past_range(self):
 
         """
         def test_collect_files_days_past
@@ -261,7 +286,8 @@ class TestRuleManager(unittest.TestCase):
             mock_files.return_value = [
                 todayFile,
                 todayFile.previous,
-                todayFile.previous.previous
+                todayFile.previous.previous,
+                todayFile.previous.previous.previous
             ]
 
             # Attempt to collect from the past 3 days
@@ -269,7 +295,7 @@ class TestRuleManager(unittest.TestCase):
 
         # Check if the start times of the collected files match
         for i, file in enumerate(files):
-            self.assertEqual(file.start.date(), now - timedelta(days=(i + 1)))
+            self.assertEqual(file.start.date(), now + timedelta(days=(i + 1)))
 
     def test_collect_files_filename_date(self):
 
