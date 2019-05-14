@@ -255,7 +255,6 @@ class TestRuleManager(unittest.TestCase):
 
         self.assertEqual(collectedFile.start, datetime(2019, 1, 22))
         self.assertEqual(collectedFile.end, datetime(2019, 1, 23))
-    
 
     def test_PSD_Module(self):
 
