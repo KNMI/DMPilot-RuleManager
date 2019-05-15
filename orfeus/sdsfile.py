@@ -461,7 +461,7 @@ class SDSFile():
             "-te", self.sampleEnd,
             "-szs",
             "-o", "-",
-        ] + neighbours, stdout=subprocess.PIPE)
+        ] + neighbours, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
         # Open a msrepack process and connect stdin to dataselect stdout
         # -R repack record size to recordLength
@@ -477,8 +477,10 @@ class SDSFile():
         # Not sure why we need this
         dataselect.stdout.close()
 
-        # Python 3.6 (see above)
-        dataselect.wait()
+        # Wait for child processes to terminate
+        if msrepack.wait() != 0 or dataselect.wait() != 0:
+            raise Exception("Unable to prune file (dataselect returned %s, msrepack returned %s)" % (
+                            str(dataselect.returncode), str(msrepack.returncode)))
 
         # Check that quality file has been created
         if os.path.exists(qualityFile.filepath):
