@@ -7,3 +7,11 @@ configuration.py
 *.swp
 *.swo
 deletion.db
+.cache/
+bin/
+*.o
+*.a
+lib/dataselect-3.21/dataselect
+lib/libmseed-2.19.6/example/msrepack
+lib/libmseed-2.19.6/example/msview
+lib/msi-3.8/msi
