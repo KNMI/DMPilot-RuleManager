@@ -25,6 +25,7 @@ def main():
         parser.add_argument("--dir", help="directory containing the files to process")
         parser.add_argument("--rulemap", help="set custom rule map file")
         parser.add_argument("--ruleseq", help="set custom rule sequence file")
+        parser.add_argument("--collect_wildcards", help="files to collect, defined by a wildcards string (within single quotes!)")
         parsedargs = vars(parser.parse_args())
 
         # Check parameters
@@ -34,6 +35,8 @@ def main():
             return print("A rulemap needs to be specified using --rulemap")
         if parsedargs["ruleseq"] is None:
             return print("A rule sequence needs to be specified using --ruleseq")
+        if parsedargs["collect_wildcards"] is None:
+            return print("Files to collect need to be specified using --collect_wildcards")
 
         # Set up rules
         RM = RuleManager()
@@ -41,7 +44,7 @@ def main():
 
         # Collect files
         fileCollector = SDSFileCollector(parsedargs["dir"])
-        files = fileCollector.collectFromWildcards("*.*.*.BHZ.*.*.022")
+        files = fileCollector.collectFromWildcards(parsedargs["collect_wildcards"])
 
         # Apply the sequence of rules on files
         RM.sequence(files)
