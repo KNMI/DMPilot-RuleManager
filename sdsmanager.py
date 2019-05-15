@@ -7,7 +7,7 @@ Script that runs the rules for managing the SDS archive.
 import logging
 import argparse
 
-import core.logging
+import core.logger
 from core.rulemanager import RuleManager
 from orfeus.sdscollector import SDSFileCollector
 import rules.sdsrules as sdsrules

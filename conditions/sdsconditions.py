@@ -3,11 +3,15 @@ Collection of conditions that either return True or False
 depending on whether conditions are met
 """
 
+import logging
 from datetime import datetime, timedelta
 
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
 from modules.dublincore import dublinCore
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 def assertQualityCondition(options, SDSFile):
     """
@@ -30,7 +34,21 @@ def assertWFCatalogExistsCondition(options, SDSFile):
     metadataObject = mongoSession.getMetadataDocument(SDSFile)
 
     # Document exists and has the same hash: it exists
-    return (metadataObject is not None) and (metadataObject["checksum"] == SDSFile.checksum)
+    if metadataObject is not None:
+        exists = True
+        if metadataObject["checksum"] == SDSFile.checksum:
+            same_hash = True
+            logger.debug("File %s does exist in WFCatalog, with same checksum (%s)." % (
+                            SDSFile.filename, SDSFile.checksum))
+        else:
+            same_hash = False
+            logger.debug("File %s does exist in WFCatalog, but with a different checksum (%s vs %s)." % (
+                            SDSFile.filename, metadataObject["checksum"], SDSFile.checksum))
+    else:
+        exists = False
+        logger.debug("File %s does not exist in WFCatalog." % SDSFile.filename)
+
+    return exists and same_hash
 
 def assertWFCatalogNotExistsCondition(options, SDSFile):
 
@@ -58,7 +76,23 @@ def assertDCMetadataExistsCondition(options, SDSFile):
     # Get the existing Dublin Core Object
     dublinCoreObject = dublinCore.getDCMetadata(SDSFile)
 
-    return (dublinCoreObject is not None) and (dublinCoreObject["checksum"] == SDSFile.checksum)
+
+    # Document exists and has the same hash: it exists
+    if dublinCoreObject is not None:
+        exists = True
+        if dublinCoreObject["checksum"] == SDSFile.checksum:
+            same_hash = True
+            logger.debug("File %s does exist in DublinCoreMetadata, with same checksum (%s)." % (
+                            SDSFile.filename, SDSFile.checksum))
+        else:
+            same_hash = False
+            logger.debug("File %s does exist in DublinCoreMetadata, but with a different checksum (%s vs %s)." % (
+                            SDSFile.filename, dublinCoreObject["checksum"], SDSFile.checksum))
+    else:
+        exists = False
+        logger.debug("File %s does not exist in DublinCoreMetadata." % SDSFile.filename)
+
+    return exists and same_hash
 
 def assertDCMetadataNotExistsCondition(options, SDSFile):
 

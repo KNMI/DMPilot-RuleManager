@@ -167,7 +167,7 @@ class TestRuleManager(unittest.TestCase):
         # First sequence should pass on condition (trueCondition) and execute rule
         # Second sequence should fail on condition (falseCondition)
         expected = ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'passRule'.",
-                    "INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Not executing rule 'passRule'. Rule did not pass policy 'falseCondition'."]
+                    "INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Not executed rule 'passRule'. Rule did not pass condition 'falseCondition'."]
 
         # Assert log messages equal but skip first processing
         for a, b in zip(cm.output[1:], expected):

@@ -210,21 +210,20 @@ class IRODSManager():
         rootCollection : `str`, optional
             The archive's root collection.
         """
-        self.logger.debug("Checking if file %s exists in iRODS." % SDSFile.filename)
 
         # Attempt to get the data object
         dataObject = self.getDataObject(SDSFile, rootCollection=rootCollection)
         if dataObject is None:
-            self.logger.debug("File %s does NOT exist in iRODS." % SDSFile.filename)
+            self.logger.debug("File %s does not exist in iRODS." % SDSFile.filename)
             return False
         else:
             # Compare checksum
             if dataObject.checksum == SDSFile.checksum:
-                self.logger.debug("File %s DOES exist in iRODS, with SAME checksum (%s)." % (
+                self.logger.debug("File %s does exist in iRODS, with same checksum (%s)." % (
                                     SDSFile.filename, SDSFile.checksum))
                 return True
             else:
-                self.logger.debug("File %s DOES exist in iRODS, but with a DIFFERENT checksum (%s vs %s)." % (
+                self.logger.debug("File %s does exist in iRODS, but with a different checksum (%s vs %s)." % (
                                     SDSFile.filename, dataObject.checksum, SDSFile.checksum))
                 return False
 

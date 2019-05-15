@@ -115,7 +115,7 @@ class RuleManager():
                 return not f(*args, **kwargs)
             return g
 
-        # Invert the boolean result from the policy
+        # Invert the boolean result from the condition
         if (definitions == self.conditions) and item["functionName"].startswith("!"):
             return partial(invert(getattr(definitions, item["functionName"][1:])), item["options"])
         else:
@@ -155,7 +155,7 @@ class RuleManager():
         # Items can be SDSFiles or metadata (XML) files
         for i, item in enumerate(items):
 
-            self.logger.info("Processing item %s (%d/%d)." % (item.filename, i, total))
+            self.logger.info("Processing item %s (%d/%d)." % (item.filename, i+1, total))
 
             # Get the sequence of rules to be applied
             for rule, timeout in map(self.getRule, self.ruleSequence):
@@ -166,6 +166,7 @@ class RuleManager():
 
                 # Rule options are bound to the call
                 try:
+                    self.logger.debug("%s: Executing rule '%s'." % (item.filename, rule.call.func.__name__))
                     rule.apply(item)
                     self.logger.info("%s: Successfully executed rule '%s'." % (item.filename, rule.call.func.__name__))
 
@@ -173,9 +174,9 @@ class RuleManager():
                 except TimeoutError:
                     self.logger.warning("%s: Timeout calling rule '%s'." % (item.filename, rule.call.func.__name__))
 
-                # Policy assertion errors
+                # Condition assertion errors
                 except AssertionError as e:
-                    self.logger.info("%s: Not executing rule '%s'. Rule did not pass policy '%s'." % (item.filename, rule.call.func.__name__, e))
+                    self.logger.info("%s: Not executed rule '%s'. Rule did not pass condition '%s'." % (item.filename, rule.call.func.__name__, e))
 
                 # Other exceptions
                 except Exception as e:
