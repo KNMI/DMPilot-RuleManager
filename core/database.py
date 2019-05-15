@@ -58,13 +58,13 @@ class DeletionDatabase():
 
     def _insert_row(self, filename):
         """
-        Inserts a row into the deletion table
+        Inserts a row into the deletion table, ignores if the filename is already in the table.
         """
 
         c = self.conn.cursor()
 
         # Insert a row of data
-        c.execute("INSERT INTO deletion (file, created) VALUES (?,?,?,?)",
+        c.execute("INSERT OR IGNORE INTO deletion (file, created) VALUES (?,?,?,?)",
                   (filename, datetime.now().isoformat()))
 
         # Save (commit) the changes
