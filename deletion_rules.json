@@ -19,7 +19,7 @@
 	},
 	"conditions": [
 	]
-	},
+    },
     "DELETE_ARCHIVE": {
 	"functionName": "deleteArchiveRule",
 	"options": {
@@ -34,5 +34,24 @@
 		"options": {}
 	    }
 	]
-    }
+    },
+    "DELETE_FROM_DELETION_DB": {
+	"functionName": "removeFromDeletionDatabaseRule",
+	"options": {
+	},
+	"conditions": [
+	    {
+		"functionName": "!assertDCMetadataExistsCondition",
+		"options": {}
+	    },
+	    {
+		"functionName": "!assertWFCatalogExistsCondition",
+		"options": {}
+	    },
+	    {
+		"functionName": "!assertIRODSExistCondition",
+		"options": {}
+	    },
+	]
+    },
 }

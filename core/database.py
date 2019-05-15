@@ -84,9 +84,7 @@ class DeletionDatabase():
         return c.fetchall()
 
     def _delete_row(self, filename):
-        """
-        Deletes a row from the deletion table that matches the given filename.
-        """
+        """Delete a row from the deletion table that matches the given filename."""
 
         c = self.conn.cursor()
 
@@ -97,8 +95,7 @@ class DeletionDatabase():
         self.conn.commit()
 
     def add_filename(self, filename):
-        """
-        Adds a filename to the deletion table.
+        """Add a filename to the deletion table.
 
         Parameters
         ----------
@@ -107,9 +104,17 @@ class DeletionDatabase():
 
         self._insert_row(filename)
 
-    def add_many_files(self, file_list):
+    def remove(self, sds_file):
+        """Remove one file from the deletion table.
+
+        Parameters
+        ----------
+        sds_list : `SDSFile`
         """
-        Adds a list of files to the deletion table.
+        self._delete_row(sds_file.filename)
+
+    def add_many_files(self, file_list):
+        """Add a list of files to the deletion table.
 
         Parameters
         ----------

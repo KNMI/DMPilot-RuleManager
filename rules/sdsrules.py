@@ -242,6 +242,20 @@ def deleteWaveformMetadataRule(options, SDSFile):
     logger.debug("Deleted waveform metadata for %s." % SDSFile.filename)
 
 
+def removeFromDeletionDatabaseRule(options, SDSFile):
+    """Removes the file from the deletion database.
+
+    To be used after a successful deletion of the file from all desired archives.
+    """
+
+    logger.debug("Removing deletion entry for %s." % SDSFile.filename)
+
+    from core.database import deletion_database
+    deletion_database.remove(SDSFile)
+
+    logger.debug("Removed deletion entry for %s." % SDSFile.filename)
+
+
 def testPrint(options, sdsFile):
     """Prints the filename."""
     logger.info(sdsFile.filename)

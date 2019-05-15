@@ -16,6 +16,14 @@ def assertQualityCondition(options, SDSFile):
     """
     return SDSFile.quality in options["qualities"]
 
+def assertIRODSExistCondition(options, SDSFile):
+    """
+    def assertIRODSNotExistCondition
+    Asserts that the SDSFile is not in iRODS
+    """
+    # The file was not already ingested by iRODS
+    return irodsSession.exists(SDSFile)
+
 def assertIRODSNotExistCondition(options, SDSFile):
     """
     def assertIRODSNotExistCondition
