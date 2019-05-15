@@ -22,6 +22,7 @@ class DeletionDatabase():
         # Connect to (file) database
         self.logger.debug("Connecting to deletion database stored at '%s'" % config["DELETION_DB"])
         self.conn = sqlite3.connect(config["DELETION_DB"])
+        self.conn.row_factory = sqlite3.Row
 
         # Create table if not exists
         self._create_table()
@@ -64,7 +65,7 @@ class DeletionDatabase():
         c = self.conn.cursor()
 
         # Insert a row of data
-        c.execute("INSERT OR IGNORE INTO deletion (file, created) VALUES (?,?,?,?)",
+        c.execute("INSERT OR IGNORE INTO deletion (file, created) VALUES (?,?)",
                   (filename, datetime.now().isoformat()))
 
         # Save (commit) the changes
@@ -95,6 +96,17 @@ class DeletionDatabase():
         # Save (commit) the changes
         self.conn.commit()
 
+    def add_filename(self, filename):
+        """
+        Adds a filename to the deletion table.
+
+        Parameters
+        ----------
+        filename : `str`
+        """
+
+        self._insert_row(filename)
+
     def add_many_files(self, file_list):
         """
         Adds a list of files to the deletion table.
@@ -115,4 +127,7 @@ class DeletionDatabase():
         # Insert a row of data
         c.execute("SELECT * FROM deletion")
 
-        return [SDSFile(row["file"]) for row in c.fetchall()]
+        return [SDSFile(row["file"], config["IRODS_ROOT"]) for row in c.fetchall()]
+
+
+deletion_database = DeletionDatabase()
