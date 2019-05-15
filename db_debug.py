@@ -17,15 +17,15 @@ if __name__ == "__main__":
     parsedargs = parser.parse_args()
 
     if parsedargs.count:
-        print(len(deletion_database.get_all_files()))
+        print(len(deletion_database.get_all_filenames()))
 
     if parsedargs.list:
-        for sds_file in deletion_database.get_all_files():
-            print(sds_file.filename)
+        for filename in deletion_database.get_all_filenames():
+            print(filename)
 
     if parsedargs.clear:
-        for sds_file in deletion_database.get_all_files():
-            deletion_database._delete_row(sds_file.filename)
+        for filename in deletion_database.get_all_filenames():
+            deletion_database._delete_row(filename)
 
     if parsedargs.remove is not None:
         deletion_database._delete_row(parsedargs.remove)

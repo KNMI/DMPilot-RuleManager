@@ -3,7 +3,6 @@ import sqlite3
 
 from configuration import config
 from datetime import datetime
-from orfeus.sdsfile import SDSFile
 
 
 class DeletionDatabase():
@@ -124,15 +123,15 @@ class DeletionDatabase():
         for sds_file in file_list:
             self._insert_row(sds_file.filename)
 
-    def get_all_files(self):
-        """Returns a list of all files in the deletion table."""
+    def get_all_filenames(self):
+        """Returns a list of all filenames in the deletion table."""
 
         c = self.conn.cursor()
 
         # Insert a row of data
         c.execute("SELECT * FROM deletion")
 
-        return [SDSFile(row["file"], config["IRODS_ROOT"]) for row in c.fetchall()]
+        return [row["file"] for row in c.fetchall()]
 
 
 deletion_database = DeletionDatabase()
