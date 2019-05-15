@@ -7,7 +7,7 @@ Script that runs the rules for file deletion.
 import logging
 import argparse
 
-import core.logging
+import core.logger
 from core.rulemanager import RuleManager
 from orfeus.sdsfile import SDSFile
 from core.database import deletion_database
