@@ -12,6 +12,7 @@ import os
 import requests
 import subprocess
 import base64
+import logging
 
 from datetime import datetime, timedelta
 from hashlib import sha256
@@ -68,6 +69,9 @@ class SDSFile():
             raise ValueError("Invalid SDS file submitted.")
 
         self.archiveRoot = archiveRoot
+
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
 
     # Returns the filename
     @property
@@ -475,6 +479,12 @@ class SDSFile():
 
         # Python 3.6 (see above)
         dataselect.wait()
+
+        # Check that quality file has been created
+        if os.path.exists(qualityFile.filepath):
+            self.logger.debug("Created pruned file %s" % qualityFile.filename)
+        else:
+            raise Exception("Pruned file %s has not been created!" % qualityFile.filename)
 
     def __getAdjacentFile(self, direction):
         """
