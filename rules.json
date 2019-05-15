@@ -22,12 +22,6 @@
 				}
 			},
 			{
-				"functionName": "assertModificationTimeYoungerThan",
-				"options": {
-					"days": 100
-				}
-			},
-			{
 				"functionName": "assertIRODSNotExistCondition",
 				"options": {}
 			}
