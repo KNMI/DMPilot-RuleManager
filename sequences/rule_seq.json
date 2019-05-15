@@ -3,5 +3,6 @@
     "INGESTION",
     "METADATA",
     "DCAT",
-    "PURGE"
+    "PURGE_NOT_ARCHIVED",
+    "PURGE_ARCHIVED"
 ]

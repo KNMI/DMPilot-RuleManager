@@ -18,7 +18,7 @@
 		"conditions": [{
 				"functionName": "assertQualityCondition",
 				"options": {
-					"qualities": ["D"]
+					"qualities": ["Q"]
 				}
 			},
 			{
@@ -34,9 +34,7 @@
 		"conditions": [{
 			"functionName": "assertQualityCondition",
 			"options": {
-				"qualities": [
-					"D"
-				]
+				"qualities": ["Q"]
 			}
 		}, {
 			"functionName": "assertWFCatalogNotExistsCondition",
@@ -50,22 +48,37 @@
 		"conditions": [{
 			"functionName": "assertQualityCondition",
 			"options": {
-				"qualities": ["D"]
+				"qualities": ["Q"]
 			}
 		}, {
 			"functionName": "assertDCMetadataNotExistsCondition",
 			"options": {}
 		}]
 	},
-	"PURGE": {
+	"PURGE_NOT_ARCHIVED": {
 		"functionName": "purgeRule",
-		"options": {
-			"deleteEmptyFiles": true
-		},
+		"options": {"deleteEmptyFiles": true},
 		"conditions": [{
 				"functionName": "assertQualityCondition",
 				"options": {
-					"qualities": ["R", "E", "M", "D", "Q"]
+					"qualities": ["R", "E", "M", "D"]
+				}
+			},
+			{
+				"functionName": "assertModificationTimeOlderThan",
+				"options": {
+					"days": 7
+				}
+			}
+		]
+	},
+	"PURGE_ARCHIVED": {
+		"functionName": "purgeRule",
+		"options": {"deleteEmptyFiles": true},
+		"conditions": [{
+				"functionName": "assertQualityCondition",
+				"options": {
+					"qualities": ["Q"]
 				}
 			},
 			{
@@ -83,7 +96,7 @@
 			{
 				"functionName": "assertModificationTimeOlderThan",
 				"options": {
-					"days": 30
+					"days": 7
 				}
 			}
 		]
