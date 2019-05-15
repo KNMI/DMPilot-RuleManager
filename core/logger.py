@@ -8,7 +8,7 @@ Example
 -------
 
 ```
-import core.logging
+import core.logger
 from mongomanager import mongoSession
 ...
 logger = logging.getLogger(__name__)
