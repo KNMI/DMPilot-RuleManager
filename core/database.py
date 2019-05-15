@@ -83,6 +83,19 @@ class DeletionDatabase():
 
         return c.fetchall()
 
+    def _delete_row(self, filename):
+        """
+        Deletes a row from the deletion table that matches the given filename.
+        """
+
+        c = self.conn.cursor()
+
+        # Insert a row of data
+        c.execute("DELETE FROM deletion WHERE file=?", (filename,))
+
+        # Save (commit) the changes
+        self.conn.commit()
+
     # TODO:
     # _update_row(), _delete_row() methods
     # add SDSFile.status property to store info of (un)successful deletion?
