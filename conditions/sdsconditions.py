@@ -4,6 +4,7 @@ depending on whether conditions are met
 """
 
 from datetime import datetime, timedelta
+import os
 
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
@@ -71,3 +72,7 @@ def assertDCMetadataExistsCondition(options, SDSFile):
 def assertDCMetadataNotExistsCondition(options, SDSFile):
 
     return not assertDCMetadataExistsCondition(options, SDSFile)
+
+def assertTempArchiveExistCondition(options, SDSFile):
+    """Assert that the file exists in the temporary archive."""
+    return os.path.isfile(SDSFile.filepath)

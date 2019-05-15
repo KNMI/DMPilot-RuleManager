@@ -49,6 +49,10 @@
 		"options": {}
 	    },
 	    {
+		"functionName": "!assertTempArchiveExistCondition",
+		"options": {}
+	    },
+	    {
 		"functionName": "!assertIRODSExistCondition",
 		"options": {}
 	    }

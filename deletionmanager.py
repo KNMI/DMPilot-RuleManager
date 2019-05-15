@@ -26,6 +26,7 @@ def main():
         parser.add_argument("--rulemap", help="set custom rule map file")
         parser.add_argument("--ruleseq", help="set custom rule sequence file")
         parser.add_argument("--delfile", help="list of files to be deleted")
+        parser.add_argument("--tempdir", help="the temporary acrhive directory")
         parsedargs = vars(parser.parse_args())
 
         # Check parameters
@@ -46,7 +47,7 @@ def main():
                 deletion_database.add_filename(line.strip())
 
         # Get all files from database
-        files = deletion_database.get_all_filenames()
+        files = [SDSFile(filename, parsedargs["tempdir"]) for filename in deletion_database.get_all_filenames()]
         logger.debug("Collected %d files for deletion" % len(files))
 
         # Apply the sequence of rules on files
