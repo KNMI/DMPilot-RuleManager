@@ -76,7 +76,17 @@ class MongoManager():
         Saves a document to a collection
         """
 
-        self.database[collection].save(document)
+        # First, delete all documents related to this file
+        res = self.database[collection].delete_many({"fileId": document["fileId"]})
+        if res.acknowledged and res.deleted_count > 0:
+            self.logger.debug("Deleted %d documents from '%s' collection with fileId = %s" % (
+                                res.deleted_count, collection, document["fileId"]))
+
+        # Second, insert new document
+        res = self.database[collection].insert_one(document)
+        if res.acknowledged:
+            self.logger.debug("Inserted document into '%s' collection with fileId = %s" % (
+                                collection, document["fileId"]))
 
     def saveDCDocument(self, document):
         """
