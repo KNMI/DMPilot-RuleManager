@@ -29,6 +29,10 @@ class DeletionDatabase():
         """
         Class destructor
         """
+        self.disconnect()
+
+    def disconnect(self):
+        """Closes the connection to the database."""
 
         # Close the connection
         self.logger.debug("Disconnecting from deletion database")
@@ -86,4 +90,3 @@ class DeletionDatabase():
     # add SDSFile.status property to store info of (un)successful deletion?
     # higher level method that receives the list of SDSFiles after sequence exec
     #   and inserts, updates or removes rows in the database
-    
