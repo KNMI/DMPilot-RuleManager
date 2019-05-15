@@ -22,7 +22,7 @@ import logging
 import irods
 from irods.session import iRODSSession
 from irods.models import DataObject
-from irods.exception import DataObjectDoesNotExist
+from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
 import irods.keywords as kw
 
 from configuration import config
@@ -192,7 +192,7 @@ class IRODSManager():
 
     def getDataObject(self, SDSFile, rootCollection=None):
         """
-        def IRODSManager::createDataObject
+        def IRODSManager::getDataObject
         Retrieves a data object from iRODS and returns None if it does not exist
 
         Parameters
@@ -207,20 +207,34 @@ class IRODSManager():
             if rootCollection is None:
                 return self.session.data_objects.get(SDSFile.irodsPath)
             return self.session.data_objects.get(SDSFile.customPath(rootCollection))
-        except DataObjectDoesNotExist:
+        except (DataObjectDoesNotExist, CollectionDoesNotExist):
             return None
 
     def exists(self, SDSFile, rootCollection=None):
-        """Check whether the file is registered in iRODS.
+        """Check whether the file, with the same checksum, is registered in iRODS.
 
         Parameters
         ----------
         rootCollection : `str`, optional
             The archive's root collection.
         """
-        if rootCollection is None:
-            return self.session.data_objects.exists(SDSFile.irodsPath)
-        return self.session.data_objects.exists(SDSFile.customPath(rootCollection))
+        self.logger.debug("Checking if file %s exists in iRODS." % SDSFile.filename)
+
+        # Attempt to get the data object
+        dataObject = self.getDataObject(SDSFile, rootCollection=rootCollection)
+        if dataObject is None:
+            self.logger.debug("File %s does NOT exist in iRODS." % SDSFile.filename)
+            return False
+        else:
+            # Compare checksum
+            if dataObject.checksum == SDSFile.checksum:
+                self.logger.debug("File %s DOES exist in iRODS, with SAME checksum (%s)." % (
+                                    SDSFile.filename, SDSFile.checksum))
+                return True
+            else:
+                self.logger.debug("File %s DOES exist in iRODS, but with a DIFFERENT checksum (%s vs %s)." % (
+                                    SDSFile.filename, dataObject.checksum, SDSFile.checksum))
+                return False
 
 
 irodsSession = IRODSManager()

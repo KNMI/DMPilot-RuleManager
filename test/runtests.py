@@ -124,14 +124,14 @@ class TestRuleManager(unittest.TestCase):
         def test_sdsfile_invalid
         expects exception to be raised when an invalid SDS filename is submitted
         """
-        
+
         # Assert that missing day is invalid
         with self.assertRaises(ValueError) as ex:
             self.createSDSFile("NL.HGN.02.BHZ.D.1970")
-        
+
         # Assert the exception
         self.assertEqual("Invalid SDS file submitted.", str(ex.exception.args[0]))
- 
+
     def test_rule_exception(self):
 
         """
@@ -266,6 +266,43 @@ class TestRuleManager(unittest.TestCase):
         for i, file in enumerate(sorted(files, key=lambda x: x.start)):
             self.assertEqual(file.start.date(), now + timedelta(days=i))
 
+    def test_collect_files_from_wildcards(self):
+
+        """
+        def test_collect_files_from_wildcards
+        Tests collection of SDSFiles from wildcards
+        """
+
+        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files:
+
+            # Fake SDS file from today, yesterday, and day before
+            mock_files.return_value = [
+                # Different channels
+                self.createSDSFile("NL.HGN.02.LHZ.D.2019.001"),
+                self.createSDSFile("NL.HGN.02.BHZ.D.2019.001"),
+                self.createSDSFile("NL.HGN.02.HHZ.D.2019.001"),
+                # Different days
+                self.createSDSFile("NL.OPLO.02.HHZ.D.2019.001"),
+                self.createSDSFile("NL.OPLO.02.HHZ.D.2019.010"),
+                self.createSDSFile("NL.OPLO.02.HHZ.D.2019.100"),
+                self.createSDSFile("NL.OPLO.02.HHZ.D.2019.365"),
+                # Multiple stations
+                self.createSDSFile("NL.G010..HGZ.D.2019.001"),
+                self.createSDSFile("NL.G011..HGZ.D.2019.001"),
+                self.createSDSFile("NL.G012..HGZ.D.2019.001"),
+                self.createSDSFile("NL.G013..HGZ.D.2019.001"),
+                self.createSDSFile("NL.G014..HGZ.D.2019.001"),
+            ]
+
+            filesStations = self.FC.collectFromWildcards("NL.G0*..HGZ.D.2019.001")
+            filesChannels = self.FC.collectFromWildcards("NL.HGN.02.?HZ.D.2019.001")
+            filesDays = self.FC.collectFromWildcards("NL.OPLO.02.HHZ.D.2019.*")
+
+        # Assert files are properly collected
+        self.assertEqual(len(filesStations), 5)
+        self.assertEqual(len(filesDays), 4)
+        self.assertEqual(len(filesChannels), 3)
+
     def test_collect_files_days_past_range(self):
 
         """
@@ -315,6 +352,28 @@ class TestRuleManager(unittest.TestCase):
 
         self.assertEqual(collectedFile.start, datetime(2019, 1, 22))
         self.assertEqual(collectedFile.end, datetime(2019, 1, 23))
+
+    def test_collect_files_from_modified(self):
+
+        """
+        def test_collect_files_filename_modified
+        Tests the SDSFileCollector collecting files by date in modification time
+        """
+
+        # Mock files returned by the file collector and modified property of SDSFile
+        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files, \
+            patch('orfeus.sdsfile.SDSFile.modified', new_callable=PropertyMock) as mock_modified:
+
+            mock_files.return_value = [self.createSDSFile("NL.HGN.02.LHZ.D.2019.001")]
+            mock_modified.return_value = datetime(2020, 1, 1)
+
+            # Collect files on modification date and another date
+            filesFound = self.FC.collectFromDate("2020-01-01", mode="mod_time")
+            filesNotFound = self.FC.collectFromDate("2019-01-01", mode="mod_time")
+
+        # Assert files are properly collected
+        self.assertEqual(len(filesFound), 1)
+        self.assertEqual(len(filesNotFound), 0)
 
     def test_PSD_Module(self):
 

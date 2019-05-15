@@ -1,11 +1,12 @@
 import logging
 import signal
 import json
+import jsonschema
 
 from functools import partial, wraps
 from core.rule import Rule
 from configuration import config
-
+from schema import JSON_RULE_SCHEMA
 
 class RuleManager():
 
@@ -56,6 +57,12 @@ class RuleManager():
                 rule_desc = json.load(rule_file)
         except IOError:
             raise IOError("The rulemap %s could not be found." % ruleMapFile)
+
+        # Confirm rule map against the schema
+        try:
+            jsonschema.validate(rule_desc, JSON_RULE_SCHEMA)
+        except jsonschema.exceptions.ValidationError:
+            raise ValueError("The rulemap %s does not validate against the schema." % ruleMapFile)
 
         try:
             with open(ruleSequenceFile) as order_file:
