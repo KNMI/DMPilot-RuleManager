@@ -65,10 +65,8 @@ class DeletionDatabase():
         c = self.conn.cursor()
 
         # Insert a row of data
-        c.execute("INSERT INTO deletion (file, status, created, modified) VALUES ('%s','%s','%s','%s')" % (
-            filename, status,
-            datetime.now().isoformat(), datetime.now().isoformat()
-        ))
+        c.execute("INSERT INTO deletion (file, status, created, modified) VALUES (?,?,?,?)",
+                  (filename, status, datetime.now().isoformat(), datetime.now().isoformat()))
 
         # Save (commit) the changes
         self.conn.commit()
