@@ -88,7 +88,7 @@ def ingestionRule(options, SDSFile):
 
     # Check if checksum is saved
     logger.debug("Ingested file %s with checksum '%s'" % (
-            SDSFile.filename, strirodsSession.getDataObject(SDSFile).checksum))
+            SDSFile.filename, irodsSession.getDataObject(SDSFile).checksum))
 
 
 def federatedIngestionRule(options, SDSFile):
@@ -181,7 +181,7 @@ def waveformMetadataRule(options, SDSFile):
     # Get waveform metadata
     document = collector.getMetadata(SDSFile)
     if document is None:
-      return logger.error("Could not get the waveform metadata.")
+        return logger.error("Could not get the waveform metadata.")
 
     logger.debug("Saving waveform metadata for %s." % SDSFile.filename)
 
