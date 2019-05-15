@@ -1,3 +1,6 @@
+import logging
+
+
 class Rule():
     """
     Class Rule
@@ -7,10 +10,13 @@ class Rule():
     def __init__(self, call, conditions):
         """
         Rule.__init__ 
-        Initializes a rule with a rule and policy
+        Initializes a rule with a rule and condition
         """
         self.call = call
         self.conditions = conditions
+
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
 
     def apply(self, SDSFile):
         """
@@ -30,12 +36,13 @@ class Rule():
         Asserts whether all conditions evaluate to True
         """
 
-        # Go over each configured policy and assert the policy evaluates to True
-        for policy in self.conditions:
-            if not policy(SDSFile):
+        # Go over each configured condition and assert the condition evaluates to True
+        for condition in self.conditions:
+            self.logger.debug("%s: Asserting condition '%s'." % (SDSFile.filename, condition.func.__name__))
+            if not condition(SDSFile):
 
-                # If a __wrapped__ attribut exists the function was inverted
-                if "__wrapped__" in dir(policy.func):
-                  raise AssertionError("!%s" % policy.func.__name__)
+                # If a __wrapped__ attribute exists the function was inverted
+                if "__wrapped__" in dir(condition.func):
+                  raise AssertionError("!%s" % condition.func.__name__)
                 else:
-                  raise AssertionError(policy.func.__name__)
+                  raise AssertionError(condition.func.__name__)
