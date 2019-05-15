@@ -47,11 +47,9 @@ class DeletionDatabase():
 
         # Create table
         c.execute('''CREATE TABLE IF NOT EXISTS deletion
-                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                     (id INTEGER PRIMARY KEY,
                       file TEXT UNIQUE,
-                      status TEXT,
-                      created TEXT,
-                      modified TEXT
+                      created TEXT
                      )''')
 
         # Save (commit) the changes
@@ -65,8 +63,8 @@ class DeletionDatabase():
         c = self.conn.cursor()
 
         # Insert a row of data
-        c.execute("INSERT INTO deletion (file, status, created, modified) VALUES (?,?,?,?)",
-                  (filename, status, datetime.now().isoformat(), datetime.now().isoformat()))
+        c.execute("INSERT INTO deletion (file, created) VALUES (?,?,?,?)",
+                  (filename, datetime.now().isoformat()))
 
         # Save (commit) the changes
         self.conn.commit()
