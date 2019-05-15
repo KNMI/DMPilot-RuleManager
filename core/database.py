@@ -3,6 +3,7 @@ import sqlite3
 
 from configuration import config
 from datetime import datetime
+from orfeus.sdsfile import SDSFile
 
 
 class DeletionDatabase():
@@ -55,7 +56,7 @@ class DeletionDatabase():
         # Save (commit) the changes
         self.conn.commit()
 
-    def _insert_row(self, filename, status):
+    def _insert_row(self, filename):
         """
         Inserts a row into the deletion table
         """
@@ -94,8 +95,24 @@ class DeletionDatabase():
         # Save (commit) the changes
         self.conn.commit()
 
-    # TODO:
-    # _update_row(), _delete_row() methods
-    # add SDSFile.status property to store info of (un)successful deletion?
-    # higher level method that receives the list of SDSFiles after sequence exec
-    #   and inserts, updates or removes rows in the database
+    def add_many_files(self, file_list):
+        """
+        Adds a list of files to the deletion table.
+
+        Parameters
+        ----------
+        file_list : `list` of `SDSFile`
+        """
+
+        for sds_file in file_list:
+            self._insert_row(sds_file.filename)
+
+    def get_all_files(self):
+        """Returns a list of all files in the deletion table."""
+
+        c = self.conn.cursor()
+
+        # Insert a row of data
+        c.execute("SELECT * FROM deletion")
+
+        return [SDSFile(row["file"]) for row in c.fetchall()]
