@@ -60,7 +60,6 @@
 	"PURGE": {
 		"functionName": "purgeRule",
 		"options": {
-			"deleteEmptyFiles": true
 		},
 		"conditions": [{
 				"functionName": "assertQualityCondition",

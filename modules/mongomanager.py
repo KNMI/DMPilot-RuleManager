@@ -70,6 +70,14 @@ class MongoManager():
 
         return self.database[collection].find_one(query)
 
+    def deleteOne(self, collection, query):
+        """
+        def MongoManager::deleteOne
+        Delete a document in a collection
+        """
+
+        return self.database[collection].delete_one(query)
+
     def save(self, collection, document):
         """
         def MongoManager::save
@@ -105,6 +113,15 @@ class MongoManager():
         return self.findOne(config["MONGO"]["DC_METADATA_COLLECTION"],
                             {"fileId": SDSFile.filename})
 
+    def deleteDCDocument(self, SDSFile):
+        """
+        def MongoManager::deleteDCDocument
+        Delete one Dublin Core metadata document corresponding to a file
+        """
+
+        return self.deleteOne(config["MONGO"]["DC_METADATA_COLLECTION"],
+                              {"fileId": SDSFile.filename})
+
     def setMetadataDocument(self, document):
         """
         def MongoManager::saveMetadataDocument
@@ -121,6 +138,15 @@ class MongoManager():
 
         return self.findOne(config["MONGO"]["WF_METADATA_COLLECTION"],
                             {"fileId": SDSFile.filename})
+
+    def deleteMetadataDocument(self, SDSFile):
+        """
+        def MongoManager::deleteMetadataDocument
+        Delete one waveform metadata document corresponding to a file
+        """
+
+        return self.deleteOne(config["MONGO"]["WF_METADATA_COLLECTION"],
+                              {"fileId": SDSFile.filename})
 
 
 mongoSession = MongoManager()

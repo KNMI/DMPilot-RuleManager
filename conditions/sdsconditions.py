@@ -5,6 +5,7 @@ depending on whether conditions are met
 
 import logging
 from datetime import datetime, timedelta
+import os
 
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
@@ -19,6 +20,14 @@ def assertQualityCondition(options, SDSFile):
     Asserts that the SDSFile quality is in options
     """
     return SDSFile.quality in options["qualities"]
+
+def assertIRODSExistCondition(options, SDSFile):
+    """
+    def assertIRODSNotExistCondition
+    Asserts that the SDSFile is not in iRODS
+    """
+    # The file was not already ingested by iRODS
+    return irodsSession.exists(SDSFile)
 
 def assertIRODSNotExistCondition(options, SDSFile):
     """
@@ -97,3 +106,7 @@ def assertDCMetadataExistsCondition(options, SDSFile):
 def assertDCMetadataNotExistsCondition(options, SDSFile):
 
     return not assertDCMetadataExistsCondition(options, SDSFile)
+
+def assertTempArchiveExistCondition(options, SDSFile):
+    """Assert that the file exists in the temporary archive."""
+    return os.path.isfile(SDSFile.filepath)

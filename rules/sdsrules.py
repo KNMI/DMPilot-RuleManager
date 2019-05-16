@@ -6,6 +6,7 @@ Every rule should be implemented as a module funcion with exactly two arguments:
 2) the item that is subject to the rule, in this case, a `SDSFile` object.
 """
 
+import os
 import logging
 from datetime import datetime, timedelta
 
@@ -91,6 +92,26 @@ def ingestionRule(options, SDSFile):
             SDSFile.filename, irodsSession.getDataObject(SDSFile).checksum))
 
 
+def deleteArchiveRule(options, SDSFile):
+    """Handler for the rule that deletes a file from the iRODS archive.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The description of the file to be deleted.
+    """
+
+    logger.debug("Deleting file %s." % SDSFile.filename)
+
+    # Attempt to delete from iRODS
+    irodsSession.deleteDataObject(SDSFile)
+
+    # Check if checksum is saved
+    logger.debug("Deleted file %s." % SDSFile.filename)
+
+
 def federatedIngestionRule(options, SDSFile):
     """Handler for a federated ingestion rule. Puts the object in a given
     root collection, potentially in a federated zone.
@@ -123,23 +144,20 @@ def purgeRule(options, SDSFile):
     ----------
     options : `dict`
         The rule's options.
-        - ``daysPurgeAfter``: Number of days after which the file should be deleted (`int`)
-        - ``deleteEmptyFiles``: Whether to delete files with no samples regardless of age (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
 
-    # If configured: files with file size 0 need to be deleted
-    if options["deleteEmptyFiles"] and SDSFile.size == 0:
-        logger.debug("Purging empty file %s." % SDSFile.filename)
-        result = irodsSession.purgeTemporaryFile(SDSFile)
-        logger.debug("Purged empty file %s." % SDSFile.filename)
-        return result
-
     # Some other configurable rules
-    logger.debug("Purging file %s." % SDSFile.filename)
-    irodsSession.purgeTemporaryFile(SDSFile)
-    logger.debug("Purged file %s." % SDSFile.filename)
+    logger.debug("Purging file %s from temporary archive." % SDSFile.filename)
+    try:
+        # Yeah let's be careful with this..
+        #os.remove(SDSFile.filepath)
+        logger.debug("Purged file %s from temporary archive." % SDSFile.filename)
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise
+        logger.debug("File %s not present in temporary archive." % SDSFile.filename)
 
 
 def dcMetadataRule(options, SDSFile):
@@ -165,6 +183,23 @@ def dcMetadataRule(options, SDSFile):
         logger.debug("Saved Dublin Core metadata for %s." % SDSFile.filename)
 
 
+def deleteDCMetadataRule(options, SDSFile):
+    """Delete Dublin Core metadata of an SDS file.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.debug("Deleting Dublin Core metadata for %s." % SDSFile.filename)
+
+    mongoSession.deleteDCDocument(SDSFile)
+    logger.debug("Deleted Dublin Core metadata for %s." % SDSFile.filename)
+
+
 def waveformMetadataRule(options, SDSFile):
     """Handler for the WFCatalog metadata rule.
     TODO XXX
@@ -188,6 +223,37 @@ def waveformMetadataRule(options, SDSFile):
     # Save the metadata document
     mongoSession.setMetadataDocument(document)
     logger.debug("Saved waveform metadata for %s." % SDSFile.filename)
+
+
+def deleteWaveformMetadataRule(options, SDSFile):
+    """Delete waveform metadata of an SDS file.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.debug("Deleting waveform metadata for %s." % SDSFile.filename)
+
+    mongoSession.deleteMetadataDocument(SDSFile)
+    logger.debug("Deleted waveform metadata for %s." % SDSFile.filename)
+
+
+def removeFromDeletionDatabaseRule(options, SDSFile):
+    """Removes the file from the deletion database.
+
+    To be used after a successful deletion of the file from all desired archives.
+    """
+
+    logger.debug("Removing deletion entry for %s." % SDSFile.filename)
+
+    from core.database import deletion_database
+    deletion_database.remove(SDSFile)
+
+    logger.debug("Removed deletion entry for %s." % SDSFile.filename)
 
 
 def testPrint(options, sdsFile):
