@@ -21,5 +21,6 @@ config = {
         "LEVEL": "INFO",
         "FILENAME": "~/log/sdsmanager.log" # use None for stdout
     },
-    "DEFAULT_RULE_TIMEOUT" : 10
+    "DEFAULT_RULE_TIMEOUT" : 10,
+    "DELETION_DB": "./deletion.db"
 }

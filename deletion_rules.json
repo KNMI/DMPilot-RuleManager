@@ -1,0 +1,61 @@
+{
+    "DELETE_METADATA": {
+	"functionName": "deleteWaveformMetadataRule",
+	"options": {
+	},
+	"conditions": [
+	]
+    },
+    "DELETE_DCAT": {
+	"functionName": "deleteDCMetadataRule",
+	"options": {
+	},
+	"conditions": [
+	]
+    },
+    "DELETE_TEMP_ARCHIVE": {
+	"functionName": "purgeRule",
+	"options": {
+	},
+	"conditions": [
+	]
+    },
+    "DELETE_ARCHIVE": {
+	"functionName": "deleteArchiveRule",
+	"options": {
+	},
+	"conditions": [
+	    {
+		"functionName": "!assertDCMetadataExistsCondition",
+		"options": {}
+	    },
+	    {
+		"functionName": "!assertWFCatalogExistsCondition",
+		"options": {}
+	    }
+	]
+    },
+    "DELETE_FROM_DELETION_DB": {
+	"functionName": "removeFromDeletionDatabaseRule",
+	"options": {
+	},
+	"conditions": [
+	    {
+		"functionName": "!assertDCMetadataExistsCondition",
+		"options": {}
+	    },
+	    {
+		"functionName": "!assertWFCatalogExistsCondition",
+		"options": {}
+	    },
+	    {
+		"functionName": "!assertTempArchiveExistCondition",
+		"options": {}
+	    },
+	    {
+		"functionName": "!assertIRODSExistCondition",
+		"options": {}
+	    }
+	]
+    }
+}

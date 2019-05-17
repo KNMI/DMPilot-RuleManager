@@ -15,12 +15,18 @@ from orfeus.sdsfile import SDSFile
 # Initialize logger
 logger = logging.getLogger(__name__)
 
+
 def assertQualityCondition(options, sds_file):
     """
     def assertQualityCondition
     Asserts that the SDSFile quality is in options
     """
     return sds_file.quality in options["qualities"]
+
+
+def assertIRODSExistsCondition(options, sds_file):
+    return irodsSession.exists(sds_file)
+
 
 def assertIRODSNotExistCondition(options, sds_file):
     """
@@ -29,6 +35,7 @@ def assertIRODSNotExistCondition(options, sds_file):
     """
     # The file was not already ingested by iRODS
     return not irodsSession.exists(sds_file)
+
 
 def assertWFCatalogExistsCondition(options, sds_file):
 
@@ -52,18 +59,19 @@ def assertWFCatalogExistsCondition(options, sds_file):
 
     return exists and same_hash
 
+
 def assertWFCatalogNotExistsCondition(options, sds_file):
 
     return not assertWFCatalogExistsCondition(options, sds_file)
 
-def assertIRODSExistsCondition(options, sds_file):
-    return irodsSession.exists(sds_file)
 
 def assertModificationTimeYoungerThan(options, sds_file):
     return sds_file.modified > (datetime.now() - timedelta(days=options["days"]))
 
+
 def assertModificationTimeOlderThan(options, sds_file):
     return sds_file.modified < (datetime.now() - timedelta(days=options["days"]))
+
 
 def assertDCMetadataExistsCondition(options, sds_file):
 
@@ -87,6 +95,7 @@ def assertDCMetadataExistsCondition(options, sds_file):
 
     return exists and same_hash
 
+
 def assertDCMetadataNotExistsCondition(options, sds_file):
 
     return not assertDCMetadataExistsCondition(options, sds_file)
@@ -99,3 +108,8 @@ def assertPrunedFileExistsCondition(options, sds_file):
     qualityFile = SDSFile(sds_file.filename, sds_file.archiveRoot)
     qualityFile.quality = "Q"
     return os.path.exists(qualityFile.filepath)
+
+
+def assertTempArchiveExistCondition(options, SDSFile):
+    """Assert that the file exists in the temporary archive."""
+    return os.path.isfile(SDSFile.filepath)

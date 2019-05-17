@@ -415,5 +415,6 @@ class TestRuleManager(unittest.TestCase):
 
         map(testSegment, enumerate(result))
 
+
 if __name__ == '__main__':
     unittest.main()
