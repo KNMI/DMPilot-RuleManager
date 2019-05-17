@@ -7,13 +7,14 @@ class Rule():
     Container for a single rule with a rule and conditions to be asserted
     """
 
-    def __init__(self, call, conditions):
+    def __init__(self, call, conditions, name=None):
         """
         Rule.__init__ 
         Initializes a rule with a rule and condition
         """
         self.call = call
         self.conditions = conditions
+        self.name = name
 
         # Initialize logger
         self.logger = logging.getLogger(__name__)
