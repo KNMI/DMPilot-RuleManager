@@ -5,95 +5,97 @@ depending on whether conditions are met
 
 import logging
 from datetime import datetime, timedelta
+import os
 
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
 from modules.dublincore import dublinCore
+from orfeus.sdsfile import SDSFile
 
 # Initialize logger
 logger = logging.getLogger(__name__)
 
-def assertQualityCondition(options, SDSFile):
+def assertQualityCondition(options, sds_file):
     """
     def assertQualityCondition
     Asserts that the SDSFile quality is in options
     """
-    return SDSFile.quality in options["qualities"]
+    return sds_file.quality in options["qualities"]
 
-def assertIRODSNotExistCondition(options, SDSFile):
+def assertIRODSNotExistCondition(options, sds_file):
     """
     def assertIRODSNotExistCondition
     Asserts that the SDSFile is not in iRODS
     """
     # The file was not already ingested by iRODS
-    return not irodsSession.exists(SDSFile)
+    return not irodsSession.exists(sds_file)
 
-def assertWFCatalogExistsCondition(options, SDSFile):
+def assertWFCatalogExistsCondition(options, sds_file):
 
     # Extract the current metadata object from the database
-    metadataObject = mongoSession.getMetadataDocument(SDSFile)
+    metadataObject = mongoSession.getMetadataDocument(sds_file)
 
     # Document exists and has the same hash: it exists
     if metadataObject is not None:
         exists = True
-        if metadataObject["checksum"] == SDSFile.checksum:
+        if metadataObject["checksum"] == sds_file.checksum:
             same_hash = True
             logger.debug("File %s does exist in WFCatalog, with same checksum (%s)." % (
-                            SDSFile.filename, SDSFile.checksum))
+                            sds_file.filename, sds_file.checksum))
         else:
             same_hash = False
             logger.debug("File %s does exist in WFCatalog, but with a different checksum (%s vs %s)." % (
-                            SDSFile.filename, metadataObject["checksum"], SDSFile.checksum))
+                            sds_file.filename, metadataObject["checksum"], sds_file.checksum))
     else:
         exists = False
-        logger.debug("File %s does not exist in WFCatalog." % SDSFile.filename)
+        logger.debug("File %s does not exist in WFCatalog." % sds_file.filename)
 
     return exists and same_hash
 
-def assertWFCatalogNotExistsCondition(options, SDSFile):
+def assertWFCatalogNotExistsCondition(options, sds_file):
 
-    return not assertWFCatalogExistsCondition(options, SDSFile)
+    return not assertWFCatalogExistsCondition(options, sds_file)
 
-def assertIRODSExistsCondition(options, SDSFile):
-    return irodsSession.exists(SDSFile)
+def assertIRODSExistsCondition(options, sds_file):
+    return irodsSession.exists(sds_file)
 
-def assertModificationTimeYoungerThan(options, SDSFile):
-    """
-    def assertIRODSNotExistCondition
-    Asserts that the SDSFile is not in iRODS
-    """
-    return SDSFile.modified > (datetime.now() - timedelta(days=options["days"]))
+def assertModificationTimeYoungerThan(options, sds_file):
+    return sds_file.modified > (datetime.now() - timedelta(days=options["days"]))
 
-def assertModificationTimeOlderThan(options, SDSFile):
-    """
-    def assertIRODSNotExistCondition
-    Asserts that the SDSFile is not in iRODS
-    """
-    return SDSFile.modified < (datetime.now() - timedelta(days=options["days"]))
+def assertModificationTimeOlderThan(options, sds_file):
+    return sds_file.modified < (datetime.now() - timedelta(days=options["days"]))
 
-def assertDCMetadataExistsCondition(options, SDSFile):
+def assertDCMetadataExistsCondition(options, sds_file):
 
     # Get the existing Dublin Core Object
-    dublinCoreObject = dublinCore.getDCMetadata(SDSFile)
-
+    dublinCoreObject = dublinCore.getDCMetadata(sds_file)
 
     # Document exists and has the same hash: it exists
     if dublinCoreObject is not None:
         exists = True
-        if dublinCoreObject["checksum"] == SDSFile.checksum:
+        if dublinCoreObject["checksum"] == sds_file.checksum:
             same_hash = True
             logger.debug("File %s does exist in DublinCoreMetadata, with same checksum (%s)." % (
-                            SDSFile.filename, SDSFile.checksum))
+                            sds_file.filename, sds_file.checksum))
         else:
             same_hash = False
             logger.debug("File %s does exist in DublinCoreMetadata, but with a different checksum (%s vs %s)." % (
-                            SDSFile.filename, dublinCoreObject["checksum"], SDSFile.checksum))
+                            sds_file.filename, dublinCoreObject["checksum"], sds_file.checksum))
     else:
         exists = False
-        logger.debug("File %s does not exist in DublinCoreMetadata." % SDSFile.filename)
+        logger.debug("File %s does not exist in DublinCoreMetadata." % sds_file.filename)
 
     return exists and same_hash
 
-def assertDCMetadataNotExistsCondition(options, SDSFile):
+def assertDCMetadataNotExistsCondition(options, sds_file):
 
-    return not assertDCMetadataExistsCondition(options, SDSFile)
+    return not assertDCMetadataExistsCondition(options, sds_file)
+
+
+def assertPrunedFileExistsCondition(options, sds_file):
+    """Aserts that the pruned version of the SDS file is in the temporary archive."""
+
+    # Create a phantom SDSFile with a different quality idenfier
+    qualityFile = SDSFile(sds_file.filename, sds_file.archiveRoot)
+    qualityFile.quality = "Q"
+    return os.path.exists(qualityFile.filepath)

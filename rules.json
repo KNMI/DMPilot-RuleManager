@@ -65,6 +65,10 @@
 				}
 			},
 			{
+				"functionName": "assertPrunedFileExistsCondition",
+				"options": {}
+			},
+			{
 				"functionName": "assertModificationTimeOlderThan",
 				"options": {
 					"days": 7
