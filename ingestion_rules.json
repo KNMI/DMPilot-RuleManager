@@ -55,13 +55,30 @@
 			"options": {}
 		}]
 	},
-	"PURGE_NOT_ARCHIVED": {
+	"PURGE_UNKNOWN": {
 		"functionName": "purgeRule",
-		"options": {"deleteEmptyFiles": true},
+		"options": {},
 		"conditions": [{
 				"functionName": "assertQualityCondition",
 				"options": {
-					"qualities": ["R", "E", "M", "D"]
+					"qualities": ["R", "E", "M"]
+				}
+			},
+			{
+				"functionName": "assertModificationTimeOlderThan",
+				"options": {
+					"days": 2
+				}
+			}
+		]
+	},
+	"PURGE_RAW": {
+		"functionName": "purgeRule",
+		"options": {},
+		"conditions": [{
+				"functionName": "assertQualityCondition",
+				"options": {
+					"qualities": ["D"]
 				}
 			},
 			{
@@ -76,9 +93,9 @@
 			}
 		]
 	},
-	"PURGE_ARCHIVED": {
+	"PURGE_PRUNED": {
 		"functionName": "purgeRule",
-		"options": {"deleteEmptyFiles": true},
+		"options": {},
 		"conditions": [{
 				"functionName": "assertQualityCondition",
 				"options": {
@@ -100,7 +117,7 @@
 			{
 				"functionName": "assertModificationTimeOlderThan",
 				"options": {
-					"days": 7
+					"days": 14
 				}
 			}
 		]
