@@ -1,125 +1,125 @@
 {
-	"PRUNE": {
-		"functionName": "pruneRule",
-		"options": {
-			"removeOverlap": true,
-			"repackRecordSize": 4096
-		},
-		"conditions": [{
-			"functionName": "assertQualityCondition",
-			"options": {
-				"qualities": ["D"]
-			}
-		}]
-	},
-	"INGESTION": {
-		"functionName": "ingestionRule",
-		"options": {},
-		"conditions": [{
-				"functionName": "assertQualityCondition",
-				"options": {
-					"qualities": ["Q"]
-				}
-			},
-			{
-				"functionName": "assertIRODSNotExistCondition",
-				"options": {}
-			}
-		]
-	},
-	"METADATA": {
-		"functionName": "waveformMetadataRule",
-		"timeout" : 5,
-		"options": {},
-		"conditions": [{
-			"functionName": "assertQualityCondition",
-			"options": {
-				"qualities": ["Q"]
-			}
-		}, {
-			"functionName": "assertWFCatalogNotExistsCondition",
-			"options": {}
-		}]
-	},
-	"DCAT": {
-		"functionName": "dcMetadataRule",
-		"timeout" : 5,
-		"options": {},
-		"conditions": [{
-			"functionName": "assertQualityCondition",
-			"options": {
-				"qualities": ["Q"]
-			}
-		}, {
-			"functionName": "assertDCMetadataNotExistsCondition",
-			"options": {}
-		}]
-	},
-	"PURGE_UNKNOWN": {
-		"functionName": "purgeRule",
-		"options": {},
-		"conditions": [{
-				"functionName": "assertQualityCondition",
-				"options": {
-					"qualities": ["R", "E", "M"]
-				}
-			},
-			{
-				"functionName": "assertModificationTimeOlderThan",
-				"options": {
-					"days": 2
-				}
-			}
-		]
-	},
-	"PURGE_RAW": {
-		"functionName": "purgeRule",
-		"options": {},
-		"conditions": [{
-				"functionName": "assertQualityCondition",
-				"options": {
-					"qualities": ["D"]
-				}
-			},
-			{
-				"functionName": "assertPrunedFileExistsCondition",
-				"options": {}
-			},
-			{
-				"functionName": "assertModificationTimeOlderThan",
-				"options": {
-					"days": 7
-				}
-			}
-		]
-	},
-	"PURGE_PRUNED": {
-		"functionName": "purgeRule",
-		"options": {},
-		"conditions": [{
-				"functionName": "assertQualityCondition",
-				"options": {
-					"qualities": ["Q"]
-				}
-			},
-			{
-				"functionName": "assertIRODSExistsCondition",
-				"options": {}
-			},
-			{
-				"functionName": "assertWFCatalogExistsCondition",
-				"options": {}
-			},
-			{
-				"functionName": "assertDCMetadataExistsCondition",
-				"options": {}
-			},
-			{
-				"functionName": "assertModificationTimeOlderThan",
-				"options": {
-					"days": 14
-				}
-			}
-		]
-	}
+    "PRUNE": {
+        "functionName": "pruneRule",
+        "options": {
+            "removeOverlap": true,
+            "repackRecordSize": 4096
+        },
+        "conditions": [{
+            "functionName": "assertQualityCondition",
+            "options": {
+                "qualities": ["D"]
+            }
+        }]
+    },
+    "INGESTION": {
+        "functionName": "ingestionRule",
+        "options": {},
+        "conditions": [{
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertIRODSNotExistCondition",
+                "options": {}
+            }
+        ]
+    },
+    "METADATA": {
+        "functionName": "waveformMetadataRule",
+        "timeout" : 5,
+        "options": {},
+        "conditions": [{
+            "functionName": "assertQualityCondition",
+            "options": {
+                "qualities": ["Q"]
+            }
+        }, {
+            "functionName": "assertWFCatalogNotExistsCondition",
+            "options": {}
+        }]
+    },
+    "DCAT": {
+        "functionName": "dcMetadataRule",
+        "timeout" : 5,
+        "options": {},
+        "conditions": [{
+            "functionName": "assertQualityCondition",
+            "options": {
+                "qualities": ["Q"]
+            }
+        }, {
+            "functionName": "assertDCMetadataNotExistsCondition",
+            "options": {}
+        }]
+    },
+    "PURGE_UNKNOWN": {
+        "functionName": "purgeRule",
+        "options": {},
+        "conditions": [{
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["R", "E", "M"]
+                }
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 2
+                }
+            }
+        ]
+    },
+    "PURGE_RAW": {
+        "functionName": "purgeRule",
+        "options": {},
+        "conditions": [{
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["D"]
+                }
+            },
+            {
+                "functionName": "assertPrunedFileExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 7
+                }
+            }
+        ]
+    },
+    "PURGE_PRUNED": {
+        "functionName": "purgeRule",
+        "options": {},
+        "conditions": [{
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertIRODSExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertWFCatalogExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertDCMetadataExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 14
+                }
+            }
+        ]
+    }
 }
