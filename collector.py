@@ -4,6 +4,7 @@
 Script that collects files and outputs their names.
 """
 
+import sys
 import logging
 import argparse
 
@@ -19,31 +20,20 @@ def main():
 
         # Parse command line arguments
         parser = argparse.ArgumentParser()
-        parser.add_argument("-o", "--output", help="output file")
-        parser.add_argument("--dir", help="directory containing the files to collect")
-        parser.add_argument("--collect_wildcards", help="files to collect, defined by a wildcards string (within single quotes!)")
+        parser.add_argument("--dir", help="directory containing the files to collect", required=True)
+        parser.add_argument("--collect_wildcards", help="files to collect, defined by a wildcards string (within single quotes!)", required=True)
+        parser.add_argument("-o", "--output", help="output, a file name or stdout if not provided", type=argparse.FileType('w'), default=sys.stdout)
         parsedargs = parser.parse_args()
-
-        # Check parameters
-        if parsedargs.dir is None:
-            return print("A directory needs to be specified using --dir")
-        if parsedargs.collect_wildcards is None:
-            return print("Files to collect need to be specified using --collect_wildcards")
 
         # Collect files
         fileCollector = SDSFileCollector(parsedargs.dir)
         files = fileCollector.collectFromWildcards(parsedargs.collect_wildcards)
 
-        if parsedargs.output is None:
+        # Write to output (file or stdout)
+        with parsedargs.output as list_file:
             for sds_file in files:
-                print(sds_file.filename)
-            logger.info("Finished SDS File Collector execution.")
-
-        else:
-            with open(parsedargs.output, "w") as list_file:
-                for sds_file in files:
-                    list_file.write(sds_file.filename + "\n")
-            logger.info("Finished SDS File Collector execution. Saved file %s.", parsedargs.output)
+                list_file.write(sds_file.filename + "\n")
+        logger.info("Finished SDS File Collector execution. Output to '%s'.", parsedargs.output.name)
 
     except Exception as e:
         logger.error('General error!: "%s"' % e, exc_info=True)

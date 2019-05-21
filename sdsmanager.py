@@ -22,20 +22,14 @@ def main():
 
         # Parse command line arguments
         parser = argparse.ArgumentParser()
-        parser.add_argument("--dir", help="directory containing the files to process")
-        parser.add_argument("--rulemap", help="set custom rule map file")
-        parser.add_argument("--ruleseq", help="set custom rule sequence file")
+        parser.add_argument("--dir", help="directory containing the files to process", required=True)
+        parser.add_argument("--rulemap", help="rule map file", required=True)
+        parser.add_argument("--ruleseq", help="rule sequence file", required=True)
         parser.add_argument("--collect_wildcards", help="files to collect, defined by a wildcards string (within single quotes!)")
-        parser.add_argument("--from_file", help="files to collect, listed in a text file")
+        parser.add_argument("--from_file", help="files to collect, listed in a text file or stdin '-'", type=argparse.FileType('r'))
         parsedargs = vars(parser.parse_args())
 
-        # Check parameters
-        if parsedargs["dir"] is None:
-            return print("A directory needs to be specified using --dir")
-        if parsedargs["rulemap"] is None:
-            return print("A rulemap needs to be specified using --rulemap")
-        if parsedargs["ruleseq"] is None:
-            return print("A rule sequence needs to be specified using --ruleseq")
+        # Check collection parameters
         if parsedargs["collect_wildcards"] is None and parsedargs["from_file"] is None:
             return print("Files to collect need to be specified using --collect_wildcards or --from_file")
 
@@ -51,7 +45,7 @@ def main():
             files = fileCollector.collectFromWildcards(parsedargs["collect_wildcards"])
         elif parsedargs["from_file"] is not None:
             filename_list = []
-            with open(parsedargs["from_file"]) as list_file:
+            with parsedargs["from_file"] as list_file:
                 for line in list_file:
                     filename_list.append(line.strip())
             files = fileCollector.collectFromFileList(filename_list)
