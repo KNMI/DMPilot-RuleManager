@@ -73,9 +73,11 @@ class RuleManager():
         # Get the rule from the map
         try:
             self.ruleSequence = [rule_desc[x] for x in rule_seq]
+            for x in rule_seq:
+                rule_desc[x]["ruleName"] = x
         except KeyError as exception:
-            raise ValueError("The rule %s could not be found in the configured rule map %s." % 
-                (exception.args[0], ruleMapFile))
+            raise ValueError("The rule %s could not be found in the configured rule map %s." %
+                             (exception.args[0], ruleMapFile))
 
         # Check if the rules are valid
         self.__checkRuleSequence(self.ruleSequence)
@@ -131,7 +133,8 @@ class RuleManager():
         # There may be multiple conditions defined per rule
         rule_obj = Rule(
             self.bindOptions(self.rules, rule),
-            map(lambda x: self.bindOptions(self.conditions, x), rule["conditions"])
+            map(lambda x: self.bindOptions(self.conditions, x), rule["conditions"]),
+            name=rule["ruleName"]
         )
 
         # Get timeout from rule-specific config or from default value
@@ -166,21 +169,21 @@ class RuleManager():
 
                 # Rule options are bound to the call
                 try:
-                    self.logger.debug("%s: Executing rule '%s'." % (item.filename, rule.call.func.__name__))
+                    self.logger.debug("%s: Executing rule '%s'." % (item.filename, rule.name))
                     rule.apply(item)
-                    self.logger.info("%s: Successfully executed rule '%s'." % (item.filename, rule.call.func.__name__))
+                    self.logger.info("%s: Successfully executed rule '%s'." % (item.filename, rule.name))
 
                 # The rule was timed out
                 except TimeoutError:
-                    self.logger.warning("%s: Timeout calling rule '%s'." % (item.filename, rule.call.func.__name__))
+                    self.logger.warning("%s: Timeout calling rule '%s'." % (item.filename, rule.name))
 
                 # Condition assertion errors
                 except AssertionError as e:
-                    self.logger.info("%s: Not executed rule '%s'. Rule did not pass condition '%s'." % (item.filename, rule.call.func.__name__, e))
+                    self.logger.info("%s: Not executed rule '%s'. Rule did not pass condition '%s'." % (item.filename, rule.name, e))
 
                 # Other exceptions
                 except Exception as e:
-                    self.logger.error("%s: Rule execution '%s' failed: %s" % (item.filename, rule.call.func.__name__, e), exc_info=False)
+                    self.logger.error("%s: Rule execution '%s' failed: %s" % (item.filename, rule.name, e), exc_info=False)
 
                 # Disable the alarm
                 finally:
