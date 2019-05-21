@@ -147,7 +147,7 @@ class TestRuleManager(unittest.TestCase):
             self.RM.sequence([self.SDSMock])
 
         # Assert timeout message in log
-        self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'exceptionRule' failed: Oops!"])
+        self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'EXCEPTION' failed: Oops!"])
 
     def test_rule_conditions(self):
 
@@ -166,8 +166,8 @@ class TestRuleManager(unittest.TestCase):
         # Expected log messages
         # First sequence should pass on condition (trueCondition) and execute rule
         # Second sequence should fail on condition (falseCondition)
-        expected = ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'passRule'.",
-                    "INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Not executed rule 'passRule'. Rule did not pass condition 'falseCondition'."]
+        expected = ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'CONDITION_TRUE'.",
+                    "INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Not executed rule 'CONDITION_FALSE'. Rule did not pass condition 'falseCondition'."]
 
         # Assert log messages equal but skip first processing
         for a, b in zip(cm.output[1:], expected):
@@ -185,7 +185,7 @@ class TestRuleManager(unittest.TestCase):
         with self.assertLogs("core.rulemanager", level="ERROR") as cm:
             self.RM.sequence([self.SDSMock])
 
-        self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'passRule' failed: Oops!"])
+        self.assertEqual(cm.output, ["ERROR:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Rule execution 'CONDITION_EXCEPTION' failed: Oops!"])
 
     def test_rule_conditions_options(self):
 
@@ -201,7 +201,7 @@ class TestRuleManager(unittest.TestCase):
         with self.assertLogs("core.rulemanager", level="INFO") as cm:
             self.RM.sequence([self.SDSMock])
 
-        self.assertEqual(cm.output[1:], ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'passRule'."])
+        self.assertEqual(cm.output[1:], ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'CONDITION_OPTIONS'."])
 
     def test_rule_options(self):
 
@@ -217,7 +217,7 @@ class TestRuleManager(unittest.TestCase):
         with self.assertLogs("core.rulemanager", level="INFO") as cm:
             self.RM.sequence([self.SDSMock])
 
-        self.assertEqual(cm.output[1:], ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'optionRule'."])
+        self.assertEqual(cm.output[1:], ["INFO:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Successfully executed rule 'OPTIONS'."])
 
     def test_rule_timeout(self):
 
@@ -239,7 +239,7 @@ class TestRuleManager(unittest.TestCase):
         self.assertAlmostEqual(1.0, (datetime.now() - start).total_seconds(), places=2)
 
         # Assert timeout message in log
-        self.assertEqual(cm.output, ["WARNING:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Timeout calling rule 'timeoutRule'."])
+        self.assertEqual(cm.output, ["WARNING:core.rulemanager:NL.HGN.02.BHZ.D.1970.001: Timeout calling rule 'TIMEOUT'."])
 
     def test_collect_files_days_future_range(self):
 
