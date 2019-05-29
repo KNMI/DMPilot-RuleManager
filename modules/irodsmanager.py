@@ -23,6 +23,7 @@ import irods
 from irods.session import iRODSSession
 from irods.models import DataObject
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
+from irods.rule import Rule
 import irods.keywords as kw
 
 from configuration import config
@@ -87,6 +88,36 @@ class IRODSManager():
 
     def getDataObjects(self, path):
         return self.getCollection(path).data_objects
+
+    def executeRule(self, rulePath, input_parameters):
+
+        """
+        Executes a rule from given file path with input parameters
+        """
+
+        rule = Rule(self.session, rulePath, params=input_parameters, output="ruleExecOut")
+
+        output = rule.execute()
+
+        # This is insane but the output of writeLine is here
+        return output.MsParam_PI[0].inOutStruct.stdoutBuf.buf.decode("utf-8").strip("\x00")
+
+    def assignPID(self, SDSFile):
+
+        """
+        def IRODSManager::assignPID
+        Assigns a persistent identifier to a SDSFile
+        """
+
+        # Path to the rule
+        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "irods", "rules", "pid.r")
+
+        inputParameters = {
+          "*path": "'%s'" % SDSFile.irodsPath
+        }
+
+        return self.executeRule(RULE_PATH, inputParameters)
+
 
     def createDataObject(self, SDSFile,
                          rescName="demoResc",

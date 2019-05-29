@@ -17,6 +17,7 @@ from core.rulemanager import RuleManager
 from orfeus.sdscollector import SDSFileCollector
 
 # Modules
+from modules.irodsmanager import irodsSession
 from modules.psdcollector import psdCollector
 from orfeus.sdsfile import SDSFile
 
@@ -378,6 +379,11 @@ class TestRuleManager(unittest.TestCase):
     def test_prune(self):
 
        self.SDSReal.prune()
+
+    def test_PID(self):
+
+       output = irodsSession.assignPID(self.SDSReal)
+       self.assertEqual(output, "PID-existing: 21.T12996/7E0B3950-820C-11E9-9C7E-06D373D624C2\n")
 
     def test_PSD_Module(self):
 
