@@ -375,6 +375,10 @@ class TestRuleManager(unittest.TestCase):
         self.assertEqual(len(filesFound), 1)
         self.assertEqual(len(filesNotFound), 0)
 
+    def test_prune(self):
+
+       self.SDSReal.prune()
+
     def test_PSD_Module(self):
 
         """
