@@ -8,6 +8,7 @@ from core.rule import Rule
 from configuration import config
 from schema import JSON_RULE_SCHEMA
 
+
 class RuleManager():
 
     """
@@ -40,8 +41,12 @@ class RuleManager():
         ----------
         ruleModule : module
             A module containing all the rule handling functions.
+        conditionModule : module
+            A module containing all the condition functions.
         ruleMapFile : `str`
-            The path for a JSON file defining which rules to run, their order, and their options.
+            The path for a JSON file defining which rules to run, and their options
+        ruleSequenceFile : `str`
+            The path for a JSON file defining in which order to run the rules.
         """
 
         # Load the Python scripted rules and conditions
