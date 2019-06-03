@@ -55,6 +55,30 @@
             "options": {}
         }]
     },
+    "PID": {
+        "functionName": "pidRule",
+        "timeout" : 5,
+        "options": {},
+        "conditions": [{
+            "functionName": "assertQualityCondition",
+            "options": {
+                "qualities": ["Q"]
+            }
+        }]
+    },
+    "REPLICATION": {
+        "functionName": "replicationRule",
+        "timeout" : 5,
+        "options": {
+	    "replicationRoot": "/remoteZone/home/rods#localZone/"
+	},
+        "conditions": [{
+            "functionName": "assertQualityCondition",
+            "options": {
+                "qualities": ["Q"]
+            }
+        }]
+    },
     "PURGE_UNKNOWN": {
         "functionName": "purgeRule",
         "options": {},
