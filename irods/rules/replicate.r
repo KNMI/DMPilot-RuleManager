@@ -9,5 +9,3 @@ Replication {
         writeLine("stdout", "Replica *source on *destination Failed: *response");
     }
 }
-INPUT *source="",*destination=""
-OUTPUT ruleExecOut

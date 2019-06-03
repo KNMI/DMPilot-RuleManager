@@ -92,6 +92,46 @@ def ingestionRule(options, SDSFile):
             SDSFile.filename, irodsSession.getDataObject(SDSFile).checksum))
 
 
+def pidRule(options, SDSFile):
+    """Handler for the PID assignment rule.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.debug("Assigning PID to file %s." % SDSFile.filename)
+
+    # Attempt to assign PID
+    pid = irodsSession.assignPID(SDSFile)
+
+    logger.debug("Assigned PID %s to file %s." % (pid, SDSFile.filename))
+
+
+def replicationRule(options, SDSFile):
+    """Handler for the PID assignment rule.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``replicationRoot``: Root replication collection (`str`)
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.debug("Replicating file %s." % SDSFile.filename)
+
+    # Attempt to replicate file
+    irodsSession.eudatReplication(SDSFile, options["replicationRoot"])
+
+    logger.debug("Replicated file %s to collection %s." % (SDSFile.filename,
+                                                           options["replicationRoot"]))
+
+
 def deleteArchiveRule(options, SDSFile):
     """Handler for the rule that deletes a file from the iRODS archive.
 

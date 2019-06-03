@@ -84,19 +84,19 @@ class SDSFile():
                          self.year,
                          self.day])
 
-    # Returns filepath for a given file
-    @property
-    def filepath(self):
-        return os.path.join(self.directory, self.filename)
-
-    # Returns filepath for a given file
-    @property
-    def irodsPath(self):
-        return os.path.join(self.irodsDirectory, self.filename)
-
     # Returns custom filepath for a given file
     def customPath(self, root):
         return os.path.join(self.customDirectory(root), self.filename)
+
+    # Returns filepath for a given file
+    @property
+    def filepath(self):
+        return self.customPath(self.directory)
+
+    # Returns iRODS filepath for a given file
+    @property
+    def irodsPath(self):
+        return self.customPath(self.irodsDirectory)
 
     # Returns the stream identifier
     @property
@@ -118,26 +118,20 @@ class SDSFile():
             self.channelDirectory
         )
 
-    @property
-    def irodsDirectory(self):
-        return os.path.join(
-            self.irodsRoot,
-            self.subDirectory
-        )
-
     def customDirectory(self, root):
         return os.path.join(
             root,
             self.subDirectory
         )
 
+    @property
+    def irodsDirectory(self):
+        return self.customDirectory(self.irodsRoot)
+
     # Returns the file directory based on SDS structure
     @property
     def directory(self):
-        return os.path.join(
-            self.archiveRoot,
-            self.subDirectory
-        )
+        return self.customDirectory(self.archiveRoot)
 
     # Returns channel directory
     @property

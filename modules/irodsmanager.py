@@ -103,21 +103,35 @@ class IRODSManager():
         return output.MsParam_PI[0].inOutStruct.stdoutBuf.buf.decode("utf-8").strip("\x00")
 
     def assignPID(self, SDSFile):
+        """Assigns a persistent identifier to a SDSFile.
 
-        """
-        def IRODSManager::assignPID
-        Assigns a persistent identifier to a SDSFile
+        Returns
+        -------
+        pid : `str`
+            The PID assigned to the object.
         """
 
         # Path to the rule
         RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "irods", "rules", "pid.r")
 
         inputParameters = {
-          "*path": "'%s'" % SDSFile.irodsPath
+            "*path": "'%s'" % SDSFile.irodsPath
         }
 
         return self.executeRule(RULE_PATH, inputParameters)
 
+    def eudatReplication(self, SDSFile, replicationRoot):
+        """Execute a replication using EUDAT rules."""
+
+        # Path to the rule
+        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "irods", "rules", "replicate.r")
+
+        inputParameters = {
+            "*source": "'%s'" % SDSFile.irodsPath,
+            "*destination": "'%s'" % SDSFile.customPath(replicationRoot)
+        }
+
+        return self.executeRule(RULE_PATH, inputParameters)
 
     def createDataObject(self, SDSFile,
                          rescName="demoResc",
