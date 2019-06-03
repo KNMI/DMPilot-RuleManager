@@ -66,18 +66,34 @@ To include the new `exampleRule` in the execution, add a new object to the list
 in the JSON rule map, mentioning the rule, and defining its options, like so:
 ```
 {
-    'functionName': 'exampleRule',
-    'options': { ... }
+    "functionName": "exampleRule",
+    "options": { ... }
+    "conditions": [{
+        "functionName": "exampleCondition",
+       	"options": { ... }
+    }, ...]
 }
 ```
 
-Note that the `'options'` attribute is mandatory, even if empty.
+Note that the `"options"` and `"conditions"` attributes are mandatory, even if empty.
+
+Once all the rules and their options are defined in the rule map, a
+second JSON file, the rule sequence, defines their order. This file is
+simpler and contains just one array, listing the rule names in the
+order they should be run.
+
+```
+[
+    "exampleRule",
+    ...
+]
+```
 
 ## Implementing a new conditional for an existing manager
 
 Rules are subject to conditions before being executed. These so called conditionals are
-defined in rules.json and have a name like `assertQualityPolicy`. The result of the operation
-can be negated by adding an exclamation in front of the function name e.g. `!assertQualityPolicy`.
+defined in rules.json and have a name like `assertQualityCondition`. The result of the operation
+can be negated by adding an exclamation in front of the function name e.g. `!assertQualityCondition`.
 
 These function names refer to conditions defined in the conditions directory and should be loaded during
 the initialization of the rule manager.
@@ -107,11 +123,12 @@ passed in an iterable object.
 
 ### Defining policies
 
-As mentioned above, policies are top-level functions in a module. For
-a new manager, define all the desired rules in a new module, and pass
-this module to the manager.
+As mentioned above, policies (both rules and contitions) are top-level functions in a module. For
+a new manager, define all the desired rules and conditions in new modules, and pass
+these modules to the manager.
 
-Then, define their order and options in a JSON file.
+Then, define their options in a JSON rule map file, and their order
+in a JSON rule sequence file.
 
 ### RuleManager
 
@@ -123,7 +140,7 @@ An example on how to use it:
 
 ```python
 rm = RuleManager() # Initialization, sets up logging
-rm.loadRules(rules_module, rulemap_file) # Loads the rules
+rm.loadRules(rules_module, conditions_module, rulemap_file, ruleseq_file) # Loads the rules
 rm.sequence(item_list) # Executes the sequence of rules on all items
 ```
 
