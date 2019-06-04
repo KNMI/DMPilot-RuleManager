@@ -106,10 +106,16 @@ def pidRule(options, SDSFile):
     logger.debug("Assigning PID to file %s." % SDSFile.filename)
 
     # Attempt to assign PID
-    pid = irodsSession.assignPID(SDSFile)
+    response = irodsSession.assignPID(SDSFile)
 
-    logger.debug("Assigned PID %s to file %s." % (pid, SDSFile.filename))
+    [status, pid] = response.strip().split()
 
+    if status == "PID-new:":
+        logger.info("Assigned PID %s to file %s." % (pid, SDSFile.filename))
+    elif status == "PID-existing:":
+        logger.info("File %s was previously assigned PID %s." % (SDSFile.filename, pid))
+    else:
+        logger.error("Unknown response: %s" % response.strip())
 
 def replicationRule(options, SDSFile):
     """Handler for the PID assignment rule.
@@ -126,7 +132,7 @@ def replicationRule(options, SDSFile):
     logger.debug("Replicating file %s." % SDSFile.filename)
 
     # Attempt to replicate file
-    irodsSession.eudatReplication(SDSFile, options["replicationRoot"])
+    response = irodsSession.eudatReplication(SDSFile, options["replicationRoot"])
 
     logger.debug("Replicated file %s to collection %s." % (SDSFile.filename,
                                                            options["replicationRoot"]))
