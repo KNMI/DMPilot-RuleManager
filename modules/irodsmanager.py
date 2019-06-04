@@ -131,6 +131,9 @@ class IRODSManager():
             "*destination": "'%s'" % SDSFile.customPath(replicationRoot)
         }
 
+        # Create the collection if it does not exist
+        self.createCollection(SDSFile.customDirectory(replicationRoot))
+
         return self.executeRule(RULE_PATH, inputParameters)
 
     def createDataObject(self, SDSFile,
