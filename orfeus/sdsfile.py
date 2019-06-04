@@ -91,12 +91,12 @@ class SDSFile():
     # Returns filepath for a given file
     @property
     def filepath(self):
-        return self.customPath(self.directory)
+        return self.customPath(self.archiveRoot)
 
     # Returns iRODS filepath for a given file
     @property
     def irodsPath(self):
-        return self.customPath(self.irodsDirectory)
+        return self.customPath(self.irodsRoot)
 
     # Returns the stream identifier
     @property
