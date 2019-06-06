@@ -108,6 +108,8 @@ class IRODSManager():
         Returns
         -------
         is_new : `bool` or `None`
+            `True` if a new PID was assigned to the file, `False` file had a PID already,
+            and `None` in case of an error.
         pid : `str`
             The PID assigned to the object.
         """
@@ -134,7 +136,22 @@ class IRODSManager():
         return is_new, pid
 
     def eudatReplication(self, SDSFile, replicationRoot):
-        """Execute a replication using EUDAT rules."""
+        """Execute a replication using EUDAT rules.
+
+        Parameters
+        ----------
+        SDSFile : `SDSFile`
+            The file to replicate.
+        replicationRoot : `str`
+            Root replication collection.
+
+        Returns
+        -------
+        success : `bool`
+            `True` if the replication was successful.
+        response : `str`
+            The message returned by the rule. Useful in case of failure.
+        """
 
         # Path to the rule
         RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
@@ -148,7 +165,16 @@ class IRODSManager():
         # Create the collection if it does not exist
         self.createCollection(SDSFile.customDirectory(replicationRoot))
 
-        return self.executeRule(RULE_PATH, inputParameters)
+        response_str = self.executeRule(RULE_PATH, inputParameters).strip()
+
+        status = response_str.split()[0]
+        response = response_str[len(status): + 1]
+
+        success = False
+        if status == "Success:":
+            success = True
+
+        return success, response
 
     def createDataObject(self, SDSFile,
                          rescName="demoResc",

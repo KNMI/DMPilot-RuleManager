@@ -126,10 +126,13 @@ def replicationRule(options, SDSFile):
     logger.debug("Replicating file %s." % SDSFile.filename)
 
     # Attempt to replicate file
-    response = irodsSession.eudatReplication(SDSFile, options["replicationRoot"])
+    success, response = irodsSession.eudatReplication(SDSFile, options["replicationRoot"])
 
-    logger.debug("Replicated file %s to collection %s." % (SDSFile.filename,
-                                                           options["replicationRoot"]))
+    if success:
+        logger.debug("Replicated file %s to collection %s." % (SDSFile.filename,
+                                                               options["replicationRoot"]))
+    else:
+        logger.error("Error replicating file %s: %s" % (SDSFile.filename, response))
 
 
 def deleteArchiveRule(options, SDSFile):

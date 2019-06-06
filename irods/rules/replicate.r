@@ -3,9 +3,9 @@ Replication {
     *recursive = "true";
     *status = EUDATReplication(*source, *destination, *registered, *recursive, *response);
     if (*status) {
-        writeLine("stdout", "Replica *source on *destination Success!");
+        writeLine("stdout", "Success: *source replicated on *destination");
     }
     else {
-        writeLine("stdout", "Replica *source on *destination Failed: *response");
+        writeLine("stdout", "Failed: *response");
     }
 }
