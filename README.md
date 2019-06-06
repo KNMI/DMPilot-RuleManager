@@ -62,16 +62,19 @@ argument, `item` is the object to which the rule is applied.
 For example, rules for the SDS archive are in the `sdsrules` module,
 and `item` is a `SDSFile` object describing the SDS file.
 
-To include the new `exampleRule` in the execution, add a new object to the list
-in the JSON rule map, mentioning the rule, and defining its options, like so:
+To include the new `exampleRule` in the execution, add a new pair to
+the JSON rule map, naming the rule and defining its options, like so:
 ```
 {
-    "functionName": "exampleRule",
-    "options": { ... }
-    "conditions": [{
-        "functionName": "exampleCondition",
-       	"options": { ... }
-    }, ...]
+    "EXAMPLE": {
+        "functionName": "exampleRule",
+        "options": { ... }
+        "conditions": [{
+            "functionName": "exampleCondition",
+       	    "options": { ... }
+        }, ...]
+    },
+    ...
 }
 ```
 
@@ -84,7 +87,7 @@ order they should be run.
 
 ```
 [
-    "exampleRule",
+    "EXAMPLE",
     ...
 ]
 ```
