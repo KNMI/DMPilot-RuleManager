@@ -112,7 +112,8 @@ class IRODSManager():
         """
 
         # Path to the rule
-        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "irods", "rules", "pid.r")
+        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
+                                 "irods", "rules", "pid.r")
 
         inputParameters = {
             "*path": "'%s'" % SDSFile.irodsPath
@@ -124,7 +125,8 @@ class IRODSManager():
         """Execute a replication using EUDAT rules."""
 
         # Path to the rule
-        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "irods", "rules", "replicate.r")
+        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
+                                 "irods", "rules", "replicate.r")
 
         inputParameters = {
             "*source": "'%s'" % SDSFile.irodsPath,

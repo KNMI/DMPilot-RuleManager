@@ -1,14 +1,12 @@
 """
-Module that houses all the rule handler for SDS daily files.
+Module that houses all the rule handlers for SDS daily files.
 
-Every rule should be implemented as a module funcion with exactly two arguments:
+Every rule should be implemented as a module function with exactly two arguments:
 1) a `dict` that holds the options for the rule, and
 2) the item that is subject to the rule, in this case, a `SDSFile` object.
 """
 
-import os
 import logging
-from datetime import datetime, timedelta
 
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
@@ -19,7 +17,7 @@ from modules.psdcollector import psdCollector
 logger = logging.getLogger(__name__)
 
 
-def psdMetadataRule(self, options, SDSFile):
+def psdMetadataRule(options, SDSFile):
     """Handler for PSD calculation.
     TODO XXX
 
@@ -32,11 +30,11 @@ def psdMetadataRule(self, options, SDSFile):
     """
 
     if SDSFile.isPressureChannel:
-      # Store in psd.seismic
-      print(psdCollector.process(SDSFile))
+        # Store in psd.seismic
+        print(psdCollector.process(SDSFile))
     else:
-      # Store in psd.infra
-      print(psdCollector.process(SDSFile))
+        # Store in psd.infra
+        print(psdCollector.process(SDSFile))
 
 
 def pruneRule(options, SDSFile):
@@ -69,12 +67,9 @@ def ingestionRule(options, SDSFile):
     ----------
     options : `dict`
         The rule's options.
-        - ``days``: Maximum age of the file to be ingested (`int`)
-        - ``daysIgnoreOlderThan``: (`int`)
         - ``rescName``: Name of the iRODS resource to save the object (`str`)
         - ``purgeCache``: Whether or not to purge the cache,
                           in case the resource is compound (`bool`)
-        - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
@@ -116,6 +111,7 @@ def pidRule(options, SDSFile):
         logger.info("File %s was previously assigned PID %s." % (SDSFile.filename, pid))
     else:
         logger.error("Unknown response: %s" % response.strip())
+
 
 def replicationRule(options, SDSFile):
     """Handler for the PID assignment rule.
@@ -198,7 +194,7 @@ def purgeRule(options, SDSFile):
     logger.debug("Purging file %s from temporary archive." % SDSFile.filename)
     try:
         # Yeah let's be careful with this..
-        #os.remove(SDSFile.filepath)
+        # os.remove(SDSFile.filepath)
         logger.debug("Purged file %s from temporary archive." % SDSFile.filename)
     except OSError as e:
         if e.errno != errno.ENOENT:
