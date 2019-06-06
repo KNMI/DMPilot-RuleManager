@@ -382,8 +382,9 @@ class TestRuleManager(unittest.TestCase):
 
     def test_PID(self):
 
-       output = irodsSession.assignPID(self.SDSReal)
-       self.assertEqual(output, "PID-existing: 21.T12996/7E0B3950-820C-11E9-9C7E-06D373D624C2\n")
+        is_new, pid = irodsSession.assignPID(self.SDSReal)
+        self.assertFalse(is_new)
+        self.assertEqual(pid, "21.T12996/7E0B3950-820C-11E9-9C7E-06D373D624C2")
 
     def test_PSD_Module(self):
 
