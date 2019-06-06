@@ -101,16 +101,14 @@ def pidRule(options, SDSFile):
     logger.debug("Assigning PID to file %s." % SDSFile.filename)
 
     # Attempt to assign PID
-    response = irodsSession.assignPID(SDSFile)
+    is_new, pid = irodsSession.assignPID(SDSFile)
 
-    [status, pid] = response.strip().split()
-
-    if status == "PID-new:":
+    if is_new is None:
+        logger.error("Error while assigning PID to file %s." % SDSFile.filename)
+    elif is_new:
         logger.info("Assigned PID %s to file %s." % (pid, SDSFile.filename))
-    elif status == "PID-existing:":
-        logger.info("File %s was previously assigned PID %s." % (SDSFile.filename, pid))
-    else:
-        logger.error("Unknown response: %s" % response.strip())
+    elif not is_new:
+        logger.info("File %s was already previously assigned PID %s." % (SDSFile.filename, pid))
 
 
 def replicationRule(options, SDSFile):

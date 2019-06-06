@@ -107,6 +107,7 @@ class IRODSManager():
 
         Returns
         -------
+        is_new : `bool` or `None`
         pid : `str`
             The PID assigned to the object.
         """
@@ -119,7 +120,18 @@ class IRODSManager():
             "*path": "'%s'" % SDSFile.irodsPath
         }
 
-        return self.executeRule(RULE_PATH, inputParameters)
+        response_str = self.executeRule(RULE_PATH, inputParameters).strip()
+        [status, pid] = response_str.split()
+
+        is_new = None
+        if status == "PID-new:":
+            is_new = True
+        elif status == "PID-existing:":
+            is_new = False
+        else:
+            self.logger.error("Unknown response: %s" % response_str)
+
+        return is_new, pid
 
     def eudatReplication(self, SDSFile, replicationRoot):
         """Execute a replication using EUDAT rules."""
