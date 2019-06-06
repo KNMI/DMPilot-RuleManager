@@ -134,3 +134,9 @@ class SDSFileCollector(FileCollector):
 
         # Negative days, skipping today
         return self.collectFromDateRange(datetime.now(), -days, mode=mode)
+
+    def collectFromFileList(self, file_list):
+        """Collect files from a list of filenames."""
+
+        return list(filter(lambda x: x.filename in file_list,
+                           self.files))
