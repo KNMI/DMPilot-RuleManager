@@ -126,6 +126,6 @@ def assertFileReplicatedCondition(options, sds_file):
     return irodsSession.exists(sds_file, rootCollection=options["replicationRoot"])
 
 
-def assertPID(options, sds_file):
-    """Assert that an PID was assigned to the file."""
+def assertPIDCondition(options, sds_file):
+    """Assert that a PID was assigned to the file on iRODS."""
     return irodsSession.getPID(sds_file) is not None

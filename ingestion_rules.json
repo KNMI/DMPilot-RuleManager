@@ -72,12 +72,18 @@
         "options": {
 	    "replicationRoot": "/remoteZone/home/rods#localZone/"
 	},
-        "conditions": [{
-            "functionName": "assertQualityCondition",
-            "options": {
-                "qualities": ["Q"]
+        "conditions": [
+	    {
+		"functionName": "assertQualityCondition",
+		"options": {
+                    "qualities": ["Q"]
+		}
+            },
+            {
+		"functionName": "assertPIDCondition",
+		"options": {}
             }
-        }]
+        ]
     },
     "PURGE_UNKNOWN": {
         "functionName": "purgeRule",
@@ -143,6 +149,16 @@
                 "options": {
                     "days": 14
                 }
+            },
+            {
+		"functionName": "assertPIDCondition",
+		"options": {}
+            },
+            {
+		"functionName": "assertFileReplicatedCondition",
+		"options": {
+		    "replicationRoot": "/remoteZone/home/rods#localZone/"
+		}
             }
         ]
     }
