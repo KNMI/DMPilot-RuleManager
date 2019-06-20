@@ -119,7 +119,11 @@ class IRODSManager():
                                  "irods", "rules", "pid.r")
 
         inputParameters = {
-            "*path": "'%s'" % SDSFile.irodsPath
+            "*path": "'%s'" % SDSFile.irodsPath,
+            "*parent_pid" : "'None'",
+            "*ror" : "'None'",
+            "*fio" : "'None'",
+            "*fixed" : "'false'"
         }
 
         response_str = self.executeRule(RULE_PATH, inputParameters).strip()
