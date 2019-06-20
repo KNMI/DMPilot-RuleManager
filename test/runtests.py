@@ -384,12 +384,12 @@ class TestRuleManager(unittest.TestCase):
 
         is_new, pid = irodsSession.assignPID(self.SDSReal)
         self.assertFalse(is_new)
-        self.assertEqual(pid, "21.T12996/7E0B3950-820C-11E9-9C7E-06D373D624C2")
+        self.assertEqual(pid, "21.T12996/F03A98FA-934A-11E9-9C7E-06D373D624C2")
 
     def test_getPID(self):
 
         pid = irodsSession.getPID(self.SDSReal)
-        self.assertEqual(pid, "21.T12996/7E0B3950-820C-11E9-9C7E-06D373D624C2")
+        self.assertEqual(pid.upper(), "21.T12996/F03A98FA-934A-11E9-9C7E-06D373D624C2")
 
     def test_PSD_Module(self):
 
