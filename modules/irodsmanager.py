@@ -323,6 +323,24 @@ class IRODSManager():
                                     SDSFile.filename, dataObject.checksum, SDSFile.checksum))
                 return False
 
+    def getPID(self, SDSFile):
+        """Get the PID assigned to the file, or None if the file has no PID."""
+
+        # Attempt to get the data object
+        dataObject = self.getDataObject(SDSFile)
+        if dataObject is None:
+            self.logger.error("File %s does not exist in iRODS." % SDSFile.filename)
+            return None
+
+        pid_query = dataObject.metadata.get_all('PID')
+        if len(pid_query) == 0:
+            return None
+        elif len(pid_query) > 1:
+            self.logger.error("File %s has more than one PID assigned to it." % SDSFile.filename)
+            return None
+
+        return pid_query[0].value
+
 
 irodsSession = IRODSManager()
 irodsSession.connect()

@@ -17,10 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def assertQualityCondition(options, sds_file):
-    """
-    def assertQualityCondition
-    Asserts that the SDSFile quality is in options
-    """
+    """Asserts that the SDSFile quality is in options."""
     return sds_file.quality in options["qualities"]
 
 
@@ -29,10 +26,7 @@ def assertIRODSExistsCondition(options, sds_file):
 
 
 def assertIRODSNotExistCondition(options, sds_file):
-    """
-    def assertIRODSNotExistCondition
-    Asserts that the SDSFile is not in iRODS
-    """
+    """Asserts that the SDSFile is not in iRODS."""
     # The file was not already ingested by iRODS
     return not irodsSession.exists(sds_file)
 
@@ -113,3 +107,25 @@ def assertPrunedFileExistsCondition(options, sds_file):
 def assertTempArchiveExistCondition(options, SDSFile):
     """Assert that the file exists in the temporary archive."""
     return os.path.isfile(SDSFile.filepath)
+
+
+def assertFileReplicatedCondition(options, sds_file):
+    """Assert that the file has been replicated.
+
+    Checks replication by verifying that the file is present in iRODS,
+    in the given remote collection.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``replicationRoot``: Root replication collection (`str`)
+    sds_file : `SDSFile`
+        The file being processed.
+    """
+    return irodsSession.exists(sds_file, rootCollection=options["replicationRoot"])
+
+
+def assertPID(options, sds_file):
+    """Assert that an PID was assigned to the file."""
+    return irodsSession.getPID(sds_file) is not None
