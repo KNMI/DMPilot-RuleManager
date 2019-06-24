@@ -218,7 +218,7 @@ def dcMetadataRule(options, SDSFile):
     logger.debug("Saving Dublin Core metadata for %s." % SDSFile.filename)
 
     # Get the existing Dublin Core Object
-    document = dublinCore.extractDCMetadata(SDSFile)
+    document = dublinCore.extractDCMetadata(SDSFile, irodsSession.getPID(SDSFile).upper())
 
     # Save to the database
     if document:

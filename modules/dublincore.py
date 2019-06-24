@@ -21,7 +21,7 @@ class DublinCore:
 
         return mongoSession.getDCDocument(SDSFile)
 
-    def extractDCMetadata(self, SDSFile):
+    def extractDCMetadata(self, SDSFile, pid):
         """Computes Dublin Core metadata for the file described by
         `SDSFile`."""
 
@@ -41,7 +41,7 @@ class DublinCore:
             "_cls": "eudat.models.mongo.wf_do",
             "fileId": SDSFile.filename,
             "checksum": SDSFile.checksum,
-            "dc_identifier": "TODO_PID",
+            "dc_identifier": pid,
             "dc_title": "INGV_Repository",
             "dc_subject": "mSEED, waveform, quality",
             "dc_creator": "EIDA NODE (TODO)",
