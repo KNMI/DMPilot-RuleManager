@@ -316,8 +316,11 @@ class IRODSManager():
 
         Parameters
         ----------
+        SDSFile : `SDSFile`
+            The file we want to check.
         rootCollection : `str`, optional
-            The archive's root collection.
+            The archive's root collection, to search in a non-default collection,
+            e.g., a replication site.
         """
 
         # Attempt to get the data object
@@ -336,11 +339,20 @@ class IRODSManager():
                                     SDSFile.filename, dataObject.checksum, SDSFile.checksum))
                 return False
 
-    def getPID(self, SDSFile):
-        """Get the PID assigned to the file, or None if the file has no PID."""
+    def getPID(self, SDSFile, rootCollection=None):
+        """Get the PID assigned to the file, or None if the file has no PID.
+
+        Parameters
+        ----------
+        SDSFile : `SDSFile`
+            The file we want to check.
+        rootCollection : `str`, optional
+            The archive's root collection, to search in a non-default collection,
+            e.g., a replication site.
+        """
 
         # Attempt to get the data object
-        dataObject = self.getDataObject(SDSFile)
+        dataObject = self.getDataObject(SDSFile, rootCollection=rootCollection)
         if dataObject is None:
             self.logger.error("File %s does not exist in iRODS." % SDSFile.filename)
             return None

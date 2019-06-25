@@ -129,3 +129,8 @@ def assertFileReplicatedCondition(options, sds_file):
 def assertPIDCondition(options, sds_file):
     """Assert that a PID was assigned to the file on iRODS."""
     return irodsSession.getPID(sds_file) is not None
+
+
+def assertReplicaPIDCondition(options, sds_file):
+    """Assert that a PID was assigned to the file on the replication iRODS."""
+    return irodsSession.getPID(sds_file, rootCollection=options["replicationRoot"]) is not None
