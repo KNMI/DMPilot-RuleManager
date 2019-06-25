@@ -114,16 +114,20 @@ class IRODSManager():
             The PID assigned to the object.
         """
 
+        if self.getPID(SDSFile):
+            self.logger.error("File %s already has a PID registered in iRODS" % SDSFile.filename)
+            return
+
         # Path to the rule
         RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
                                  "irods", "rules", "pid.r")
 
         inputParameters = {
             "*path": "'%s'" % SDSFile.irodsPath,
-            "*parent_pid" : "'None'",
-            "*ror" : "'None'",
-            "*fio" : "'None'",
-            "*fixed" : "'false'"
+            "*parent_pid": "'None'",
+            "*ror": "'None'",
+            "*fio": "'None'",
+            "*fixed": "'false'"
         }
 
         response_str = self.executeRule(RULE_PATH, inputParameters).strip()
