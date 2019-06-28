@@ -7,10 +7,11 @@ import logging
 from datetime import datetime, timedelta
 import os
 
+from modules.dublincore import getDCMetadata
+from orfeus.sdsfile import SDSFile
+
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
-from modules.dublincore import dublinCore
-from orfeus.sdsfile import SDSFile
 
 # Initialize logger
 logger = logging.getLogger(__name__)
@@ -70,7 +71,7 @@ def assertModificationTimeOlderThan(options, sds_file):
 def assertDCMetadataExistsCondition(options, sds_file):
 
     # Get the existing Dublin Core Object
-    dublinCoreObject = dublinCore.getDCMetadata(sds_file)
+    dublinCoreObject = getDCMetadata(sds_file)
 
     # Document exists and has the same hash: it exists
     if dublinCoreObject is not None:

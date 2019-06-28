@@ -8,10 +8,10 @@ Every rule should be implemented as a module function with exactly two arguments
 
 import logging
 from modules.wfcatalog import getWFMetadata
+from modules.dublincore import extractDCMetadata
 
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
-from modules.dublincore import dublinCore
 from modules.psdcollector import psdCollector
 
 logger = logging.getLogger(__name__)
@@ -218,7 +218,7 @@ def dcMetadataRule(options, SDSFile):
     logger.debug("Saving Dublin Core metadata for %s." % SDSFile.filename)
 
     # Get the existing Dublin Core Object
-    document = dublinCore.extractDCMetadata(SDSFile, irodsSession.getPID(SDSFile).upper())
+    document = extractDCMetadata(SDSFile, irodsSession.getPID(SDSFile).upper())
 
     # Save to the database
     if document:
