@@ -7,10 +7,10 @@ Every rule should be implemented as a module function with exactly two arguments
 """
 
 import logging
+from modules.wfcatalog import getWFMetadata
 
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
-from modules.wfcatalog import collector
 from modules.dublincore import dublinCore
 from modules.psdcollector import psdCollector
 
@@ -257,7 +257,7 @@ def waveformMetadataRule(options, SDSFile):
     """
 
     # Get waveform metadata
-    document = collector.getMetadata(SDSFile)
+    document = getWFMetadata(SDSFile)
     if document is None:
         return logger.error("Could not get the waveform metadata.")
 
