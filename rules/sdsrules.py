@@ -237,10 +237,9 @@ def deleteDCMetadataRule(options, SDSFile):
         The file to be processed.
     """
 
-    logger.debug("Deleting Dublin Core metadata for %s." % SDSFile.filename)
-
+    logger.debug("Marking %s as deleted in Dublin Core metadata." % SDSFile.filename)
     mongoSession.deleteDCDocument(SDSFile)
-    logger.debug("Deleted Dublin Core metadata for %s." % SDSFile.filename)
+    logger.debug("Marked %s as deleted in Dublin Core metadata." % SDSFile.filename)
 
 
 def waveformMetadataRule(options, SDSFile):

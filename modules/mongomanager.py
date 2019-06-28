@@ -114,13 +114,15 @@ class MongoManager():
                             {"fileId": SDSFile.filename})
 
     def deleteDCDocument(self, SDSFile):
-        """
-        def MongoManager::deleteDCDocument
-        Delete one Dublin Core metadata document corresponding to a file
-        """
+        """Updates the Dublin Core metadata document corresponding to a file
+        marking it as deleted."""
 
-        return self.deleteOne(config["MONGO"]["DC_METADATA_COLLECTION"],
-                              {"fileId": SDSFile.filename})
+        return (self.database[config["MONGO"]["DC_METADATA_COLLECTION"]]
+                .update_many({"fileId": SDSFile.filename},
+                             {'$set': {
+                                 'irods_path': 'DELETED',
+                                 'checksum': 'DELETED'
+                             }}))
 
     def setMetadataDocument(self, document):
         """
