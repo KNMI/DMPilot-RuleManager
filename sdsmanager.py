@@ -22,11 +22,14 @@ def main():
 
         # Parse command line arguments
         parser = argparse.ArgumentParser()
-        parser.add_argument("--dir", help="directory containing the files to process", required=True)
+        parser.add_argument("--dir", help="directory containing the files to process",
+                            required=True)
         parser.add_argument("--rulemap", help="rule map file", required=True)
         parser.add_argument("--ruleseq", help="rule sequence file", required=True)
         parser.add_argument("--collect_wildcards", help="files to collect, defined by a wildcards string (within single quotes!)")
-        parser.add_argument("--from_file", help="files to collect, listed in a text file or stdin '-'", type=argparse.FileType('r'))
+        parser.add_argument("--from_file",
+                            help="files to collect, listed in a text file or stdin '-'",
+                            type=argparse.FileType('r'))
         parsedargs = vars(parser.parse_args())
 
         # Check collection parameters
@@ -57,6 +60,7 @@ def main():
 
     except Exception as e:
         logger.error('General error!: "%s"' % e, exc_info=True)
+
 
 if __name__ == "__main__":
     main()

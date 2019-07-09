@@ -184,7 +184,7 @@ class IRODSManager():
 
         # Trim cache
         dataObject = self.getDataObject(SDSFile)
-        options = { kw.REPL_NUM_KW: str(dataObject.replicas[-1].number) }
+        options = {kw.REPL_NUM_KW: str(dataObject.replicas[-1].number)}
         dataObject.unlink(**options)
 
         return success, response
