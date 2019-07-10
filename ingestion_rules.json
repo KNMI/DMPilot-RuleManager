@@ -1,5 +1,6 @@
 {
     "PRUNE": {
+	"description": "Prunes and repacks the daily file. Saves a Q-quality file.",
         "functionName": "pruneRule",
         "options": {
             "removeOverlap": true,
@@ -13,6 +14,7 @@
         }]
     },
     "INGESTION": {
+	"description": "Puts the pruned file in the local iRODS.",
         "functionName": "ingestionRule",
         "options": {},
         "conditions": [{
@@ -28,6 +30,7 @@
         ]
     },
     "METADATA": {
+	"description": "Writes waveform metadata to the WFCatalog.",
         "functionName": "waveformMetadataRule",
         "timeout" : 5,
         "options": {},
@@ -42,6 +45,7 @@
         }]
     },
     "DCAT": {
+	"description": "Writes Dublin Core metadata to the WFCatalog.",
         "functionName": "dcMetadataRule",
         "timeout" : 5,
         "options": {},
@@ -56,6 +60,7 @@
         }]
     },
     "PID": {
+	"description": "Assigns a PID to the file using B2HANDLE.",
         "functionName": "pidRule",
         "timeout" : 5,
         "options": {},
@@ -67,6 +72,7 @@
         }]
     },
     "REPLICATION": {
+	"description": "Replicates the file in a federated iRODS, using B2SAFE",
         "functionName": "replicationRule",
         "timeout" : 5,
         "options": {
@@ -86,6 +92,7 @@
         ]
     },
     "PURGE_UNKNOWN": {
+	"description": "Deletes [REM]-quality local files that are older than 2 days.",
         "functionName": "purgeRule",
         "options": {},
         "conditions": [{
@@ -103,6 +110,7 @@
         ]
     },
     "PURGE_RAW": {
+	"description": "Deletes D-quality files that have been pruned.",
         "functionName": "purgeRule",
         "options": {},
         "conditions": [{
@@ -124,6 +132,7 @@
         ]
     },
     "PURGE_PRUNED": {
+	"description": "Deletes pruned files that have been successfully processed.",
         "functionName": "purgeRule",
         "options": {},
         "conditions": [{
