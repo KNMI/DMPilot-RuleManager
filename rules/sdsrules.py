@@ -111,6 +111,29 @@ def pidRule(options, SDSFile):
         logger.info("File %s was already previously assigned PID %s." % (SDSFile.filename, pid))
 
 
+def addPidToWFCatalogRule(options, SDSFile):
+    """Updates the WFCatalog with the file PID from the local iRODS archive.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.debug("Updating WFCatalog with the PID of file %s." % SDSFile.filename)
+
+    pid = irodsSession.getPID(SDSFile)
+
+    if pid is not None:
+        mongoSession.update_many({"fileId": SDSFile.filename},
+                                 {"$set": {"dc_identifier": pid}})
+        logger.info("Entry for file %s updated with PID %s." % (SDSFile.filename, pid))
+    else:
+        logger.error("File %s has no PID." % SDSFile.filename)
+
+
 def replicationRule(options, SDSFile):
     """Handler for the PID assignment rule.
 
