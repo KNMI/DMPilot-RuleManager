@@ -1,0 +1,83 @@
+{
+    "CHECK_INGESTION": {
+	"description": "Check if the file is in iRODS.",
+        "functionName": "printWithMessage",
+        "options": {"message": "Failed iRODS ingestion"},
+        "conditions": [
+            {
+                "functionName": "!assertIRODSExistsCondition",
+                "options": {}
+            }
+        ]
+    },
+    "CHECK_WFCATALOG": {
+	"description": "Check if waveform metadata for the file exists.",
+        "functionName": "printWithMessage",
+        "timeout" : 5,
+        "options": {"message": "Failed WFCatalog"},
+        "conditions": [
+	    {
+		"functionName": "!assertWFCatalogExistsCondition",
+		"options": {}
+            }
+	]
+    },
+    "CHECK_DCAT": {
+	"description": "Check if Dublin Core metadata for the file exists.",
+        "functionName": "printWithMessage",
+        "timeout" : 5,
+        "options": {"message": "Failed DC metadata"},
+        "conditions": [
+	    {
+		"functionName": "!assertDCMetadataExistsCondition",
+		"options": {}
+            }
+	]
+    },
+    "CHECK_PID": {
+	"description": "Check if the file has a PID in the local iRODS.",
+        "functionName": "printWithMessage",
+        "timeout" : 5,
+        "options": {"message": "Failed PID"},
+        "conditions": [
+            {
+		"functionName": "!assertPIDCondition",
+		"options": {}
+            }
+	]
+    },
+    "CHECK_REPLICATION": {
+	"description": "Check if the file is replicated.",
+        "functionName": "printWithMessage",
+        "timeout" : 5,
+        "options": {
+	    "message": "Failed replica",
+	    "replicationRoot": "/remoteZone/home/rods#localZone/"
+	},
+        "conditions": [
+            {
+		"functionName": "!assertFileReplicatedCondition",
+		"options": {
+		    "replicationRoot": "/remoteZone/home/rods#localZone/"
+		}
+            }
+        ]
+    },
+    "CHECK_REPLICA_PID": {
+	"description": "Check if the replica has a PID.",
+        "functionName": "printWithMessage",
+        "timeout" : 5,
+        "options": {
+	    "message": "Failed replica PID",
+	    "replicationRoot": "/remoteZone/home/rods#localZone/"
+	},
+        "conditions": [
+            {
+		"functionName": "!assertReplicaPIDCondition",
+		"options": {
+		    "replicationRoot": "/remoteZone/home/rods#localZone/"
+		}
+            }
+        ]
+    }
+}
