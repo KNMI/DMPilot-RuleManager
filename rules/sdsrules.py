@@ -321,6 +321,20 @@ def removeFromDeletionDatabaseRule(options, SDSFile):
     logger.debug("Removed deletion entry for %s." % SDSFile.filename)
 
 
+def printWithMessage(options, sdsFile):
+    """Prints the filename followed by a message.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``message``: Message to print (`str`)
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+    print(sdsFile.filename, options["message"])
+
+
 def testPrint(options, sdsFile):
     """Prints the filename."""
     logger.info(sdsFile.filename)
