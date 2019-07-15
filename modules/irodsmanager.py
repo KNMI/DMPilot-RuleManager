@@ -291,13 +291,42 @@ class IRODSManager():
                                       SDSFile.customPath(rootCollection),
                                       **options)
 
-    def getDataObject(self, SDSFile, rootCollection=None):
-        """
-        def IRODSManager::getDataObject
-        Retrieves a data object from iRODS and returns None if it does not exist
+    def getFederatedDataObject(self, SDSFile, rootCollection):
+        """Retrieves a data object from a federated iRODS and returns None if it does not exist.
+
+        The irods-pythonclient library does not support a get() for a
+        federated data object, only for collections. See
+        <https://github.com/irods/python-irodsclient/issues/163>.
 
         Parameters
         ----------
+        SDSFile : `SDSFile`
+            File to search.
+        rootCollection : `str`
+            The archive's root collection.
+        """
+
+        # Get collection
+        try:
+            fed_col = self.getCollection(SDSFile.customDirectory(rootCollection))
+        except CollectionDoesNotExist:
+            return None
+
+        # Iterate over the collection objects looking for the right file
+        for obj in fed_col.data_objects:
+            if SDSFile.filename == obj.name:
+                return obj
+
+        return None
+
+    def getDataObject(self, SDSFile, rootCollection=None):
+        """
+        Retrieves a data object from iRODS and returns None if it does not exist.
+
+        Parameters
+        ----------
+        SDSFile : `SDSFile`
+            File to search.
         rootCollection : `str`, optional
             The archive's root collection.
         """
@@ -307,7 +336,7 @@ class IRODSManager():
         try:
             if rootCollection is None:
                 return self.session.data_objects.get(SDSFile.irodsPath)
-            return self.session.data_objects.get(SDSFile.customPath(rootCollection))
+            return self.getFederatedDataObject(SDSFile, rootCollection)
         except (DataObjectDoesNotExist, CollectionDoesNotExist):
             return None
 
