@@ -1,4 +1,4 @@
-eudatPidSearch {
+eudatePidSearch {
 
   EUDATSearchPID(*path, *existing_pid)
 

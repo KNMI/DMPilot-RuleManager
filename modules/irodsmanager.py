@@ -363,7 +363,7 @@ class IRODSManager():
         """
         # Path to the rule
         RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
-                                 "irods", "rules", "get_fed_pid.r")
+                                 "irods", "rules", "get_fed_pid_icat.r")
 
         inputParameters = {
             "*path": "'%s'" % SDSFile.customPath(rootCollection)
