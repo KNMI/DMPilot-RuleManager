@@ -114,7 +114,7 @@ def assertFileReplicatedCondition(options, sds_file):
     """Assert that the file has been replicated.
 
     Checks replication by verifying that the file is present in iRODS,
-    in the given remote collection.
+    in the given remote collection. Does not check checksum.
 
     Parameters
     ----------
@@ -124,7 +124,8 @@ def assertFileReplicatedCondition(options, sds_file):
     sds_file : `SDSFile`
         The file being processed.
     """
-    return irodsSession.exists(sds_file, rootCollection=options["replicationRoot"])
+    return irodsSession.doesFederatedDataObjectExist(sds_file,
+                                                     options["replicationRoot"])
 
 
 def assertPIDCondition(options, sds_file):

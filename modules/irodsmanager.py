@@ -319,6 +319,36 @@ class IRODSManager():
 
         return None
 
+    def doesFederatedDataObjectExist(self, SDSFile, rootCollection):
+        """Check whether a data object is present in a federated iRODS.
+
+        Uses an external iRODS rule file.
+
+        Parameters
+        ----------
+        SDSFile : `SDSFile`
+            File to search.
+        rootCollection : `str`
+            The archive's root collection.
+        """
+        # Path to the rule
+        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
+                                 "irods", "rules", "exist.r")
+
+        inputParameters = {
+            "*path": "'%s'" % SDSFile.customPath(rootCollection)
+        }
+
+        response_str = self.executeRule(RULE_PATH, inputParameters).strip()
+
+        status = response_str.split()[0]
+
+        success = False
+        if status == "True:":
+            success = True
+
+        return success
+
     def getDataObject(self, SDSFile, rootCollection=None):
         """
         Retrieves a data object from iRODS and returns None if it does not exist.
