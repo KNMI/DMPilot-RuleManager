@@ -349,6 +349,36 @@ class IRODSManager():
 
         return success
 
+    def getFederatedPID(self, SDSFile, rootCollection):
+        """Get the PID of a data object in a federated iRODS.
+
+        Uses an external iRODS rule file.
+
+        Parameters
+        ----------
+        SDSFile : `SDSFile`
+            File to search.
+        rootCollection : `str`
+            The archive's root collection.
+        """
+        # Path to the rule
+        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
+                                 "irods", "rules", "get_fed_pid.r")
+
+        inputParameters = {
+            "*path": "'%s'" % SDSFile.customPath(rootCollection)
+        }
+
+        response_str = self.executeRule(RULE_PATH, inputParameters).strip()
+        [status, pid] = response_str.split()
+
+        success = True
+        if status == "Failure:":
+            success = False
+            pid = None
+
+        return success, pid
+
     def getDataObject(self, SDSFile, rootCollection=None):
         """
         Retrieves a data object from iRODS and returns None if it does not exist.
