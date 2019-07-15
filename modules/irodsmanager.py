@@ -352,7 +352,7 @@ class IRODSManager():
     def getFederatedPID(self, SDSFile, rootCollection):
         """Get the PID of a data object in a federated iRODS.
 
-        Uses an external iRODS rule file.
+        Assumes that the file is present. Uses an external iRODS rule file.
 
         Parameters
         ----------

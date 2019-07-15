@@ -133,6 +133,12 @@ def assertPIDCondition(options, sds_file):
 
 
 def assertReplicaPIDCondition(options, sds_file):
-    """Assert that a PID was assigned to the file on the replication iRODS."""
+    """Assert that a PID was assigned to the file on the replication
+    iRODS. Also returns False if the file is not present at the replica
+    site."""
+
+    if not assertFileReplicatedCondition(options, sds_file):
+        return False
+
     status, pid = irodsSession.getFederatedPID(sds_file, options["replicationRoot"])
     return status
