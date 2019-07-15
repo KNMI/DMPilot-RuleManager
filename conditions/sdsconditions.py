@@ -124,8 +124,7 @@ def assertFileReplicatedCondition(options, sds_file):
     sds_file : `SDSFile`
         The file being processed.
     """
-    return irodsSession.doesFederatedDataObjectExist(sds_file,
-                                                     options["replicationRoot"])
+    return irodsSession.federatedExists(sds_file, options["replicationRoot"])
 
 
 def assertPIDCondition(options, sds_file):

@@ -319,7 +319,7 @@ class IRODSManager():
 
         return None
 
-    def doesFederatedDataObjectExist(self, SDSFile, rootCollection):
+    def federatedExists(self, SDSFile, rootCollection):
         """Check whether a data object is present in a federated iRODS.
 
         Uses an external iRODS rule file.
