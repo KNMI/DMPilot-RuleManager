@@ -19,10 +19,9 @@ import os
 import logging
 
 # Lots of iRODS imports
-import irods
 from irods.session import iRODSSession
-from irods.models import DataObject
-from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
+from irods.models import DataObject, Collection
+from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist, MultipleResultsFound
 from irods.rule import Rule
 import irods.keywords as kw
 
@@ -320,9 +319,7 @@ class IRODSManager():
         return None
 
     def federatedExists(self, SDSFile, rootCollection):
-        """Check whether a data object is present in a federated iRODS.
-
-        Uses an external iRODS rule file.
+        """Check whether a data object is present in a federated iRODS zone.
 
         Parameters
         ----------
@@ -331,23 +328,36 @@ class IRODSManager():
         rootCollection : `str`
             The archive's root collection.
         """
-        # Path to the rule
-        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
-                                 "irods", "rules", "exist.r")
+        # Query iRODS
+        q = (irodsSession.session.query(Collection.name, DataObject.name, DataObject.checksum)
+             .filter(Collection.name == SDSFile.customDirectory(rootCollection))
+             .filter(DataObject.name == SDSFile.filename))
+        results = q.all()
 
-        inputParameters = {
-            "*path": "'%s'" % SDSFile.customPath(rootCollection)
-        }
+        # No file found
+        if len(results) == 0:
+            self.logger.debug("File %s does not exist in root collection %s."
+                              % (SDSFile.filename, rootCollection))
+            return False
 
-        response_str = self.executeRule(RULE_PATH, inputParameters).strip()
+        # Read checksum(s) into a set to eliminate repeats
+        checksum_set = {r[DataObject.checksum] for r in results}
+        if len(checksum_set) > 1:
+            raise MultipleResultsFound(
+                'File %s has more than one different version in collection %s'
+                % (SDSFile.filename, rootCollection))
+        remote_checksum = checksum_set.pop()
 
-        status = response_str.split()[0]
+        # Compare checksums
+        if SDSFile.checksum == remote_checksum:
+            self.logger.debug("File %s does exist in iRODS, with same checksum (%s)."
+                              % (SDSFile.filename, SDSFile.checksum))
+            return True
 
-        success = False
-        if status == "True:":
-            success = True
-
-        return success
+        self.logger.debug(
+            "File %s does exist in iRODS, but with a different checksum (%s vs %s)."
+            % (SDSFile.filename, remote_checksum, SDSFile.checksum))
+        return False
 
     def getFederatedPID(self, SDSFile, rootCollection):
         """Get the PID of a data object in a federated iRODS.
@@ -424,8 +434,9 @@ class IRODSManager():
                                     SDSFile.filename, SDSFile.checksum))
                 return True
             else:
-                self.logger.debug("File %s does exist in iRODS, but with a different checksum (%s vs %s)." % (
-                                    SDSFile.filename, dataObject.checksum, SDSFile.checksum))
+                self.logger.debug(
+                    "File %s does exist in iRODS, but with a different checksum (%s vs %s)."
+                    % (SDSFile.filename, dataObject.checksum, SDSFile.checksum))
                 return False
 
     def getPID(self, SDSFile, rootCollection=None):
