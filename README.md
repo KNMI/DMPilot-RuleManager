@@ -37,7 +37,9 @@ be automatically compiled using the installation script using:
 ## Testing
 
 The rule manager engine can be tested using the `runtests.py` script included in
-the `test` directory.
+the `test` directory. Note that thee tests can interact with other services,
+like iRODS or WFCatalog, it might not be advisable to run it in production
+environments.
 
 ## Running the SDS policy manager
 
