@@ -20,7 +20,7 @@ import logging
 
 # Lots of iRODS imports
 from irods.session import iRODSSession
-from irods.models import DataObject, Collection
+from irods.models import Collection, DataObject, DataObjectMeta
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist, MultipleResultsFound
 from irods.rule import Rule
 import irods.keywords as kw
@@ -319,7 +319,7 @@ class IRODSManager():
         return None
 
     def federatedExists(self, SDSFile, rootCollection):
-        """Check whether a data object is present in a federated iRODS zone.
+        """Check whether a data object is present in a federated iRODS zone with the same checksum.
 
         Parameters
         ----------
@@ -327,6 +327,11 @@ class IRODSManager():
             File to search.
         rootCollection : `str`
             The archive's root collection.
+
+        Raises
+        ------
+        MultipleResultsFound
+            Raised if more than one different versions of the file exist in remote location.
         """
         # Query iRODS
         q = (irodsSession.session.query(Collection.name, DataObject.name, DataObject.checksum)
@@ -343,9 +348,8 @@ class IRODSManager():
         # Read checksum(s) into a set to eliminate repeats
         checksum_set = {r[DataObject.checksum] for r in results}
         if len(checksum_set) > 1:
-            raise MultipleResultsFound(
-                'File %s has more than one different version in collection %s'
-                % (SDSFile.filename, rootCollection))
+            raise MultipleResultsFound('File %s has more than one different versions.'
+                                       % SDSFile.customPath(rootCollection))
         remote_checksum = checksum_set.pop()
 
         # Compare checksums
@@ -362,32 +366,47 @@ class IRODSManager():
     def getFederatedPID(self, SDSFile, rootCollection):
         """Get the PID of a data object in a federated iRODS.
 
-        Assumes that the file is present. Uses an external iRODS rule file.
-
         Parameters
         ----------
         SDSFile : `SDSFile`
             File to search.
         rootCollection : `str`
             The archive's root collection.
+
+        Returns
+        -------
+        pid : `str`
+            The PID is the file has one, or None if the file does not exist or does not have a PID.
+
+        Raises
+        ------
+        MultipleResultsFound
+            Raised if file has more than one different PID assigned to it.
         """
-        # Path to the rule
-        RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
-                                 "irods", "rules", "get_fed_pid_icat.r")
+        # Query iRODS
+        q = (irodsSession.session
+             .query(Collection.name, DataObject.name, DataObjectMeta.value)
+             .filter(Collection.name == SDSFile.customDirectory(rootCollection))
+             .filter(DataObject.name == SDSFile.filename)
+             .filter(DataObjectMeta.name == 'PID'))
+        results = q.all()
 
-        inputParameters = {
-            "*path": "'%s'" % SDSFile.customPath(rootCollection)
-        }
+        # No file or PID found
+        if len(results) == 0:
+            self.logger.debug("File %s does not exist or does not have a PID registered."
+                              % SDSFile.filename)
+            return None
 
-        response_str = self.executeRule(RULE_PATH, inputParameters).strip()
-        [status, pid] = response_str.split()
+        # Read PID(s) into a set to eliminate repeats
+        pid_set = {r[DataObjectMeta.value] for r in results}
+        if len(pid_set) > 1:
+            raise MultipleResultsFound('File %s has more than one PID.'
+                                       % SDSFile.customPath(rootCollection))
 
-        success = True
-        if status == "Failure:":
-            success = False
-            pid = None
-
-        return success, pid
+        # Return the PID
+        pid = pid_set.pop()
+        self.logger.debug("File %s has PID %s." % (SDSFile.filename, pid))
+        return pid
 
     def getDataObject(self, SDSFile, rootCollection=None):
         """
