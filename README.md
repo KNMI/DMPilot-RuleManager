@@ -32,6 +32,7 @@ The source code for these packages is included in the ./lib directory and can
 be automatically compiled using the installation script using:
 
     ./install.sh
+    export PATH=$PATH:`pwd`/bin
 
 ## Testing
 
