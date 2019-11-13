@@ -53,10 +53,10 @@ class RuleManager():
         self.rules = ruleModule
         self.conditions = conditionModule
 
-        # Load the configured sequence of rules
         rule_desc = None    # Rule configuration
         rule_seq = None     # Rule order
 
+        # Load the rule configuration JSON file
         try:
             with open(ruleMapFile) as rule_file:
                 rule_desc = json.load(rule_file)
@@ -69,6 +69,7 @@ class RuleManager():
         except jsonschema.exceptions.ValidationError:
             raise ValueError("The rulemap %s does not validate against the schema." % ruleMapFile)
 
+        # Load the rule sequence JSON file
         try:
             with open(ruleSequenceFile) as order_file:
                 rule_seq = json.load(order_file)
@@ -77,9 +78,9 @@ class RuleManager():
 
         # Get the rule from the map
         try:
-            self.ruleSequence = [rule_desc[x] for x in rule_seq]
-            for x in rule_seq:
-                rule_desc[x]["ruleName"] = x
+            self.ruleSequence = [rule_desc[rule_name] for rule_name in rule_seq]
+            for rule_name in rule_seq:
+                rule_desc[rule_name]["ruleName"] = rule_name
         except KeyError as exception:
             raise ValueError("The rule %s could not be found in the configured rule map %s." %
                              (exception.args[0], ruleMapFile))
