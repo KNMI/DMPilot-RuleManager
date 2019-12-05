@@ -102,11 +102,7 @@ class SDSFile():
     # Returns the S3 key for a given file
     @property
     def s3Key(self):
-        return os.path.join(
-            self.s3Prefix,
-            self.subDirectory,
-            self.filename
-        )
+        return self.customPath(self.s3Prefix)
 
     # Returns the stream identifier
     @property
