@@ -42,10 +42,13 @@ def delete(sds_file):
 
 
 def get_checksum(sds_file):
-    """Returns the checksum registered in the object S3 metadata."""
+    """Returns the checksum registered in the object S3 metadata. Assumes the object exists."""
     bucket = _get_bucket()
     obj = bucket.Object(sds_file.s3Key)
-    return obj.metadata['checksum']
+    try:
+        return obj.metadata['checksum']
+    except KeyError:
+        return None
 
 
 def download_file(sds_file, dest_path):
