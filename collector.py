@@ -15,7 +15,7 @@ from orfeus.sdscollector import SDSFileCollector
 def main():
     try:
         # Initialize logger
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger('RuleManager')
         logger.info("Running SDS File Collector.")
 
         # Parse command line arguments

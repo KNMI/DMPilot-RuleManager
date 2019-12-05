@@ -50,6 +50,7 @@ class SDSFile():
     # Save some configuration to the class
     irodsRoot = config["IRODS_ROOT"]
     fdsnws = config["FDSNWS_ADDRESS"]
+    s3Prefix = config["S3"]["PREFIX"]
 
     def __init__(self, filename, archiveRoot):
         """
@@ -71,7 +72,7 @@ class SDSFile():
         self.archiveRoot = archiveRoot
 
         # Initialize logger
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('RuleManager')
 
     # Returns the filename
     @property
@@ -97,6 +98,15 @@ class SDSFile():
     @property
     def irodsPath(self):
         return self.customPath(self.irodsRoot)
+
+    # Returns the S3 key for a given file
+    @property
+    def s3Key(self):
+        return os.path.join(
+            self.s3Prefix,
+            self.subDirectory,
+            self.filename
+        )
 
     # Returns the stream identifier
     @property
@@ -192,7 +202,7 @@ class SDSFile():
             return datetime.fromtimestamp(self.stats.st_ctime)
         elif enum == "modified":
             return datetime.fromtimestamp(self.stats.st_mtime)
-     
+
     @property
     def size(self):
         return self.getStat("size")

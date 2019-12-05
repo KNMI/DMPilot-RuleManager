@@ -18,7 +18,7 @@ import conditions.sdsconditions as sdsconditions
 def main():
     try:
         # Initialize logger
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger('RuleManager')
         logger.info("Running deletion Manager.")
 
         # Parse command line arguments

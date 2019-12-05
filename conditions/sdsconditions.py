@@ -10,11 +10,12 @@ import os
 from modules.dublincore import getDCMetadata
 from orfeus.sdsfile import SDSFile
 
+import modules.s3manager as s3manager
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
 
 # Initialize logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('RuleManager')
 
 
 def assertQualityCondition(options, sds_file):
@@ -24,6 +25,16 @@ def assertQualityCondition(options, sds_file):
 
 def assertIRODSExistsCondition(options, sds_file):
     return irodsSession.exists(sds_file)
+
+
+def assertS3ExistsCondition(options, sds_file):
+    if "check_checksum" in options:
+        if options["check_checksum"]:
+            return (s3manager.exists(sds_file)
+                    and s3manager.get_checksum(sds_file) == sds_file.checksum)
+        else:
+            return s3manager.exists(sds_file)
+    return s3manager.exists(sds_file)
 
 
 def assertIRODSNotExistCondition(options, sds_file):
