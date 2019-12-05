@@ -39,7 +39,7 @@ class IRODSManager():
     def __init__(self):
 
         # Initialize logger
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('RuleManager')
         self.logger.debug("Initializing a new iRODS Session.")
 
         self.session = None

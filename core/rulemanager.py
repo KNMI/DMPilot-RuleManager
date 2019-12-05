@@ -19,7 +19,7 @@ class RuleManager():
     def __init__(self):
 
         # Initialize logger
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('RuleManager')
         self.logger.debug("Initializing the Rule Manager.")
 
         self.rules = None

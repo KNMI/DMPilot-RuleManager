@@ -10,6 +10,10 @@ config = {
         "DC_METADATA_COLLECTION": "wf_do",
         "WF_METADATA_COLLECTION": "daily_streams"
     },
+    "S3": {
+        "BUCKET_NAME": "bucket-name",
+        "PREFIX": "SDS"
+    },
     "IRODS": {
         "HOST": "localhost",
         "PORT": "1247",

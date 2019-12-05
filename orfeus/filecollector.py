@@ -20,7 +20,7 @@ class FileCollector:
         """
 
         # Initialize logger
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('RuleManager')
         self.logger.debug("Initializing the %s." % self.__class__.__name__)
 
         self._initialized = datetime.now()

@@ -35,7 +35,7 @@ class MongoManager():
         """
 
         # Initialize logger
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('RuleManager')
         self.logger.debug("Initializing a new Mongo Session.")
 
         self.client = None

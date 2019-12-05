@@ -10,11 +10,12 @@ import logging
 from modules.wfcatalog import getWFMetadata
 from modules.dublincore import extractDCMetadata
 
+import modules.s3manager as s3manager
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongoSession
 from modules.psdcollector import psdCollector
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('RuleManager')
 
 
 def psdMetadataRule(options, SDSFile):
@@ -60,7 +61,7 @@ def pruneRule(options, SDSFile):
     logger.debug("Pruned file %s." % SDSFile.filename)
 
 
-def ingestionRule(options, SDSFile):
+def ingestionIrodsRule(options, SDSFile):
     """Handler for the ingestion rule.
 
     Parameters
@@ -85,6 +86,26 @@ def ingestionRule(options, SDSFile):
     # Check if checksum is saved
     logger.debug("Ingested file %s with checksum '%s'" % (
             SDSFile.filename, irodsSession.getDataObject(SDSFile).checksum))
+
+
+def ingestionS3Rule(options, SDSFile):
+    """Handler for the ingestion rule.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+    logger.debug("Ingesting file %s." % SDSFile.filename)
+
+    # Upload file to S3
+    s3manager.put(SDSFile)
+
+    # Check if checksum is saved
+    logger.debug("Ingested file %s with checksum '%s'" % (
+            SDSFile.filename, SDSFile.checksum))
 
 
 def pidRule(options, SDSFile):

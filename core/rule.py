@@ -17,7 +17,7 @@ class Rule():
         self.name = name
 
         # Initialize logger
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('RuleManager')
 
     def apply(self, SDSFile):
         """

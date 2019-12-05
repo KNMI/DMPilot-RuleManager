@@ -15,7 +15,7 @@
     },
     "INGESTION": {
 	"description": "Puts the pruned file in the local iRODS.",
-        "functionName": "ingestionRule",
+        "functionName": "ingestionS3Rule",
         "options": {},
         "conditions": [{
                 "functionName": "assertQualityCondition",
@@ -24,8 +24,10 @@
                 }
             },
             {
-                "functionName": "assertIRODSNotExistCondition",
-                "options": {}
+                "functionName": "!assertS3ExistsCondition",
+                "options": {
+		    "check_checksum": true
+		}
             }
         ]
     },
