@@ -1,0 +1,43 @@
+# rulemanager -> volumes and cfg?
+# rulemanager -> aws credentials as docker secrets
+# wfcatalog -> cfg?
+# ppsd-webservice -> dockerfile todo
+# mongodb -> docker run -p 27017:27017 --name mongo_server -v $(pwd)/mongodb:/data/db -d mongo:4.0.5-xenial
+
+version: '3.5'
+services:
+  rulemanager:
+    container_name: 'rulemanager'
+    build:
+      context: ./
+      dockerfile: ./dev-env/Dockerfile
+    volumes:
+      - ./:/home/rulemanager
+      - ./dev-env/data/sds:/data/temp_archive
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
+  wf_catalog_mongo:
+    image: 'mongo'
+    hostname: 'wf_catalog_mongo'
+    container_name: 'wf_catalog_mongo'
+    volumes:
+      - wfcat_mongodb:/data/db
+
+  ppsd_webservice:
+    image: 'ppsd_webservice'
+    container_name: 'ppsd_webservice'
+    ports:
+      - '3000:3000'
+
+  ppsd_mongo:
+    image: 'mongo'
+    hostname: 'ppsd_mongo'
+    container_name: 'ppsd_mongo'
+    volumes:
+      - ppsd_mongodb:/data/db
+
+volumes:
+  wfcat_mongodb:
+  ppsd_mongodb:

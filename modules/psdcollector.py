@@ -235,16 +235,16 @@ class PSDCollector():
 
         inventory = SDSFile.inventory
 
-        # Inventory could not be read: return empty spectra
+        # Inventory could not be read
         if inventory is None:
-            return spectra
+            raise Exception("Inventory could not be read")
 
         # And the prepared data
         data = self.__prepareData(SDSFile)
 
-        # Data could not be read: return empty spectra
+        # Data could not be read
         if data is None:
-            return spectra
+            raise Exception("Data could not be read")
 
         # Try creating the PPSD
         try:
@@ -262,7 +262,7 @@ class PSDCollector():
             ppsd.add(data)
 
         except Exception as ex:
-            return spectra
+            raise Exception("Error processing PPSD: '%s'" % (str(ex)))
 
         for segment, time in zip(ppsd._binned_psds, SDSFile.psdBins):
 
@@ -275,14 +275,16 @@ class PSDCollector():
                 byteAmplitudes = self.__toByteArray(psd_array)
             # This may fail in multiple ways.. try the next segment
             except Exception as ex:
+                self.logger.warning("Failed processing PPSD for 1 segment: '%s'" % (str(ex)))
                 continue
 
             # Add hash of the data & metadata (first 8 hex digits)
             # Saving 64 bytes * 2 makes (checksums) our database pretty big and this should be sufficient to 
             # detect changes
             psdObject = {
-                "checksum": SDSFile.checksum[:13],
-                "checksumInventory": self.__getResponseChecksum(inventory)[:13],
+                "fileId": SDSFile.filename,
+                "checksum": SDSFile.checksum,
+                "checksumInventory": self.__getResponseChecksum(inventory),
                 "net": SDSFile.net,
                 "sta": SDSFile.sta,
                 "loc": SDSFile.loc,

@@ -18,9 +18,8 @@ from modules.psdcollector import psdCollector
 logger = logging.getLogger('RuleManager')
 
 
-def psdMetadataRule(options, SDSFile):
-    """Handler for PSD calculation.
-    TODO XXX
+def ppsdMetadataRule(options, SDSFile):
+    """Handler for PPSD calculation.
 
     Parameters
     ----------
@@ -30,12 +29,39 @@ def psdMetadataRule(options, SDSFile):
         The file to be processed.
     """
 
-    if SDSFile.isPressureChannel:
-        # Store in psd.seismic
-        print(psdCollector.process(SDSFile))
-    else:
-        # Store in psd.infra
-        print(psdCollector.process(SDSFile))
+    logger.debug("Computing PPSD metadata for %s." % SDSFile.filename)
+
+    # Process PPSD
+    documents = psdCollector.process(SDSFile)
+
+    # Save to the database
+    mongoSession.deletePPSDDocuments(SDSFile)
+    for document in documents:
+        mongoSession.savePPSDDocument(document)
+        ## TODO
+        #if not SDSFile.isPressureChannel:
+        #    # Store in psd.seismic
+        #    mongoSession.savePPSDDocument(document)
+        #else:
+        #    # Store in psd.infra
+        #    mongoSession.savePPSDDocument(document)
+    logger.debug("Saved PPSD metadata for %s." % SDSFile.filename)
+
+
+def deletePPSDMetadataRule(options, SDSFile):
+    """Delete PPSD metadata of an SDS file.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    logger.debug("Deleting PPSD metadata for %s." % SDSFile.filename)
+    mongoSession.deletePPSDDocuments(SDSFile)
+    logger.debug("Deleted PPSD metadata for %s." % SDSFile.filename)
 
 
 def pruneRule(options, SDSFile):

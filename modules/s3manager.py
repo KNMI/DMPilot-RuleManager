@@ -5,11 +5,13 @@ from configuration import config
 
 
 BUCKET_NAME = config["S3"]["BUCKET_NAME"]
+PROFILE = config["S3"]["PROFILE"]
 
 
 def _get_bucket():
     """Returns the Bucket resource object for the SDS archive."""
-    s3_resource = boto3.resource('s3')
+    session = boto3.session.Session(profile_name=PROFILE)
+    s3_resource = session.resource('s3')
     return s3_resource.Bucket(name=BUCKET_NAME)
 
 
