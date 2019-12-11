@@ -36,31 +36,73 @@
         "functionName": "waveformMetadataRule",
         "timeout" : 5,
         "options": {},
-        "conditions": [{
-            "functionName": "assertQualityCondition",
-            "options": {
-                "qualities": ["Q"]
+        "conditions": [
+	    {
+		"functionName": "assertQualityCondition",
+		"options": {
+                    "qualities": ["Q"]
+		}
+            },
+	    {
+		"functionName": "assertWFCatalogNotExistsCondition",
+		"options": {}
+            },
+	    {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+		    "check_checksum": true
+		}
             }
-        }, {
-            "functionName": "assertWFCatalogNotExistsCondition",
-            "options": {}
-        }]
+	]
     },
     "DCAT": {
 	"description": "Writes Dublin Core metadata to the WFCatalog.",
         "functionName": "dcMetadataRule",
         "timeout" : 5,
         "options": {},
-        "conditions": [{
-            "functionName": "assertQualityCondition",
-            "options": {
-                "qualities": ["Q"]
+        "conditions": [
+	    {
+		"functionName": "assertQualityCondition",
+		"options": {
+                    "qualities": ["Q"]
+		}
+            },
+	    {
+		"functionName": "assertDCMetadataNotExistsCondition",
+		"options": {}
+            },
+	    {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+		    "check_checksum": true
+		}
             }
-        }, {
-            "functionName": "assertDCMetadataNotExistsCondition",
-            "options": {}
-        }]
+	]
     },
+    "PPSD": {
+        "description": "Proceses PPSD metadata and stores it in a MongoDB.",
+        "functionName": "ppsdMetadataRule",
+        "timeout" : 5,
+        "options": {},
+        "conditions": [
+            {
+		"functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertPPSDMetadataNotExistsCondition",
+                "options": {}
+            },
+	    {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+		    "check_checksum": true
+		}
+            }
+        ]
+    }
     "PID": {
 	"description": "Assigns a PID to the file using B2HANDLE.",
         "functionName": "pidRule",
@@ -90,6 +132,12 @@
             {
 		"functionName": "assertPIDCondition",
 		"options": {}
+            },
+	    {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+		    "check_checksum": true
+		}
             }
         ]
     },
@@ -97,7 +145,8 @@
 	"description": "Deletes [REM]-quality local files that are older than 2 days.",
         "functionName": "purgeRule",
         "options": {},
-        "conditions": [{
+        "conditions": [
+	    {
                 "functionName": "assertQualityCondition",
                 "options": {
                     "qualities": ["R", "E", "M"]
@@ -143,9 +192,11 @@
                     "qualities": ["Q"]
                 }
             },
-            {
-                "functionName": "assertIRODSExistsCondition",
-                "options": {}
+	    {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+		    "check_checksum": true
+		}
             },
             {
                 "functionName": "assertWFCatalogExistsCondition",

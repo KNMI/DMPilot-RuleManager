@@ -28,18 +28,23 @@ added to `$PATH`. These programs include:
 - IRIS MSRepack (https://github.com/iris-edu/libmseed)
 - IRIS MSI (https://github.com/iris-edu/msi)
 
-The source code for these packages is included in the ./lib directory and can
-be automatically compiled using the installation script using:
+In addition to that, the file `requirements.txt` lists all Python packages
+needed to run Rule Manager.
 
-    ./install.sh
-    export PATH=$PATH:`pwd`/bin
+These dependencies are easily installed in a Docker container. See *Local
+development environment* below.
 
-## Testing
+## Unit testing
 
 The rule manager engine can be tested using the `runtests.py` script included in
 the `test` directory. Note that thee tests can interact with other services,
 like iRODS or WFCatalog, it might not be advisable to run it in production
 environments.
+
+## Local development environment
+
+Read `dev-env/README.md` for creating a local environment based on Docker for
+development purposes (only).
 
 ## Running the SDS policy manager
 

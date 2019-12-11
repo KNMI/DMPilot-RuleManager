@@ -107,6 +107,35 @@ def assertDCMetadataNotExistsCondition(options, sds_file):
     return not assertDCMetadataExistsCondition(options, sds_file)
 
 
+def assertPPSDMetadataExistsCondition(options, sds_file):
+
+    # Get the existing PPSD document
+    PPSDObjects = mongoSession.getPPSDDocuments(sds_file)
+
+    # Document exists and has the same hash: it exists
+    if PPSDObjects is not None:
+        PPSDObject = PPSDObjects[0]
+        exists = True
+        if PPSDObject["checksum"] == sds_file.checksum:
+            same_hash = True
+            logger.debug("PPSD data exists for file %s, with same checksum (%s)." % (
+                            sds_file.filename, sds_file.checksum))
+        else:
+            same_hash = False
+            logger.debug("PPSD data exists for file %s, but with a different checksum (%s vs %s)." % (
+                            sds_file.filename, PPSDObject["checksum"], sds_file.checksum))
+    else:
+        exists = False
+        logger.debug("PPSD data does no exist for file %s." % sds_file.filename)
+
+    return exists and same_hash
+
+
+def assertPPSDMetadataNotExistsCondition(options, sds_file):
+
+    return not assertPPSDMetadataExistsCondition(options, sds_file)
+
+
 def assertPrunedFileExistsCondition(options, sds_file):
     """Aserts that the pruned version of the SDS file is in the temporary archive."""
 

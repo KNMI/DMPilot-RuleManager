@@ -70,6 +70,14 @@ class MongoManager():
 
         return self.database[collection].find_one(query)
 
+    def findMany(self, collection, query):
+        """
+        def MongoManager::findMany
+        Finds a document in a collection
+        """
+
+        return self.database[collection].find(query)
+
     def deleteOne(self, collection, query):
         """
         def MongoManager::deleteOne
@@ -78,17 +86,26 @@ class MongoManager():
 
         return self.database[collection].delete_one(query)
 
-    def save(self, collection, document):
+    def deleteMany(self, collection, query):
+        """
+        def MongoManager::deleteMany
+        Delete many documents in a collection
+        """
+
+        return self.database[collection].delete_many(query)
+
+    def save(self, collection, document, overwrite=True):
         """
         def MongoManager::save
         Saves a document to a collection
         """
 
         # First, delete all documents related to this file
-        res = self.database[collection].delete_many({"fileId": document["fileId"]})
-        if res.acknowledged and res.deleted_count > 0:
-            self.logger.debug("Deleted %d documents from '%s' collection with fileId = %s" % (
-                                res.deleted_count, collection, document["fileId"]))
+        if overwrite:
+            res = self.database[collection].delete_many({"fileId": document["fileId"]})
+            if res.acknowledged and res.deleted_count > 0:
+                self.logger.debug("Deleted %d documents from '%s' collection with fileId = %s" % (
+                                    res.deleted_count, collection, document["fileId"]))
 
         # Second, insert new document
         res = self.database[collection].insert_one(document)
@@ -149,6 +166,28 @@ class MongoManager():
 
         return self.deleteOne(config["MONGO"]["WF_METADATA_COLLECTION"],
                               {"fileId": SDSFile.filename})
+
+    def savePPSDDocument(self, document):
+        """Saves a PPSD metadata document."""
+
+        self.save(config["MONGO"]["PPSD_METADATA_COLLECTION"], document, overwrite=False)
+
+    def getPPSDDocuments(self, SDSFile):
+        """Returns a PPSD document corresponding to a file."""
+
+        return self.findMany(config["MONGO"]["PPSD_METADATA_COLLECTION"],
+                            {"fileId": SDSFile.filename})
+
+    def deletePPSDDocuments(self, SDSFile):
+        """Deletes the PPSD documents corresponding to a file marking it as
+        deleted."""
+
+        res = self.deleteMany(config["MONGO"]["PPSD_METADATA_COLLECTION"],
+                              {"fileId": SDSFile.filename})
+        self.logger.debug("Deleted %d documents from '%s' collection with fileId = %s" % (
+                            res.deleted_count, config["MONGO"]["PPSD_METADATA_COLLECTION"],
+                            SDSFile.filename))
+        return res
 
 
 mongoSession = MongoManager()

@@ -2,7 +2,7 @@ config = {
     "IRODS_ROOT": "/ZoneA/home/rods/",
     "FDSNWS_ADDRESS": "https://www.orfeus-eu.org/fdsnws/station/1/query",
     "MONGO": {
-        "HOST": "localhost",
+        "HOST": "wf_catalog_mongo",
         "PORT": 27017,
         "USER": "username",
         "PASS": "password",
@@ -12,9 +12,9 @@ config = {
         "PPSD_METADATA_COLLECTION": "ppsd"
     },
     "S3": {
-        "BUCKET_NAME": "bucket-name",
-        "PREFIX": "SDS",
-        "PROFILE": None
+        "BUCKET_NAME": "seismo-test-sds",
+        "PREFIX": "my-sds",
+        "PROFILE": "sandbox"
     },
     "IRODS": {
         "HOST": "localhost",
@@ -25,7 +25,7 @@ config = {
     },
     "LOGGING": {
         "LEVEL": "INFO",
-        "FILENAME": "~/log/sdsmanager.log" # use None for stdout
+        "FILENAME": None # use None for stdout
     },
     "DEFAULT_RULE_TIMEOUT" : 10,
     "DELETION_DB": "./deletion.db"
