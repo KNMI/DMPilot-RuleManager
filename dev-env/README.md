@@ -27,30 +27,17 @@ export AWS_ACCESS_KEY_ID=$(aws --profile $(id -un) configure get aws_access_key_
 export AWS_SECRET_ACCESS_KEY=$(aws --profile $(id -un) configure get aws_secret_access_key)
 ```
 
-## 2 - Option 1) Complete environment with docker-compose
+## 2) Create environment with docker-compose
 
 ```
 # (Re-)Build custom container images
 docker-compose -f dev-env/docker-compose.yml --project-directory ./ -p devenv build
 
-# Bring containers up
+# Bring environment up
 docker-compose -f dev-env/docker-compose.yml --project-directory ./ -p devenv up
 
 # Run rulemanager container interactively
 docker-compose -f dev-env/docker-compose.yml --project-directory ./ -p devenv run rulemanager bash
-
-# Bring everything down
-docker-compose -f dev-env/docker-compose.yml --project-directory ./ -p devenv down
-```
-
-## 2 - Option 2) Rule Manager container only
-
-```
-# Build container image
-docker build -t rulemanager -f ./dev-env/Dockerfile .
-
-# Run container interactively
-docker run -v $(pwd):/home/rulemanager -v $HOME/tmp/sds_1:/data/temp_archive -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -it rulemanager
 ```
 
 ## 3) Commands inside Rule Manager container
@@ -64,12 +51,15 @@ docker run -v $(pwd):/home/rulemanager -v $HOME/tmp/sds_1:/data/temp_archive -e 
 aws s3 ls seismo-test-sds --profile sandbox
 ```
 
-## 4) Remove all Docker containers / images
+## 4) Clean-up
 ```
-# Remove all Docker containers
+# Bring environment down
+docker-compose -f dev-env/docker-compose.yml --project-directory ./ -p devenv down
+
+# (Optional) Remove all Docker containers
 docker rm $(docker ps -a -q)
 
-# Remove all Docker images
+# (Optional) Remove all Docker images
 docker rmi $(docker images -q)
 ```
 
