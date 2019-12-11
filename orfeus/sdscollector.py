@@ -8,6 +8,7 @@
 
 """
 
+import logging
 from fnmatch import fnmatch
 from datetime import date, datetime, timedelta
 from itertools import repeat
@@ -32,6 +33,9 @@ class SDSFileCollector(FileCollector):
         Initializes a file collector class
         """
 
+        # Initialize logger
+        self.logger = logging.getLogger('RuleManager')
+
         super().__init__(archiveDir)
         self.files = self.collectAll()
 
@@ -40,8 +44,13 @@ class SDSFileCollector(FileCollector):
         def fileCollector.collectAll
         Returns all files in the SDS archive
         """
-
-        return list(map(SDSFile, self.files, repeat(self.archiveDir)))
+        files = []
+        for f in self.files:
+            try:
+                files.append(SDSFile(f, self.archiveDir))
+            except Exception as e:
+                self.logger.debug("Unable to parse file '%s' as SDSFile: '%s'" % (f, str(e)))
+        return files
 
     def collectFromDate(self, iDate, mode="file_name"):
         """
