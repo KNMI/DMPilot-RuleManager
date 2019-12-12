@@ -73,7 +73,7 @@ class PSDCollector():
 
     # Period limits 100Hz should be enough and 0.001Hz a low enough frequency
     # In case of 200Hz sampled data this is the nyquist frequency
-    PERIOD_LIMIT_TUPLE = (0.01, 1000)
+    PERIOD_LIMIT_TUPLE = (0.001, 1000)
 
     def __init__(self):
 
