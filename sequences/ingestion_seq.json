@@ -2,8 +2,5 @@
     "PRUNE",
     "INGESTION",
     "METADATA",
-    "DCAT",
-    "PURGE_UNKNOWN",
-    "PURGE_RAW",
-    "PURGE_PRUNED"
+    "PPSD"
 ]

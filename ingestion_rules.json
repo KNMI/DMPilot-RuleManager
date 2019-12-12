@@ -82,7 +82,7 @@
     "PPSD": {
         "description": "Proceses PPSD metadata and stores it in a MongoDB.",
         "functionName": "ppsdMetadataRule",
-        "timeout" : 5,
+        "timeout" : 10,
         "options": {},
         "conditions": [
             {
@@ -102,7 +102,7 @@
 		}
             }
         ]
-    }
+    },
     "PID": {
 	"description": "Assigns a PID to the file using B2HANDLE.",
         "functionName": "pidRule",

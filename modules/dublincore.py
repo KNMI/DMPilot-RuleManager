@@ -2,16 +2,6 @@
 
 from datetime import datetime
 
-from modules.mongomanager import mongoSession
-
-
-def getDCMetadata(SDSFile):
-    """Returns the stored metadata for the file described by
-    `SDSFile`. Returns None if no document is found corresponding
-    to the filename of the given file."""
-
-    return mongoSession.getDCDocument(SDSFile)
-
 
 def extractDCMetadata(SDSFile, pid):
     """Computes Dublin Core metadata for the file described by

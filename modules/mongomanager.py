@@ -1,17 +1,18 @@
 """
-This module implements a MongoDB session manager as a _fake singleton_.
+This module implements a MongoDB session manager as a `dict`
+holding one session to each collection in `config`.
 
 Instead of calling the MongoManager() constructor, use the
-mongoSession variable, that is already created and connected to Mongo
+mongo_pool variable, that is already created and connected to Mongo
 when the module is loaded.
 
 Example
 -------
 
 ```
-from mongomanager import mongoSession
+from mongomanager import mongo_pool
 ...
-mongoSession.save("collection_name", document)
+mongo_pool.setMetadataDocument("collection_name", document)
 ```
 """
 
@@ -22,173 +23,171 @@ from configuration import config
 from pymongo import MongoClient
 
 
-class MongoManager():
+class MongoSession():
+    """Container for a MongoDB session. It is plugged to a single collection.
+
+    Attributes
+    ----------
+    client : `pymongo.MongoClient`
+    database : `pymongo.database`
+    collection : `pymongo.collection`
+
+    Parameters
+    ----------
+    config_dict : `dict`
+        The information needed to connect to the database. Needs to have the
+        following fields:
+        - ``HOST``: The database hostname or IP. (`str`)
+        - ``PORT``: Port to connect to MongoDB. (`int`)
+        - ``DATABASE``: Database name. (`str`)
+        - ``COLLECTION``: Collection name. (`str`)
+        - ``AUTHENTICATE``: Whether or not the databse uses authentication. (`bool`)
+        - ``USER``: Username. Only needed when authenticating. (`str`)
+        - ``PASS``: Password. Only needed when authenticating. (`str`)
     """
-    Class MongoManager
-    Container for MongoDB connection
-    """
 
-    def __init__(self):
-        """
-        def MongoManager.__init__
-        Initializes the class
-        """
-
-        # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
-        self.logger.debug("Initializing a new Mongo Session.")
-
+    def __init__(self, config_dict):
+        # Session will not be initialized yet
         self.client = None
         self.database = None
+        self.collection = None
+
+        # DB location
+        self._host = config_dict["HOST"]
+        self._port = config_dict["PORT"]
+        self._db_name = config_dict["DATABASE"]
+        self._collection_name = config_dict["COLLECTION"]
+
+        # Authentication info
+        self._authenticate = config_dict.get("AUTHENTICATE", False)
+        self._user = config_dict.get("USER", None)
+        self._pass = config_dict.get("PASS", None)
+
+        # Initialize logger
+        self._logger = logging.getLogger('RuleManager')
+        self._logger.debug("Initializing a new Mongo Session on %s:%s." % (self._host, self._port))
 
     def connect(self):
-        """
-        def MongoManager.connect
-        Creates a connection to the database
-        """
+        """Creates a connection to the database. If the object already has a
+        connection, does nothing."""
 
         if self.client is not None:
             return
 
-        self.client = MongoClient(
-            config["MONGO"]["HOST"],
-            config["MONGO"]["PORT"]
-        )
-
-        # Use the wfrepo database
-        self.database = self.client[config["MONGO"]["DATABASE"]]
+        # Create a connection
+        self.client = MongoClient(self._host, self._port)
+        self.database = self.client[self._db_name]
+        self.collection = self.database[self._collection_name]
 
         # Authenticate against the database
-        if "AUTHENTICATE" in config["MONGO"] and config["MONGO"]["AUTHENTICATE"]:
-            self.database.authenticate(config["MONGO"]["USER"], config["MONGO"]["PASS"])
+        if self._authenticate:
+            self.database.authenticate(self._user, self._pass)
 
-    def findOne(self, collection, query):
-        """
-        def MongoManager::findOne
-        Finds a document in a collection
-        """
+    def findOne(self, query):
+        """Finds a single document in the collection."""
+        return self.collection.find_one(query)
 
-        return self.database[collection].find_one(query)
+    def findMany(self, query):
+        """Finds documents in the collection."""
+        return self.collection.find(query)
 
-    def findMany(self, collection, query):
-        """
-        def MongoManager::findMany
-        Finds a document in a collection
-        """
+    def deleteOne(self, query):
+        """Deletes a single document from the collection."""
+        return self.collection.delete_one(query)
 
-        return self.database[collection].find(query)
+    def deleteMany(self, query):
+        """Deletes many documents from the collection."""
+        return self.collection.delete_many(query)
 
-    def deleteOne(self, collection, query):
-        """
-        def MongoManager::deleteOne
-        Delete a document in a collection
-        """
-
-        return self.database[collection].delete_one(query)
-
-    def deleteMany(self, collection, query):
-        """
-        def MongoManager::deleteMany
-        Delete many documents in a collection
-        """
-
-        return self.database[collection].delete_many(query)
-
-    def save(self, collection, document, overwrite=True):
-        """
-        def MongoManager::save
-        Saves a document to a collection
-        """
+    def save(self, document, overwrite=True):
+        """Saves a document."""
 
         # First, delete all documents related to this file
         if overwrite:
-            res = self.database[collection].delete_many({"fileId": document["fileId"]})
+            res = self.collection.delete_many({"fileId": document["fileId"]})
             if res.acknowledged and res.deleted_count > 0:
-                self.logger.debug("Deleted %d documents from '%s' collection with fileId = %s" % (
-                                    res.deleted_count, collection, document["fileId"]))
+                self._logger.debug("Deleted %d documents from '%s' collection with fileId = %s" % (
+                                     res.deleted_count, self._collection_name, document["fileId"]))
 
         # Second, insert new document
-        res = self.database[collection].insert_one(document)
+        res = self.collection.insert_one(document)
         if res.acknowledged:
-            self.logger.debug("Inserted document into '%s' collection with fileId = %s" % (
-                                collection, document["fileId"]))
+            self._logger.debug("Inserted document into '%s' collection with fileId = %s" % (
+                                 self._collection_name, document["fileId"]))
+
+
+class MongoManager():
+    """Stores all the MongoDB sessions from the configuration. Reads all
+    MongoDB information from config and connects to all sessions at
+    load time.
+
+    Attributes
+    ----------
+    sessions : `dict` (`str` -> `MongoSession`)
+        Holds all the pairs of session name and session object.
+    """
+
+    def __init__(self):
+        self._logger = logging.getLogger('RuleManager')
+        self.sessions = {db_info['NAME']: MongoSession(db_info) for db_info in config['MONGO']}
+
+        # TODO: connect later
+        for session_name in self.sessions:
+            self.sessions[session_name].connect()
 
     def saveDCDocument(self, document):
-        """
-        def MongoManager::saveDCDocument
-        Saves a Dublin Core metadata document
-        """
+        """Saves a Dublin Core metadata document."""
 
-        self.save(config["MONGO"]["DC_METADATA_COLLECTION"], document)
+        self.sessions["Dublin Core"].save(document)
 
     def getDCDocument(self, SDSFile):
-        """
-        def MongoManager::getDCDocument
-        Returns a Dublin Core metadata document corresponding to a file
-        """
+        """Returns a Dublin Core metadata document corresponding to a file."""
 
-        return self.findOne(config["MONGO"]["DC_METADATA_COLLECTION"],
-                            {"fileId": SDSFile.filename})
+        return self.sessions["Dublin Core"].findOne({"fileId": SDSFile.filename})
 
     def deleteDCDocument(self, SDSFile):
         """Updates the Dublin Core metadata document corresponding to a file
         marking it as deleted."""
 
-        return (self.database[config["MONGO"]["DC_METADATA_COLLECTION"]]
-                .update_many({"fileId": SDSFile.filename},
-                             {'$set': {
-                                 'irods_path': 'DELETED',
-                                 'checksum': 'DELETED'
-                             }}))
+        return self.sessions["Dublin Core"].collection.update_many(
+            {"fileId": SDSFile.filename},
+            {'$set': {
+                'irods_path': 'DELETED',
+                'checksum': 'DELETED'
+            }})
 
     def setMetadataDocument(self, document):
-        """
-        def MongoManager::saveMetadataDocument
-        Saves a waveform metadata document
-        """
+        """Saves a waveform metadata document."""
 
-        self.save(config["MONGO"]["WF_METADATA_COLLECTION"], document)
+        self.sessions["WFCatalog"].save(document)
 
     def getMetadataDocument(self, SDSFile):
-        """
-        def MongoManager::getMetadataDocument
-        Returns a waveform metadata document corresponding to a file
-        """
+        """Returns a waveform metadata document corresponding to a file."""
 
-        return self.findOne(config["MONGO"]["WF_METADATA_COLLECTION"],
-                            {"fileId": SDSFile.filename})
+        return self.sessions["WFCatalog"].findOne({"fileId": SDSFile.filename})
 
     def deleteMetadataDocument(self, SDSFile):
-        """
-        def MongoManager::deleteMetadataDocument
-        Delete one waveform metadata document corresponding to a file
-        """
+        """Delete one waveform metadata document corresponding to a file."""
 
-        return self.deleteOne(config["MONGO"]["WF_METADATA_COLLECTION"],
-                              {"fileId": SDSFile.filename})
+        return self.sessions["WFCatalog"].deleteOne({"fileId": SDSFile.filename})
 
     def savePPSDDocument(self, document):
         """Saves a PPSD metadata document."""
 
-        self.save(config["MONGO"]["PPSD_METADATA_COLLECTION"], document, overwrite=False)
+        self.sessions["PPSD"].save(document, overwrite=False)
 
     def getPPSDDocuments(self, SDSFile):
-        """Returns a PPSD document corresponding to a file."""
+        """Returns the PPSD documents that correspond to a file."""
 
-        return self.findMany(config["MONGO"]["PPSD_METADATA_COLLECTION"],
-                            {"fileId": SDSFile.filename})
+        return list(self.sessions["PPSD"].findMany({"fileId": SDSFile.filename}))
 
     def deletePPSDDocuments(self, SDSFile):
-        """Deletes the PPSD documents corresponding to a file marking it as
-        deleted."""
+        """Deletes the PPSD documents corresponding to a file."""
 
-        res = self.deleteMany(config["MONGO"]["PPSD_METADATA_COLLECTION"],
-                              {"fileId": SDSFile.filename})
-        self.logger.debug("Deleted %d documents from '%s' collection with fileId = %s" % (
-                            res.deleted_count, config["MONGO"]["PPSD_METADATA_COLLECTION"],
-                            SDSFile.filename))
+        res = self.sessions["PPSD"].deleteMany({"fileId": SDSFile.filename})
+        self._logger.debug("Deleted %d documents from PPSD collection with fileId = %s" % (
+                             res.deleted_count, SDSFile.filename))
         return res
 
 
-mongoSession = MongoManager()
-mongoSession.connect()
+mongo_pool = MongoManager()

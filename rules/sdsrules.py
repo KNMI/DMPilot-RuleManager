@@ -12,7 +12,7 @@ from modules.dublincore import extractDCMetadata
 
 import modules.s3manager as s3manager
 from modules.irodsmanager import irodsSession
-from modules.mongomanager import mongoSession
+from modules.mongomanager import mongo_pool
 from modules.psdcollector import psdCollector
 
 logger = logging.getLogger('RuleManager')
@@ -35,16 +35,16 @@ def ppsdMetadataRule(options, SDSFile):
     documents = psdCollector.process(SDSFile)
 
     # Save to the database
-    mongoSession.deletePPSDDocuments(SDSFile)
+    mongo_pool.deletePPSDDocuments(SDSFile)
     for document in documents:
-        mongoSession.savePPSDDocument(document)
+        mongo_pool.savePPSDDocument(document)
         ## TODO
         #if not SDSFile.isPressureChannel:
         #    # Store in psd.seismic
-        #    mongoSession.savePPSDDocument(document)
+        #    mongo_pool.savePPSDDocument(document)
         #else:
         #    # Store in psd.infra
-        #    mongoSession.savePPSDDocument(document)
+        #    mongo_pool.savePPSDDocument(document)
     logger.debug("Saved PPSD metadata for %s." % SDSFile.filename)
 
 
@@ -60,7 +60,7 @@ def deletePPSDMetadataRule(options, SDSFile):
     """
 
     logger.debug("Deleting PPSD metadata for %s." % SDSFile.filename)
-    mongoSession.deletePPSDDocuments(SDSFile)
+    mongo_pool.deletePPSDDocuments(SDSFile)
     logger.debug("Deleted PPSD metadata for %s." % SDSFile.filename)
 
 
@@ -174,8 +174,8 @@ def addPidToWFCatalogRule(options, SDSFile):
     pid = irodsSession.getPID(SDSFile)
 
     if pid is not None:
-        mongoSession.update_many({"fileId": SDSFile.filename},
-                                 {"$set": {"dc_identifier": pid}})
+        mongo_pool.update_many({"fileId": SDSFile.filename},
+                               {"$set": {"dc_identifier": pid}})
         logger.info("Entry for file %s updated with PID %s." % (SDSFile.filename, pid))
     else:
         logger.error("File %s has no PID." % SDSFile.filename)
@@ -292,7 +292,7 @@ def dcMetadataRule(options, SDSFile):
 
     # Save to the database
     if document:
-        mongoSession.saveDCDocument(document)
+        mongo_pool.saveDCDocument(document)
         logger.debug("Saved Dublin Core metadata for %s." % SDSFile.filename)
 
 
@@ -308,7 +308,7 @@ def deleteDCMetadataRule(options, SDSFile):
     """
 
     logger.debug("Marking %s as deleted in Dublin Core metadata." % SDSFile.filename)
-    mongoSession.deleteDCDocument(SDSFile)
+    mongo_pool.deleteDCDocument(SDSFile)
     logger.debug("Marked %s as deleted in Dublin Core metadata." % SDSFile.filename)
 
 
@@ -333,7 +333,7 @@ def waveformMetadataRule(options, SDSFile):
     logger.debug("Saving waveform metadata for %s." % SDSFile.filename)
 
     # Save the metadata document
-    mongoSession.setMetadataDocument(document)
+    mongo_pool.setMetadataDocument(document)
     logger.debug("Saved waveform metadata for %s." % SDSFile.filename)
 
 
@@ -350,7 +350,7 @@ def deleteWaveformMetadataRule(options, SDSFile):
 
     logger.debug("Deleting waveform metadata for %s." % SDSFile.filename)
 
-    mongoSession.deleteMetadataDocument(SDSFile)
+    mongo_pool.deleteMetadataDocument(SDSFile)
     logger.debug("Deleted waveform metadata for %s." % SDSFile.filename)
 
 
