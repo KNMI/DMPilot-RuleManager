@@ -7,12 +7,11 @@ import logging
 from datetime import datetime, timedelta
 import os
 
-from modules.dublincore import getDCMetadata
 from orfeus.sdsfile import SDSFile
 
 import modules.s3manager as s3manager
 from modules.irodsmanager import irodsSession
-from modules.mongomanager import mongoSession
+from modules.mongomanager import mongo_pool
 
 # Initialize logger
 logger = logging.getLogger('RuleManager')
@@ -46,7 +45,7 @@ def assertIRODSNotExistCondition(options, sds_file):
 def assertWFCatalogExistsCondition(options, sds_file):
 
     # Extract the current metadata object from the database
-    metadataObject = mongoSession.getMetadataDocument(sds_file)
+    metadataObject = mongo_pool.getMetadataDocument(sds_file)
 
     # Document exists and has the same hash: it exists
     if metadataObject is not None:
@@ -82,7 +81,7 @@ def assertModificationTimeOlderThan(options, sds_file):
 def assertDCMetadataExistsCondition(options, sds_file):
 
     # Get the existing Dublin Core Object
-    dublinCoreObject = getDCMetadata(sds_file)
+    dublinCoreObject = mongo_pool.getDCDocument(sds_file)
 
     # Document exists and has the same hash: it exists
     if dublinCoreObject is not None:
@@ -110,10 +109,10 @@ def assertDCMetadataNotExistsCondition(options, sds_file):
 def assertPPSDMetadataExistsCondition(options, sds_file):
 
     # Get the existing PPSD document
-    PPSDObjects = mongoSession.getPPSDDocuments(sds_file)
+    PPSDObjects = mongo_pool.getPPSDDocuments(sds_file)
 
     # Document exists and has the same hash: it exists
-    if PPSDObjects is not None:
+    if PPSDObjects:
         PPSDObject = PPSDObjects[0]
         exists = True
         if PPSDObject["checksum"] == sds_file.checksum:

@@ -28,6 +28,8 @@ services:
   ppsd_webservice:
     image: 'ppsd_webservice'
     container_name: 'ppsd_webservice'
+    depends_on:
+      - ppsd_mongo
     ports:
       - '3000:3000'
 
