@@ -77,13 +77,27 @@ class SDSFile():
     # Returns the filename
     @property
     def filename(self):
+        return self.custom_quality_filename(self.quality)
+
+    def custom_quality_filename(self, quality):
+        """Returns the filename of the file related to this one but with another quality."""
         return ".".join([self.net,
                          self.sta,
                          self.loc,
                          self.cha,
-                         self.quality,
+                         quality,
                          self.year,
                          self.day])
+
+    def custom_quality_subdir(self, quality):
+        """Returns the subdirectory of the archived file related to this one but
+        with another quality."""
+        return os.path.join(
+            self.year,
+            self.net,
+            self.sta,
+            ".".join([self.cha, quality])
+        )
 
     # Returns custom filepath for a given file
     def customPath(self, root):

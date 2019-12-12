@@ -7,6 +7,9 @@ Every rule should be implemented as a module function with exactly two arguments
 """
 
 import logging
+import os
+import shutil
+
 from modules.wfcatalog import getWFMetadata
 from modules.dublincore import extractDCMetadata
 
@@ -380,6 +383,47 @@ def printWithMessage(options, sdsFile):
         The file to be processed.
     """
     print(sdsFile.filename, options["message"])
+
+
+def quarantineRule(options, sdsFile):
+    """Moves the file to another directory where it can be further analyzed by a human.
+
+    It should be called with the .Q file, but acts on both of them. It moves the raw
+    .D data file, and deletes the .Q file. Fails if there is already a .D file
+    with same name already quarantined.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``quarantine_path``: Directory for the quarantine area (`str`)
+        - ``dry_run``: If True, doesn't move/delete the files (`bool`)
+    SDSFile : `SDSFile`
+        The file to be processed.
+    """
+
+    # Move the raw .D file
+    d_file_path = os.path.join(sdsFile.archiveRoot,
+                               sdsFile.custom_quality_subdir('D'),
+                               sdsFile.custom_quality_filename('D'))
+    dest_dir = os.path.join(options['quarantine_path'],
+                            sdsFile.custom_quality_subdir('D'))
+    if options['dry_run']:
+        logger.info('Would move %s to %s.', d_file_path, dest_dir)
+    else:
+        os.makedirs(dest_dir, exist_ok=True)
+        shutil.move(d_file_path, dest_dir)
+        logger.info('Moved %s to %s.', d_file_path, dest_dir)
+
+    # Delete the .Q file
+    q_file_path = sdsFile.filepath
+    if options['dry_run']:
+        logger.info('Would remove %s.', q_file_path)
+    else:
+        os.remove(q_file_path)
+        logger.info('Removed %s.', q_file_path)
+
+    # TODO: Report
 
 
 def testPrint(options, sdsFile):
