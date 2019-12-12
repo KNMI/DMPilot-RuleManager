@@ -13,6 +13,20 @@
             }
         }]
     },
+    "QUARANTINE": {
+	"description": "Quarantines out-of-time D files. Deletes corresponding Q file.",
+        "functionName": "quarantineRule",
+        "options": {
+            "quarantine_path": "/tmp/quarantine/",
+            "dry_run": true
+        },
+        "conditions": [{
+            "functionName": "assertQualityCondition",
+            "options": {
+                "qualities": ["Q"]
+            }
+        }]
+    },
     "INGESTION": {
 	"description": "Puts the pruned file in the local iRODS.",
         "functionName": "ingestionS3Rule",
