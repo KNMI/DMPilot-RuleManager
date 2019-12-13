@@ -1,5 +1,5 @@
 {
-    "DELETE_METADATA": {
+    "DELETE_WFCATALOG": {
         "description": "Deletes waveform metadata from WFCatalog.",
         "functionName": "deleteWaveformMetadataRule",
         "options": {},
@@ -43,6 +43,10 @@
         "functionName": "removeFromDeletionDatabaseRule",
         "options": {},
         "conditions": [
+            {
+            "functionName": "!assertPPSDMetadataExistsCondition",
+            "options": {}
+            },
             {
             "functionName": "!assertDCMetadataExistsCondition",
             "options": {}

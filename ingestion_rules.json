@@ -1,37 +1,42 @@
 {
     "PRUNE": {
-	"description": "Prunes and repacks the daily file. Saves a Q-quality file.",
+        "description": "Prunes and repacks the daily file. Saves a Q-quality file.",
         "functionName": "pruneRule",
         "options": {
             "removeOverlap": true,
             "repackRecordSize": 4096
         },
-        "conditions": [{
-            "functionName": "assertQualityCondition",
-            "options": {
-                "qualities": ["D"]
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["D"]
+                }
             }
-        }]
+        ]
     },
     "QUARANTINE": {
-	"description": "Quarantines out-of-time D files. Deletes corresponding Q file.",
+        "description": "Quarantines out-of-time D files. Deletes corresponding Q file.",
         "functionName": "quarantineRule",
         "options": {
             "quarantine_path": "/tmp/quarantine/",
             "dry_run": true
         },
-        "conditions": [{
-            "functionName": "assertQualityCondition",
-            "options": {
-                "qualities": ["Q"]
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
             }
-        }]
+        ]
     },
     "INGESTION": {
-	"description": "Puts the pruned file in the local iRODS.",
+        "description": "Puts the pruned file in the S3 bucket.",
         "functionName": "ingestionS3Rule",
         "options": {},
-        "conditions": [{
+        "conditions": [
+            {
                 "functionName": "assertQualityCondition",
                 "options": {
                     "qualities": ["Q"]
@@ -40,67 +45,67 @@
             {
                 "functionName": "!assertS3ExistsCondition",
                 "options": {
-		    "check_checksum": true
-		}
+                    "check_checksum": true
+                }
             }
         ]
     },
-    "METADATA": {
-	"description": "Writes waveform metadata to the WFCatalog.",
+    "WFCATALOG": {
+        "description": "Writes waveform metadata to the WFCatalog.",
         "functionName": "waveformMetadataRule",
         "timeout" : 5,
         "options": {},
         "conditions": [
-	    {
-		"functionName": "assertQualityCondition",
-		"options": {
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
                     "qualities": ["Q"]
-		}
+                }
             },
-	    {
-		"functionName": "assertWFCatalogNotExistsCondition",
-		"options": {}
+            {
+                "functionName": "assertWFCatalogNotExistsCondition",
+                "options": {}
             },
-	    {
+            {
                 "functionName": "assertS3ExistsCondition",
                 "options": {
-		    "check_checksum": true
-		}
+                    "check_checksum": true
+                }
             }
-	]
+        ]
     },
     "DCAT": {
-	"description": "Writes Dublin Core metadata to the WFCatalog.",
+        "description": "Writes Dublin Core metadata to the WFCatalog.",
         "functionName": "dcMetadataRule",
         "timeout" : 5,
         "options": {},
         "conditions": [
-	    {
-		"functionName": "assertQualityCondition",
-		"options": {
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
                     "qualities": ["Q"]
-		}
+                }
             },
-	    {
-		"functionName": "assertDCMetadataNotExistsCondition",
-		"options": {}
+            {
+                "functionName": "assertDCMetadataNotExistsCondition",
+                "options": {}
             },
-	    {
+            {
                 "functionName": "assertS3ExistsCondition",
                 "options": {
-		    "check_checksum": true
-		}
+                    "check_checksum": true
+                }
             }
-	]
+        ]
     },
     "PPSD": {
         "description": "Proceses PPSD metadata and stores it in a MongoDB.",
         "functionName": "ppsdMetadataRule",
-        "timeout" : 10,
+        "timeout" : 30,
         "options": {},
         "conditions": [
             {
-		"functionName": "assertQualityCondition",
+                "functionName": "assertQualityCondition",
                 "options": {
                     "qualities": ["Q"]
                 }
@@ -109,58 +114,60 @@
                 "functionName": "assertPPSDMetadataNotExistsCondition",
                 "options": {}
             },
-	    {
+            {
                 "functionName": "assertS3ExistsCondition",
                 "options": {
-		    "check_checksum": true
-		}
+                    "check_checksum": true
+                }
             }
         ]
     },
     "PID": {
-	"description": "Assigns a PID to the file using B2HANDLE.",
+        "description": "Assigns a PID to the file using B2HANDLE.",
         "functionName": "pidRule",
         "timeout" : 5,
         "options": {},
-        "conditions": [{
-            "functionName": "assertQualityCondition",
-            "options": {
-                "qualities": ["Q"]
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
             }
-        }]
+        ]
     },
     "REPLICATION": {
-	"description": "Replicates the file in a federated iRODS, using B2SAFE",
+        "description": "Replicates the file in a federated iRODS, using B2SAFE",
         "functionName": "replicationRule",
         "timeout" : 5,
         "options": {
-	    "replicationRoot": "/remoteZone/home/rods#localZone/"
-	},
+            "replicationRoot": "/remoteZone/home/rods#localZone/"
+        },
         "conditions": [
-	    {
-		"functionName": "assertQualityCondition",
-		"options": {
-                    "qualities": ["Q"]
-		}
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                            "qualities": ["Q"]
+                }
             },
             {
-		"functionName": "assertPIDCondition",
-		"options": {}
+                "functionName": "assertPIDCondition",
+                "options": {}
             },
-	    {
+            {
                 "functionName": "assertS3ExistsCondition",
                 "options": {
-		    "check_checksum": true
-		}
+                    "check_checksum": true
+                }
             }
         ]
     },
     "PURGE_UNKNOWN": {
-	"description": "Deletes [REM]-quality local files that are older than 2 days.",
+        "description": "Deletes [REM]-quality local files that are older than 2 days.",
         "functionName": "purgeRule",
         "options": {},
         "conditions": [
-	    {
+            {
                 "functionName": "assertQualityCondition",
                 "options": {
                     "qualities": ["R", "E", "M"]
@@ -175,10 +182,11 @@
         ]
     },
     "PURGE_RAW": {
-	"description": "Deletes D-quality files that have been pruned.",
+        "description": "Deletes D-quality files that have been pruned.",
         "functionName": "purgeRule",
         "options": {},
-        "conditions": [{
+        "conditions": [
+            {
                 "functionName": "assertQualityCondition",
                 "options": {
                     "qualities": ["D"]
@@ -197,20 +205,21 @@
         ]
     },
     "PURGE_PRUNED": {
-	"description": "Deletes pruned files that have been successfully processed.",
+        "description": "Deletes pruned files that have been successfully processed.",
         "functionName": "purgeRule",
         "options": {},
-        "conditions": [{
+        "conditions": [
+            {
                 "functionName": "assertQualityCondition",
                 "options": {
                     "qualities": ["Q"]
                 }
             },
-	    {
+            {
                 "functionName": "assertS3ExistsCondition",
                 "options": {
-		    "check_checksum": true
-		}
+                    "check_checksum": true
+                }
             },
             {
                 "functionName": "assertWFCatalogExistsCondition",
@@ -221,20 +230,24 @@
                 "options": {}
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "functionName": "assertPPSDMetadataNotExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertPIDCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertFileReplicatedCondition",
                 "options": {
-                    "days": 14
+                    "replicationRoot": "/remoteZone/home/rods#localZone/"
                 }
             },
             {
-		"functionName": "assertPIDCondition",
-		"options": {}
-            },
-            {
-		"functionName": "assertFileReplicatedCondition",
-		"options": {
-		    "replicationRoot": "/remoteZone/home/rods#localZone/"
-		}
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 7
+                }
             }
         ]
     }

@@ -6,7 +6,7 @@
         "options": {},
         "conditions": [
             {
-            "functionName": "assertQualityCondition",
+                "functionName": "assertQualityCondition",
                 "options": {
                     "qualities": ["D"]
                 }

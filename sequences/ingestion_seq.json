@@ -1,6 +1,6 @@
 [
     "PRUNE",
     "INGESTION",
-    "METADATA",
+    "WFCATALOG",
     "PPSD"
 ]
