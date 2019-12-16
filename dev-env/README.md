@@ -16,10 +16,17 @@ mkdir -p dev-env/data/sds/
 aws s3 cp s3://seismo-test-sds-samples/sds-sample-data.tar dev-env/data/sds-sample-data.tar --profile sandbox
 tar xvf dev-env/data/sds-sample-data.tar -C dev-env/data/sds/
 
-# Create Docker images of other services (use a separate local dir)
+# Create Docker image of the PPSD webservice (use a separate local dir)
 git clone git@gitlab.com:KNMI/RDSA/ppsd-webservice.git <PPSD_WS_DIR>
 cd <PPSD_WS_DIR>
 docker build -t ppsd_webservice .
+
+# Create Docker image of WFCatalog
+git clone https://github.com/EIDA/wfcatalog.git <WFCATALOG_DIR>
+cd <WFCATALOG_DIR>/service
+# Edit in configuration.json the following values: "HOST": "0.0.0.0", "PORT": 8888
+# Also in configuration.json, inside "MONGO": "HOST": "wf_catalog_mongo:27017/wfrepo"
+docker build -t "rm/node-ws-wfcat:1" .
 
 # Put AWS credentials in env variables to be used by containers
 # (it assumes your credentials are stored in a profile with your user name)
