@@ -1,11 +1,11 @@
 {
     "CHECK_INGESTION": {
-        "description": "Check if the file is in iRODS.",
+        "description": "Check if the file is in S3.",
         "functionName": "printWithMessage",
-        "options": {"message": "Failed iRODS ingestion"},
+        "options": {"message": "Failed S3 ingestion"},
         "conditions": [
             {
-                "functionName": "!assertIRODSExistsCondition",
+                "functionName": "!assertS3ExistsCondition",
                 "options": {}
             }
         ]

@@ -1,0 +1,13 @@
+[
+    "PRUNE",
+    "QUARANTINE",
+    "INGESTION",
+    "WFCATALOG",
+    "DCAT",
+    "PPSD",
+    "PID",
+    "REPLICATION",
+    "PURGE_UNKNOWN",
+    "PURGE_RAW",
+    "PURGE_PRUNED"
+]

@@ -1,0 +1,5 @@
+[
+    "CHECK_INGESTION",
+    "CHECK_WFCATALOG",
+    "CHECK_PPSD"
+]

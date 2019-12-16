@@ -1,0 +1,94 @@
+{
+    "DELETE_REPLICATION": {
+        "description": "TODO",
+        "functionName": "TODO",
+        "options": {},
+        "conditions": []
+    },
+    "DELETE_PID": {
+        "description": "TODO",
+        "functionName": "TODO",
+        "options": {},
+        "conditions": []
+    },
+    "DELETE_PPSD": {
+        "description": "Deletes PPSD metadata.",
+        "functionName": "deletePPSDMetadataRule",
+        "options": {},
+        "conditions": []
+    },
+    "DELETE_DCAT": {
+        "description": "Deletes Dublin Core metadata from WFCatalog.",
+        "functionName": "deleteDCMetadataRule",
+        "options": {},
+        "conditions": []
+    },
+    "DELETE_WFCATALOG": {
+        "description": "Deletes waveform metadata from WFCatalog.",
+        "functionName": "deleteWaveformMetadataRule",
+        "options": {},
+        "conditions": []
+    },
+    "DELETE_TEMP_ARCHIVE": {
+        "description": "Deletes file from local archive.",
+        "functionName": "purgeRule",
+        "options": {},
+        "conditions": []
+    },
+    "DELETE_ARCHIVE": {
+        "description": "Deletes file from S3 if its metadata is deleted.",
+        "functionName": "TODO",
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "!assertPPSDMetadataExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "!assertDCMetadataExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "!assertWFCatalogExistsCondition",
+                "options": {}
+            }
+        ]
+    },
+    "DELETE_FROM_DELETION_DB": {
+        "description": "Removes the file from the deletion list if all deletion steps were successful.",
+        "functionName": "removeFromDeletionDatabaseRule",
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "!assertFileReplicatedCondition",
+                "options": {
+                    "replicationRoot": "/remoteZone/home/rods#localZone/"
+                }
+            },
+            {
+                "functionName": "!assertPIDCondition",
+                "options": {}
+            },
+            {
+                "functionName": "!assertPPSDMetadataExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "!assertDCMetadataExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "!assertWFCatalogExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "!assertTempArchiveExistCondition",
+                "options": {}
+            },
+            {
+                "functionName": "!assertIRODSExistCondition",
+                "options": {}
+            }
+        ]
+    }
+}

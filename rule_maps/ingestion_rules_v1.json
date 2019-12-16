@@ -1,0 +1,176 @@
+{
+    "PRUNE": {
+        "description": "Prunes and repacks the daily file. Saves a Q-quality file.",
+        "functionName": "pruneRule",
+        "options": {
+            "removeOverlap": true,
+            "repackRecordSize": 4096
+        },
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["D"]
+                }
+            }
+        ]
+    },
+    "QUARANTINE": {
+        "description": "Quarantines out-of-time D files. Deletes corresponding Q file.",
+        "functionName": "quarantineRule",
+        "options": {
+            "quarantine_path": "/tmp/quarantine/",
+            "dry_run": true
+        },
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            }
+        ]
+    },
+    "INGESTION": {
+        "description": "Puts the pruned file in the S3 bucket.",
+        "functionName": "ingestionS3Rule",
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "!assertS3ExistsCondition",
+                "options": {
+                    "check_checksum": true
+                }
+            }
+        ]
+    },
+    "WFCATALOG": {
+        "description": "Writes waveform metadata to the WFCatalog.",
+        "functionName": "waveformMetadataRule",
+        "timeout" : 5,
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertWFCatalogNotExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+                    "check_checksum": true
+                }
+            }
+        ]
+    },
+    "PPSD": {
+        "description": "Proceses PPSD metadata and stores it in a MongoDB.",
+        "functionName": "ppsdMetadataRule",
+        "timeout" : 30,
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertPPSDMetadataNotExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+                    "check_checksum": true
+                }
+            }
+        ]
+    },
+    "PURGE_UNKNOWN": {
+        "description": "Deletes [REM]-quality local files that are older than 2 days.",
+        "functionName": "purgeRule",
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["R", "E", "M"]
+                }
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 2
+                }
+            }
+        ]
+    },
+    "PURGE_RAW": {
+        "description": "Deletes D-quality files that have been pruned.",
+        "functionName": "purgeRule",
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["D"]
+                }
+            },
+            {
+                "functionName": "assertPrunedFileExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 7
+                }
+            }
+        ]
+    },
+    "PURGE_PRUNED": {
+        "description": "Deletes pruned files that have been successfully processed.",
+        "functionName": "purgeRule",
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+                    "check_checksum": true
+                }
+            },
+            {
+                "functionName": "assertWFCatalogExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertPPSDMetadataNotExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 7
+                }
+            }
+        ]
+    }
+}
