@@ -40,6 +40,16 @@ services:
     volumes:
       - ppsd_mongodb:/data/db
 
+
+  wfcatalog_service:
+    image: 'rm/node-ws-wfcat:1'
+    hostname: 'wfcatalog_service'
+    container_name: 'wfcatalog_service'
+    depends_on:
+      - wf_catalog_mongo
+    ports:
+      - 8888:8888
+
 volumes:
   wfcat_mongodb:
   ppsd_mongodb:
