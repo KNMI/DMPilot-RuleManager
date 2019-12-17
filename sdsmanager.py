@@ -13,6 +13,8 @@ from orfeus.sdscollector import SDSFileCollector
 import rules.sdsrules as sdsrules
 import conditions.sdsconditions as sdsconditions
 
+from configuration import config
+
 
 def main():
     try:
@@ -22,10 +24,14 @@ def main():
 
         # Parse command line arguments
         parser = argparse.ArgumentParser()
-        parser.add_argument("--dir", help="directory containing the files to process",
-                            required=True)
+        parser.add_argument("--dir",
+                            help=("directory containing the files to process "
+                                  "(defaults to the value in configuration.py)"),
+                            default=config["DATA_DIR"])
         parser.add_argument("--ruleseq", help="rule sequence file", required=True)
-        parser.add_argument("--collect_wildcards", help="files to collect, defined by a wildcards string (within single quotes!)")
+        parser.add_argument("--collect_wildcards",
+                            help=("files to collect, defined by a wildcards string "
+                                  "(within single quotes!)"))
         parser.add_argument("--from_file",
                             help="files to collect, listed in a text file or stdin '-'",
                             type=argparse.FileType('r'))
@@ -33,7 +39,8 @@ def main():
 
         # Check collection parameters
         if parsedargs["collect_wildcards"] is None and parsedargs["from_file"] is None:
-            return print("Files to collect need to be specified using --collect_wildcards or --from_file")
+            return print("Files to collect need to be specified using "
+                         "--collect_wildcards or --from_file")
 
         # Set up rules
         RM = RuleManager()
