@@ -1,13 +1,16 @@
-[
-    "PRUNE",
-    "QUARANTINE",
-    "INGESTION",
-    "WFCATALOG",
-    "DCAT",
-    "PPSD",
-    "PID",
-    "REPLICATION",
-    "PURGE_UNKNOWN",
-    "PURGE_RAW",
-    "PURGE_PRUNED"
-]
+{
+    "ruleMap" : "/home/rulemanager/rule_maps/ingestion_rules_v2.json",
+    "sequence" : [
+	"PRUNE",
+	"QUARANTINE",
+	"INGESTION",
+	"WFCATALOG",
+	"DCAT",
+	"PPSD",
+	"PID",
+	"REPLICATION",
+	"PURGE_UNKNOWN",
+	"PURGE_RAW",
+	"PURGE_PRUNED"
+    ]
+}

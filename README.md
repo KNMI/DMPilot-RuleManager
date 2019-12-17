@@ -55,9 +55,11 @@ database.
 2) Edit your JSON rule map file specifying the options for each
 rule. The rules available are the ones in `rules.sdsrules`.
 
-3) Edit your JSON rule sequence file specifying which rules to run and in what order.
+3) Edit your JSON rule sequence file specifying which rules to run,
+the order they should run, and the rule map file that defines their
+options.
 
-4) Run `python3 sdsmanager.py --dir /path/to/archive --rulemap rules.json --ruleseq rule_seq.json`.
+4) Run `python3 sdsmanager.py --dir /path/to/archive --ruleseq rule_seq.json`.
 
 ## Implementing a new rule for an existing manager
 
@@ -151,7 +153,7 @@ An example on how to use it:
 
 ```python
 rm = RuleManager() # Initialization, sets up logging
-rm.loadRules(rules_module, conditions_module, rulemap_file, ruleseq_file) # Loads the rules
+rm.loadRules(rules_module, conditions_module, ruleseq_file) # Loads the rules
 rm.sequence(item_list) # Executes the sequence of rules on all items
 ```
 

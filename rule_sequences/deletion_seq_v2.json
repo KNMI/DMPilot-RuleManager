@@ -1,10 +1,13 @@
-[
-    "DELETE_REPLICATION",
-    "DELETE_PID",
-    "DELETE_PPSD",
-    "DELETE_DCAT",
-    "DELETE_WFCATALOG",
-    "DELETE_TEMP_ARCHIVE",
-    "DELETE_ARCHIVE",
-    "DELETE_FROM_DELETION_DB"
-]
+{
+    "ruleMap" : "/home/rulemanager/rule_maps/deletion_rules_v2.json",
+    "sequence" : [
+	"DELETE_REPLICATION",
+	"DELETE_PID",
+	"DELETE_PPSD",
+	"DELETE_DCAT",
+	"DELETE_WFCATALOG",
+	"DELETE_TEMP_ARCHIVE",
+	"DELETE_ARCHIVE",
+	"DELETE_FROM_DELETION_DB"
+    ]
+}

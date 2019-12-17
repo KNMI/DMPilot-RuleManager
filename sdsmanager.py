@@ -24,7 +24,6 @@ def main():
         parser = argparse.ArgumentParser()
         parser.add_argument("--dir", help="directory containing the files to process",
                             required=True)
-        parser.add_argument("--rulemap", help="rule map file", required=True)
         parser.add_argument("--ruleseq", help="rule sequence file", required=True)
         parser.add_argument("--collect_wildcards", help="files to collect, defined by a wildcards string (within single quotes!)")
         parser.add_argument("--from_file",
@@ -38,7 +37,7 @@ def main():
 
         # Set up rules
         RM = RuleManager()
-        RM.loadRules(sdsrules, sdsconditions, parsedargs["rulemap"], parsedargs["ruleseq"])
+        RM.loadRules(sdsrules, sdsconditions, parsedargs["ruleseq"])
 
         # Collect files
         fileCollector = SDSFileCollector(parsedargs["dir"])

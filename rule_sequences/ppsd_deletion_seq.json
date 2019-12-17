@@ -1,3 +1,6 @@
-[
-    "DELETE_PPSD"
-]
+{
+    "ruleMap" : "/home/rulemanager/rule_maps/ppsd_rules.json",
+    "sequence" : [
+	"DELETE_PPSD"
+    ]
+}

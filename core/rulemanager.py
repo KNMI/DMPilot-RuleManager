@@ -34,7 +34,7 @@ class RuleManager():
 
         raise TimeoutError("Metric calculation has timed out.")
 
-    def loadRules(self, ruleModule, conditionModule, ruleMapFile, ruleSequenceFile):
+    def loadRules(self, ruleModule, conditionModule, ruleSequenceFile):
         """Loads the rules.
 
         Parameters
@@ -43,10 +43,9 @@ class RuleManager():
             A module containing all the rule handling functions.
         conditionModule : module
             A module containing all the condition functions.
-        ruleMapFile : `str`
-            The path for a JSON file defining which rules to run, and their options
         ruleSequenceFile : `str`
-            The path for a JSON file defining in which order to run the rules.
+            The path for a JSON file defining in which order to run the rules,
+            and the name of the rule map file.
         """
 
         # Load the Python scripted rules and conditions
@@ -56,7 +55,15 @@ class RuleManager():
         rule_desc = None    # Rule configuration
         rule_seq = None     # Rule order
 
+        # Load the rule sequence JSON file
+        try:
+            with open(ruleSequenceFile) as order_file:
+                rule_seq = json.load(order_file)
+        except IOError:
+            raise IOError("The rule sequence file %s could not be found." % ruleSequenceFile)
+
         # Load the rule configuration JSON file
+        ruleMapFile = rule_seq["ruleMap"]
         try:
             with open(ruleMapFile) as rule_file:
                 rule_desc = json.load(rule_file)
@@ -69,17 +76,10 @@ class RuleManager():
         except jsonschema.exceptions.ValidationError:
             raise ValueError("The rulemap %s does not validate against the schema." % ruleMapFile)
 
-        # Load the rule sequence JSON file
-        try:
-            with open(ruleSequenceFile) as order_file:
-                rule_seq = json.load(order_file)
-        except IOError:
-            raise IOError("The rule sequence file %s could not be found." % ruleSequenceFile)
-
         # Get the rule from the map
         try:
-            self.ruleSequence = [rule_desc[rule_name] for rule_name in rule_seq]
-            for rule_name in rule_seq:
+            self.ruleSequence = [rule_desc[rule_name] for rule_name in rule_seq["sequence"]]
+            for rule_name in rule_seq["sequence"]:
                 rule_desc[rule_name]["ruleName"] = rule_name
         except KeyError as exception:
             raise ValueError("The rule %s could not be found in the configured rule map %s." %

@@ -1,9 +1,12 @@
-[
-    "CHECK_INGESTION",
-    "CHECK_WFCATALOG",
-    "CHECK_DCAT",
-    "CHECK_PPSD",
-    "CHECK_PID",
-    "CHECK_REPLICATION",
-    "CHECK_REPLICA_PID"
-]
+{
+    "ruleMap" : "/home/rulemanager/rule_maps/checkup_rules.json",
+    "sequence" : [
+	"CHECK_INGESTION",
+	"CHECK_WFCATALOG",
+	"CHECK_DCAT",
+	"CHECK_PPSD",
+	"CHECK_PID",
+	"CHECK_REPLICATION",
+	"CHECK_REPLICA_PID"
+    ]
+}

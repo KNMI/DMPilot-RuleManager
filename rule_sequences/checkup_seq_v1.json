@@ -1,5 +1,8 @@
-[
-    "CHECK_INGESTION",
-    "CHECK_WFCATALOG",
-    "CHECK_PPSD"
-]
+{
+    "ruleMap" : "/home/rulemanager/rule_maps/checkup_rules.json",
+    "sequence" : [
+	"CHECK_INGESTION",
+	"CHECK_WFCATALOG",
+	"CHECK_PPSD"
+    ]
+}
