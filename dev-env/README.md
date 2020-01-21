@@ -24,8 +24,13 @@ docker build -t ppsd_webservice .
 # Create Docker image of WFCatalog
 git clone https://github.com/EIDA/wfcatalog.git <WFCATALOG_DIR>
 cd <WFCATALOG_DIR>/service
-# Edit in configuration.json the following values: "HOST": "0.0.0.0", "PORT": 8888
-# Also in configuration.json, inside "MONGO": "HOST": "wf_catalog_mongo:27017/wfrepo"
+# Edit in configuration.json the following values:
+#   "HOST": "0.0.0.0",
+#   "PORT": 8888,
+#   "LOGPATH": "/var/log/",
+#   "MONGO": {
+#        "HOST": "wf_catalog_mongo:27017/wfrepo",
+#   }
 docker build -t "rm/node-ws-wfcat:1" .
 
 # Put AWS credentials in env variables to be used by containers
@@ -52,7 +57,7 @@ docker-compose -f dev-env/docker-compose.yml --project-directory ./ -p devenv ru
 ```
 # Execute rule manager (inside container)
 ./sdsmanager.py -h
-./sdsmanager.py --dir /data/temp_archive --rulemap ppsd_rules.json --ruleseq sequences/ppsd_seq.json --collect_wildcards "NL.HGN.02.BHZ.D.2019.335"
+./sdsmanager.py --ruleseq rule_sequences/ppsd_seq.json --collect_wildcards "NL.HGN.02.BHZ.D.2019.335"
 
 # List S3 bucket (inside container)
 aws s3 ls seismo-test-sds --profile sandbox

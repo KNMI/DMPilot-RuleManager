@@ -81,7 +81,7 @@ the JSON rule map, naming the rule and defining its options, like so:
         "options": { ... }
         "conditions": [{
             "functionName": "exampleCondition",
-       	    "options": { ... }
+            "options": { ... }
         }, ...]
     },
     ...

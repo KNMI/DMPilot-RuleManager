@@ -1,4 +1,5 @@
 config = {
+    "DATA_DIR": "/data/temp_archive/",
     "IRODS_ROOT": "/ZoneA/home/rods/",
     "FDSNWS_ADDRESS": "https://www.orfeus-eu.org/fdsnws/station/1/query",
     "MONGO": [

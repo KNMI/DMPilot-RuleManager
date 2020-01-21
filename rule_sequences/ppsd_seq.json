@@ -1,6 +1,6 @@
 {
     "ruleMap" : "/home/rulemanager/rule_maps/ppsd_rules.json",
     "sequence" : [
-	"PPSD"
+        "PPSD"
     ]
 }
