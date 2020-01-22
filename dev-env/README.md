@@ -29,7 +29,7 @@ cd <WFCATALOG_DIR>/service
 #   "PORT": 8888,
 #   "LOGPATH": "/var/log/",
 #   "MONGO": {
-#        "HOST": "wf_catalog_mongo:27017/wfrepo",
+#        "HOST": "wfcatalog_mongo:27017/wfrepo",
 #   }
 docker build -t "rm/node-ws-wfcat:1" .
 

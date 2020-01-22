@@ -18,10 +18,10 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
-  wf_catalog_mongo:
+  wfcatalog_mongo:
     image: 'mongo'
-    hostname: 'wf_catalog_mongo'
-    container_name: 'wf_catalog_mongo'
+    hostname: 'wfcatalog_mongo'
+    container_name: 'wfcatalog_mongo'
     volumes:
       - wfcat_mongodb:/data/db
 
@@ -46,7 +46,7 @@ services:
     hostname: 'wfcatalog_service'
     container_name: 'wfcatalog_service'
     depends_on:
-      - wf_catalog_mongo
+      - wfcatalog_mongo
     ports:
       - 8888:8888
 
