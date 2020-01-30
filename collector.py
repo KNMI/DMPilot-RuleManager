@@ -11,6 +11,8 @@ import argparse
 import core.logger
 from orfeus.sdscollector import SDSFileCollector
 
+from configuration import config
+
 
 def main():
     try:
@@ -20,8 +22,10 @@ def main():
 
         # Parse command line arguments
         parser = argparse.ArgumentParser()
-        parser.add_argument("--dir", help="directory containing the files to collect",
-                            required=True)
+        parser.add_argument("--dir",
+                            help=("directory containing the files to collect"
+                                  "(defaults to the value in configuration.py)"),
+                            default=config["DATA_DIR"])
         parser.add_argument("--collect_wildcards",
                             help=("files to collect, defined by a wildcards string "
                                   "(within single quotes!)"))
@@ -38,7 +42,6 @@ def main():
         if (parsedargs.collect_wildcards is None and parsedargs.collect_finished is None):
             return print("Files to collect need to be specified using "
                          "--collect_wildcards or --collect_finished")
-
 
         # Collect files
         fileCollector = SDSFileCollector(parsedargs.dir)
