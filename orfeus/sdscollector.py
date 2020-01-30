@@ -108,6 +108,20 @@ class SDSFileCollector(FileCollector):
         self.logger.debug("Found %d files." % len(files))
         return files
 
+    def collectFinishedFiles(self, tolerance):
+        """Collects all SDS files with modification timestamp older than last
+        midnight + tolerance minutes."""
+
+        # Compute maximum allowed time
+        timestamp = (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                     + timedelta(minutes=tolerance))
+        self.logger.debug("Searching files older than %s" % timestamp.isoformat())
+
+        # Select files by modification date
+        files = list(filter(lambda f: f.modified < timestamp, self.files))
+
+        return files
+
     def collectFromDateRange(self, iDate, days, mode="file_name"):
         """
         def collectFromDateRange

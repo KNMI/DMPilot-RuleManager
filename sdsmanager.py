@@ -35,12 +35,18 @@ def main():
         parser.add_argument("--from_file",
                             help="files to collect, listed in a text file or stdin '-'",
                             type=argparse.FileType('r'))
+        parser.add_argument("--collect_finished",
+                            help=("collect all files with modification date older that last "
+                                  "midnight plus the given number of minutes"),
+                            type=int)
         parsedargs = vars(parser.parse_args())
 
         # Check collection parameters
-        if parsedargs["collect_wildcards"] is None and parsedargs["from_file"] is None:
+        if (parsedargs["collect_wildcards"] is None
+            and parsedargs["from_file"] is None
+            and parsedargs["collect_finished"] is None):
             return print("Files to collect need to be specified using "
-                         "--collect_wildcards or --from_file")
+                         "--collect_wildcards, --from_file, or --collect_finished")
 
         # Set up rules
         RM = RuleManager()
@@ -58,6 +64,8 @@ def main():
                 for line in list_file:
                     filename_list.append(line.strip())
             files = fileCollector.collectFromFileList(filename_list)
+        elif parsedargs["collect_finished"] is not None:
+            files = fileCollector.collectFinishedFiles(parsedargs["collect_finished"])
 
         # Apply the sequence of rules on files
         RM.sequence(files)
