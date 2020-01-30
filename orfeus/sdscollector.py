@@ -22,7 +22,7 @@ class SDSFileCollector(FileCollector):
 
     """
     Class SDSFileCollector
-    Used for collecting files from an SDS archive based on time
+    Used for collecting files from an SDS archive based on time and/or filename
     """
 
     files = []
@@ -36,25 +36,21 @@ class SDSFileCollector(FileCollector):
         # Initialize logger
         self.logger = logging.getLogger('RuleManager')
 
+        # Collects all filenames
         super().__init__(archiveDir)
-        self.files = self.collectAll()
 
-    def collectAll(self):
-        """
-        def fileCollector.collectAll
-        Returns all files in the SDS archive
-        """
-        files = []
-        for f in self.files:
+        # Process filenames
+        sds_files = []
+        for filename in self.files:
             try:
-                files.append(SDSFile(f, self.archiveDir))
+                sds_files.append(SDSFile(filename, self.archiveDir))
             except Exception as e:
-                self.logger.debug("Unable to parse file '%s' as SDSFile: '%s'" % (f, str(e)))
-        return files
+                self.logger.debug("Unable to parse file '%s' as SDSFile: '%s'" % (filename,
+                                                                                  str(e)))
+        self.files = sds_files
 
-    def collectFromDate(self, iDate, mode="file_name"):
+    def _collectFromDate(self, iDate, mode="file_name"):
         """
-        def fileCollector.collectFromDate
         Collects SDS files for a particular date, based on file's name or on
         file's modification time
         """
@@ -87,14 +83,10 @@ class SDSFileCollector(FileCollector):
             raise ValueError("Unsupported mode %s requested to find files." % mode)
 
         self.logger.debug("Found %d files using '%s' mode." % (len(files), mode))
-
         return files
 
-    def collectFromWildcards(self, filename):
-        """
-        def fileCollector.collectFromWildcards
-        Collects SDS files based on a filename that allows wildcards
-        """
+    def filterFromWildcards(self, filename):
+        """Filters SDS files based on a filename that allows wildcards."""
 
         # Check if an SDS file was specified
         if len(filename.split(".")) != 7:
@@ -103,15 +95,25 @@ class SDSFileCollector(FileCollector):
         self.logger.debug("Searching files whose name fits in '%s'" % filename)
 
         # Take the basename and map to SDSFile
-        files = list(filter(lambda x: fnmatch(x.filename, filename), self.files))
+        self.files = list(filter(lambda x: fnmatch(x.filename, filename), self.files))
 
-        self.logger.debug("Found %d files." % len(files))
-        return files
+        self.logger.debug("Found %d files." % len(self.files))
 
-    def collectFromDateRange(self, iDate, days, mode="file_name"):
-        """
-        def collectFromDateRange
-        Collects files from a range of dates;
+    def filterFinishedFiles(self, tolerance):
+        """Filters all SDS files with modification timestamp older than last
+        midnight + tolerance minutes."""
+
+        # Compute maximum allowed time
+        timestamp = (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                     + timedelta(minutes=tolerance))
+        self.logger.debug("Searching for files modified before %s" % timestamp.isoformat())
+
+        # Select files by modification date
+        self.files = list(filter(lambda f: f.modified < timestamp, self.files))
+        self.logger.debug("Found %d files." % len(self.files))
+
+    def filterFromDateRange(self, iDate, days, mode="file_name"):
+        """Filters files from a range of dates;
             if days > 0: [date, date + N - 1]
             if days == 0: nothing
             if days < 0: [date - N, date - 1]
@@ -129,23 +131,19 @@ class SDSFileCollector(FileCollector):
             stop = start + days
         else:
             start = days
-            stop =  0
+            stop = 0
         for day in range(start, stop):
-            collectedFiles += self.collectFromDate(iDate + timedelta(days=day), mode=mode)
+            collectedFiles += self._collectFromDate(iDate + timedelta(days=day), mode=mode)
 
-        return collectedFiles
+        self.files = collectedFiles
 
-    def collectFromPastDays(self, days, mode='file_name'):
-        """
-        def collectFromPastDays
-        Collects files from N days in the past: [today - N, yesterday]
-        """
+    def filterFromPastDays(self, days, mode='file_name'):
+        """Filters files from N days in the past: [today - N, yesterday]"""
 
         # Negative days, skipping today
-        return self.collectFromDateRange(datetime.now(), -days, mode=mode)
+        self.filterFromDateRange(datetime.now(), -days, mode=mode)
 
-    def collectFromFileList(self, file_list):
-        """Collect files from a list of filenames."""
+    def filterFromFileList(self, file_list):
+        """Filter files that are in a list of filenames."""
 
-        return list(filter(lambda x: x.filename in file_list,
-                           self.files))
+        self.files = list(filter(lambda x: x.filename in file_list, self.files))
