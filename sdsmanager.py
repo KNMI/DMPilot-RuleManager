@@ -55,20 +55,19 @@ def main():
         # Collect files
         fileCollector = SDSFileCollector(parsedargs["dir"])
 
-        files = None
         if parsedargs["collect_wildcards"] is not None:
-            files = fileCollector.collectFromWildcards(parsedargs["collect_wildcards"])
-        elif parsedargs["from_file"] is not None:
+            fileCollector.filterFromWildcards(parsedargs["collect_wildcards"])
+        if parsedargs["from_file"] is not None:
             filename_list = []
             with parsedargs["from_file"] as list_file:
                 for line in list_file:
                     filename_list.append(line.strip())
-            files = fileCollector.collectFromFileList(filename_list)
-        elif parsedargs["collect_finished"] is not None:
-            files = fileCollector.collectFinishedFiles(parsedargs["collect_finished"])
+            fileCollector.filterFromFileList(filename_list)
+        if parsedargs["collect_finished"] is not None:
+            fileCollector.filterFinishedFiles(parsedargs["collect_finished"])
 
         # Apply the sequence of rules on files
-        RM.sequence(files)
+        RM.sequence(fileCollector.files)
 
         logger.info("Finished SDS Manager execution.")
 

@@ -43,15 +43,14 @@ def main():
         # Collect files
         fileCollector = SDSFileCollector(parsedargs.dir)
 
-        files = None
         if parsedargs.collect_wildcards is not None:
-            files = fileCollector.collectFromWildcards(parsedargs.collect_wildcards)
-        elif parsedargs.collect_finished is not None:
-            files = fileCollector.collectFinishedFiles(parsedargs.collect_finished)
+            fileCollector.filterFromWildcards(parsedargs.collect_wildcards)
+        if parsedargs.collect_finished is not None:
+            fileCollector.filterFinishedFiles(parsedargs.collect_finished)
 
         # Write to output (file or stdout)
         with parsedargs.output as list_file:
-            for sds_file in files:
+            for sds_file in fileCollector.files:
                 list_file.write(sds_file.filename + "\n")
         logger.info("Finished SDS File Collector execution. Output to '%s'.", parsedargs.output.name)
 
