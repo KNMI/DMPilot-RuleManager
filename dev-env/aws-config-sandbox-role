@@ -1,4 +1,0 @@
-[profile sandbox]
-region = eu-west-1
-role_arn = arn:aws:iam::510819665756:role/knmi-operator
-credential_source = Environment

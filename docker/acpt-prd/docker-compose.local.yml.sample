@@ -1,0 +1,12 @@
+version: '3.5'
+services:
+  rulemanager:
+    # Add your local user and group ids
+    user: 12345:67890
+    volumes:
+      # Add your local SDS dir
+      - ${HOME}/data/sds:/data/temp_archive:ro
+      # Add your local var dir (for i.e.: deletion.db)
+      - ${HOME}/var/rulemanager:/var/rulemanager
+      # Add your local log dir
+      - ${HOME}/log:/tmp/rulemanager/logs

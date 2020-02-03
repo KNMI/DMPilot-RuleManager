@@ -1,3 +1,4 @@
-*
-!requirements.txt
-!dev-env/obspy-spectral_estimation.py
+docker/dev/data/
+configuration.py
+.git/
+*~

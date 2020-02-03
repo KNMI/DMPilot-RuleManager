@@ -19,7 +19,7 @@ RUN apt-get update && apt-get -y install python3-obspy
 RUN apt-get update && apt-get -y install python3-pip
 
 # Install data tools from IRIS
-RUN mkdir -p /home/iris-lib/ /home/bin/
+RUN mkdir -p /home/iris-lib/ /home/bin/ /home/rulemanager/
 #
 # libmseed
 WORKDIR /home/iris-lib/
@@ -52,23 +52,28 @@ WORKDIR /home/rulemanager/
 RUN rm -Rv /home/iris-lib
 ENV PATH="$PATH:/home/bin"
 
-# Declare volume to put temporary archive
+# Declare volume for temporary archive
 VOLUME /data/temp_archive
 
-# Declare volume to put Rule Manager code
-VOLUME /home/rulemanager
+# Declare volume for var files (i.e.: deletion.db)
+VOLUME /var/rulemanager
 
-# Install AWS CLI to be able to make S3 queries
-RUN pip3 install awscli
+# Declare volume to write app logs
+VOLUME /tmp/rulemanager/logs
 
-# AWS credentials
-# TODO: use docker secrets
-ENV AWS_CONFIG_FILE="/home/rulemanager/dev-env/aws-config-sandbox-role"
+# Copy Rule Manager code
+COPY . .
 
 # Install python requirements
-COPY ./requirements.txt /home/rulemanager-requirements.txt
-RUN pip3 install -r /home/rulemanager-requirements.txt
-RUN rm -v /home/rulemanager-requirements.txt
+RUN pip3 install -r ./requirements.txt
 
 # Apply ObsPy hack for PPSD computation
-COPY ./dev-env/obspy-spectral_estimation.py /usr/lib/python3/dist-packages/obspy/signal/spectral_estimation.py
+COPY ./docker/obspy-spectral_estimation.py /usr/lib/python3/dist-packages/obspy/signal/spectral_estimation.py
+
+# Configure user
+RUN groupadd -g 23011 sysop && \
+    useradd -u 23011 -g 23011 sysop
+RUN chown -R sysop:sysop /home/rulemanager
+USER sysop
+
+# TODO: AWS credentials

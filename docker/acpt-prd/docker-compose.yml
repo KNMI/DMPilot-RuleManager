@@ -1,0 +1,32 @@
+# TODO: configuration as docker configs, secrets or env?
+# TODO: aws credentials as secrets or in config file?
+# TODO: volume temp archive (not read-only)
+# TODO: dependency on ppsd-webservice network?
+
+version: '3.5'
+services:
+  rulemanager:
+    container_name: 'rulemanager'
+    build:
+      context: ./
+      dockerfile: ./docker/acpt-prd/Dockerfile
+    user: sysop:sysop
+    volumes:
+      - /data/shared/sds:/data/temp_archive:ro
+      - /data/seismo/rulemanager:/var/rulemanager
+      - /home/sysop/log:/tmp/rulemanager/logs
+    networks:
+      - ppsd_net
+#    environment:
+#      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+#      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    secrets:
+      - source: rulemanager_config
+        target: /home/rulemanager/configuration.py
+
+secrets:
+  rulemanager_config:
+    file: ./configuration.py
+networks:
+  ppsd_net:
+    external: true
