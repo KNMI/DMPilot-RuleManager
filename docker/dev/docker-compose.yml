@@ -1,22 +1,19 @@
-# rulemanager -> volumes and cfg?
-# rulemanager -> aws credentials as docker secrets
-# wfcatalog -> cfg?
-# ppsd-webservice -> dockerfile todo
-# mongodb -> docker run -p 27017:27017 --name mongo_server -v $(pwd)/mongodb:/data/db -d mongo:4.0.5-xenial
-
 version: '3.5'
 services:
   rulemanager:
     container_name: 'rulemanager'
     build:
       context: ./
-      dockerfile: ./dev-env/Dockerfile
+      dockerfile: ./docker/dev/Dockerfile
+      args:
+        ADFS_USER: ${ADFS_USER}
     volumes:
       - ./:/home/rulemanager
-      - ./dev-env/data/sds:/data/temp_archive
+      - ./docker/dev/data/sds:/data/temp_archive
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN}
 
   wfcatalog_mongo:
     image: 'mongo'
@@ -26,12 +23,17 @@ services:
       - wfcat_mongodb:/data/db
 
   ppsd_webservice:
-    image: 'ppsd_webservice'
     container_name: 'ppsd_webservice'
+    build:
+      context: ${PPSD_WS_DIR}
+      dockerfile: ${PPSD_WS_DIR}/Dockerfile
     depends_on:
       - ppsd_mongo
     ports:
       - '3000:3000'
+    volumes:
+      - ${PPSD_WS_DIR}/config.json:/usr/src/app/config.json
+      - /dev/null:/tmp/ppsd-service/logs/PPSD-Webservice-Trace.log
 
   ppsd_mongo:
     image: 'mongo'
@@ -42,9 +44,11 @@ services:
 
 
   wfcatalog_service:
-    image: 'rm/node-ws-wfcat:1'
-    hostname: 'wfcatalog_service'
     container_name: 'wfcatalog_service'
+    hostname: 'wfcatalog_service'
+    build:
+      context: ${WFCAT_WS_DIR}/service
+      dockerfile: ${WFCAT_WS_DIR}/service/Dockerfile
     depends_on:
       - wfcatalog_mongo
     ports:

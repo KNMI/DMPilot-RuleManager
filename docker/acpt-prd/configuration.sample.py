@@ -1,18 +1,18 @@
 config = {
-    "DATA_DIR": "/data/temp_archive/",
+    "DATA_DIR": "/data/temp_archive",
     "IRODS_ROOT": "/ZoneA/home/rods/",
-    "FDSNWS_ADDRESS": "https://www.orfeus-eu.org/fdsnws/station/1/query",
+    "FDSNWS_ADDRESS": "http://rdsa-test.knmi.nl/fdsnws/station/1/query",
     "MONGO": [
         {
             "NAME": "WFCatalog",
-            "HOST": "wf_catalog_mongo",
+            "HOST": "wfcatalog_mongo",
             "PORT": 27017,
             "DATABASE": "wfrepo",
             "COLLECTION": "daily_streams"
         },
         {
             "NAME": "Dublin Core",
-            "HOST": "wf_catalog_mongo",
+            "HOST": "wfcatalog_mongo",
             "PORT": 27017,
             "DATABASE": "wfrepo",
             "COLLECTION": "dublin_core"
@@ -26,9 +26,9 @@ config = {
         }
     ],
     "S3": {
-        "BUCKET_NAME": "seismo-test-sds",
-        "PREFIX": "my-sds",
-        "PROFILE": "sandbox"
+        "BUCKET_NAME": "knmi-rdsa-sds-fg-tst-ec2",
+        "PREFIX": "sds",
+        "PROFILE": "knmi-rdsa-storage-api-rw-tst"
     },
     "IRODS": {
         "HOST": "localhost",
@@ -39,8 +39,8 @@ config = {
     },
     "LOGGING": {
         "LEVEL": "INFO",
-        "FILENAME": None # use None for stdout
+        "FILENAME": "/tmp/rulemanager/logs/rulemanager.log" # use None for stdout
     },
     "DEFAULT_RULE_TIMEOUT" : 10,
-    "DELETION_DB": "./deletion.db"
+    "DELETION_DB": "/var/rulemanager/deletion.db"
 }

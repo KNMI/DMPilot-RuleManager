@@ -2,7 +2,7 @@
     "PPSD": {
         "description": "Proceses PPSD metadata and stores it in a MongoDB.",
         "functionName": "ppsdMetadataRule",
-        "timeout" : 60,
+        "timeout" : 180,
         "options": {},
         "conditions": [
             {

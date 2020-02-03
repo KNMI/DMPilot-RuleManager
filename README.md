@@ -41,9 +41,14 @@ the `test` directory. Note that thee tests can interact with other services,
 like iRODS or WFCatalog, it might not be advisable to run it in production
 environments.
 
+## Deploying in acceptance / production
+
+Read `docker/acpt-prd/README.md` for deploying the system in an acceptance or
+production environtment based on Docker.
+
 ## Local development environment
 
-Read `dev-env/README.md` for creating a local environment based on Docker for
+Read `docker/dev/README.md` for creating a local environment based on Docker for
 development purposes (only).
 
 ## Running the SDS policy manager
