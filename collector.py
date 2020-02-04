@@ -26,7 +26,7 @@ def main():
                             help=("directory containing the files to collect"
                                   "(defaults to the value in configuration.py)"),
                             default=config["DATA_DIR"])
-        parser.add_argument("--collect_wildcards",
+        parser.add_argument("--collect_wildcards", nargs='+',
                             help=("files to collect, defined by a wildcards string "
                                   "(within single quotes!)"))
         parser.add_argument("--collect_finished",
@@ -47,7 +47,7 @@ def main():
         fileCollector = SDSFileCollector(parsedargs.dir)
 
         if parsedargs.collect_wildcards is not None:
-            fileCollector.filterFromWildcards(parsedargs.collect_wildcards)
+            fileCollector.filterFromWildcardsArray(parsedargs.collect_wildcards)
         if parsedargs.collect_finished is not None:
             fileCollector.filterFinishedFiles(parsedargs.collect_finished)
 

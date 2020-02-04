@@ -85,8 +85,8 @@ class SDSFileCollector(FileCollector):
         self.logger.debug("Found %d files using '%s' mode." % (len(files), mode))
         return files
 
-    def filterFromWildcards(self, filename):
-        """Filters SDS files based on a filename that allows wildcards."""
+    def _collectFromWildcards(self, filename):
+        """Collects SDS files based on a filename that allows wildcards."""
 
         # Check if an SDS file was specified
         if len(filename.split(".")) != 7:
@@ -95,9 +95,23 @@ class SDSFileCollector(FileCollector):
         self.logger.debug("Searching files whose name fits in '%s'" % filename)
 
         # Take the basename and map to SDSFile
-        self.files = list(filter(lambda x: fnmatch(x.filename, filename), self.files))
+        files = list(filter(lambda x: fnmatch(x.filename, filename), self.files))
 
-        self.logger.debug("Found %d files." % len(self.files))
+        self.logger.debug("Found %d files for this filename." % len(files))
+        return files
+
+    def filterFromWildcardsArray(self, wildcards_array):
+        """Filters SDS files based on an array of filenames that allow wildcards."""
+
+        self.logger.debug("Searching files for a list of %d filenames" % len(wildcards_array))
+
+        # Aggregate files found for each wildcards combination
+        collectedFiles = list()
+        for wildcards in wildcards_array:
+            collectedFiles += self._collectFromWildcards(wildcards)
+        self.files = list(set(collectedFiles))
+
+        self.logger.debug("Found %d unique files in total." % len(self.files))
 
     def filterFinishedFiles(self, tolerance):
         """Filters all SDS files with modification timestamp older than last

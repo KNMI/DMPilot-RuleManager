@@ -29,7 +29,7 @@ def main():
                                   "(defaults to the value in configuration.py)"),
                             default=config["DATA_DIR"])
         parser.add_argument("--ruleseq", help="rule sequence file", required=True)
-        parser.add_argument("--collect_wildcards",
+        parser.add_argument("--collect_wildcards", nargs='+',
                             help=("files to collect, defined by a wildcards string "
                                   "(within single quotes!)"))
         parser.add_argument("--from_file",
@@ -56,7 +56,7 @@ def main():
         fileCollector = SDSFileCollector(parsedargs["dir"])
 
         if parsedargs["collect_wildcards"] is not None:
-            fileCollector.filterFromWildcards(parsedargs["collect_wildcards"])
+            fileCollector.filterFromWildcardsArray(parsedargs["collect_wildcards"])
         if parsedargs["from_file"] is not None:
             filename_list = []
             with parsedargs["from_file"] as list_file:
