@@ -13,3 +13,4 @@ deletion.db
 *.in
 docker/dev/data/
 *.local.yml
+.env
