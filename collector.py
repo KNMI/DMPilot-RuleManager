@@ -27,8 +27,9 @@ def main():
                                   "(defaults to the value in configuration.py)"),
                             default=config["DATA_DIR"])
         parser.add_argument("--collect_wildcards", nargs='+',
-                            help=("files to collect, defined by a wildcards string "
-                                  "(within single quotes!)"))
+                            help=("files to collect, defined by one or more wildcard string(s) "
+                                  "within quotes (in the case of more than one string, any file "
+                                  "that matches at least one of them is collected)"))
         parser.add_argument("--collect_finished",
                             help=("collect all files with modification date older that last "
                                   "midnight plus the given number of minutes"),
@@ -41,7 +42,7 @@ def main():
         # Check collection parameters
         if (parsedargs.collect_wildcards is None and parsedargs.collect_finished is None):
             return print("Files to collect need to be specified using "
-                         "--collect_wildcards or --collect_finished")
+                         "--collect_wildcards and/or --collect_finished")
 
         # Collect files
         fileCollector = SDSFileCollector(parsedargs.dir)

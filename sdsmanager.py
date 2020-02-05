@@ -30,8 +30,9 @@ def main():
                             default=config["DATA_DIR"])
         parser.add_argument("--ruleseq", help="rule sequence file", required=True)
         parser.add_argument("--collect_wildcards", nargs='+',
-                            help=("files to collect, defined by a wildcards string "
-                                  "(within single quotes!)"))
+                            help=("files to collect, defined by one or more wildcard string(s) "
+                                  "within quotes (in the case of more than one string, any file "
+                                  "that matches at least one of them is collected)"))
         parser.add_argument("--from_file",
                             help="files to collect, listed in a text file or stdin '-'",
                             type=argparse.FileType('r'))
@@ -46,7 +47,7 @@ def main():
             and parsedargs["from_file"] is None
             and parsedargs["collect_finished"] is None):
             return print("Files to collect need to be specified using "
-                         "--collect_wildcards, --from_file, or --collect_finished")
+                         "--collect_wildcards, --from_file, and/or --collect_finished")
 
         # Set up rules
         RM = RuleManager()

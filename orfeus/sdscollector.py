@@ -77,7 +77,8 @@ class SDSFileCollector(FileCollector):
             self.logger.debug("Searching files modified between '%s' and '%s'" % (date_start, date_end))
 
             # Filter by modification time
-            files = list(filter(lambda x: (x.modified >= date_start and x.modified < date_end), self.files))
+            files = list(filter(lambda x: (x.modified >= date_start and x.modified < date_end),
+                                self.files))
 
         else:
             raise ValueError("Unsupported mode %s requested to find files." % mode)
@@ -97,13 +98,15 @@ class SDSFileCollector(FileCollector):
         # Take the basename and map to SDSFile
         files = list(filter(lambda x: fnmatch(x.filename, filename), self.files))
 
-        self.logger.debug("Found %d files for this filename." % len(files))
+        self.logger.debug("Found %d files for this filename/wildcard." % len(files))
         return files
 
     def filterFromWildcardsArray(self, wildcards_array):
-        """Filters SDS files based on an array of filenames that allow wildcards."""
+        """Filters SDS files based on an array of filenames that allow
+        wildcards. Accepts all files that match at least one of the
+        wildcards."""
 
-        self.logger.debug("Searching files for a list of %d filenames" % len(wildcards_array))
+        self.logger.debug("Searching files for a list of %d filenames/wildcards" % len(wildcards_array))
 
         # Aggregate files found for each wildcards combination
         collectedFiles = list()
