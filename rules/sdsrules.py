@@ -16,7 +16,7 @@ from modules.dublincore import extractDCMetadata
 import modules.s3manager as s3manager
 from modules.irodsmanager import irodsSession
 from modules.mongomanager import mongo_pool
-from modules.psdcollector import psdCollector
+from modules.psd2.psd import PSDCollector
 
 logger = logging.getLogger('RuleManager')
 
@@ -35,19 +35,11 @@ def ppsdMetadataRule(options, SDSFile):
     logger.debug("Computing PPSD metadata for %s." % SDSFile.filename)
 
     # Process PPSD
-    documents = psdCollector.process(SDSFile)
+    documents = PSDCollector(connect_sql=False).process(SDSFile, cache_response=False)
 
     # Save to the database
     mongo_pool.deletePPSDDocuments(SDSFile)
-    for document in documents:
-        mongo_pool.savePPSDDocument(document)
-        ## TODO
-        #if not SDSFile.isPressureChannel:
-        #    # Store in psd.seismic
-        #    mongo_pool.savePPSDDocument(document)
-        #else:
-        #    # Store in psd.infra
-        #    mongo_pool.savePPSDDocument(document)
+    mongo_pool.savePPSDDocuments(documents)
     logger.debug("Saved PPSD metadata for %s." % SDSFile.filename)
 
 

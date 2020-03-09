@@ -125,7 +125,7 @@ def assertPPSDMetadataExistsCondition(options, sds_file):
                             sds_file.filename, PPSDObject["checksum"], sds_file.checksum))
     else:
         exists = False
-        logger.debug("PPSD data does no exist for file %s." % sds_file.filename)
+        logger.debug("PPSD data does not exist for file %s." % sds_file.filename)
 
     return exists and same_hash
 
