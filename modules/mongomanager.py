@@ -75,7 +75,7 @@ class MongoSession():
             return
 
         # Create a connection
-        self.client = MongoClient(self._host, self._port)
+        self.client = MongoClient(self._host, self._port, retryWrites=False)
         self.database = self.client[self._db_name]
         self.collection = self.database[self._collection_name]
 
@@ -114,6 +114,10 @@ class MongoSession():
         if res.acknowledged:
             self._logger.debug("Inserted document into '%s' collection with fileId = %s" % (
                                  self._collection_name, document["fileId"]))
+
+    def saveMany(self, documents):
+        """Save a list of documents."""
+        return self.collection.insert_many(documents)
 
 
 class MongoManager():
@@ -176,14 +180,17 @@ class MongoManager():
 
         self.sessions["PPSD"].save(document, overwrite=False)
 
-    def getPPSDDocuments(self, SDSFile):
-        """Returns the PPSD documents that correspond to a file."""
+    def savePPSDDocuments(self, documents):
+        """Save a list of PPSD metadata documents."""
+        res = self.sessions["PPSD"].saveMany(documents)
+        self._logger.debug("Inserted %d documents in the PPSD collection", len(res.inserted_ids))
 
+    def getPPSDDocuments(self, SDSFile):
+        """Return the PPSD documents that correspond to a file."""
         return list(self.sessions["PPSD"].findMany({"fileId": SDSFile.filename}))
 
     def deletePPSDDocuments(self, SDSFile):
-        """Deletes the PPSD documents corresponding to a file."""
-
+        """Delete the PPSD documents corresponding to a file."""
         res = self.sessions["PPSD"].deleteMany({"fileId": SDSFile.filename})
         self._logger.debug("Deleted %d documents from PPSD collection with fileId = %s" % (
                              res.deleted_count, SDSFile.filename))
