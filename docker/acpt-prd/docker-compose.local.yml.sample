@@ -5,7 +5,7 @@ services:
     user: 12345:67890
     volumes:
       # Add your local SDS dir
-      - ${HOME}/data/sds:/data/temp_archive:ro
+      - ${HOME}/data/sds:/data/temp_archive
       # Add your local var dir (for i.e.: deletion.db)
       - ${HOME}/var/rulemanager:/var/rulemanager
       # Add your local log dir
