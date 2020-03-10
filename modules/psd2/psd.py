@@ -212,12 +212,14 @@ class PSDCollector():
 
         """
         inventory = sds_file.inventory
+        if inventory is None:
+            raise Exception("Could not find inventory for this file")
 
         # Verify that only one station is returned
         # (different responses are modeled as separate channels with same code)
         contents = inventory.get_contents()
         if (len(contents["networks"]) != 1 or len(contents["stations"]) != 1):
-            return None, None
+            raise Exception("Inventory not valid for this file")
 
         # Get all responses
         response_list = []
