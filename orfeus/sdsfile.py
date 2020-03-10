@@ -437,7 +437,7 @@ class SDSFile():
         """
 
         # Record length within some bounds
-        if recordLength < 512 and recordLength > 65536:
+        if recordLength < 512 or recordLength > 65536:
             raise ValueError("Record length is invalid")
 
         # Confirm record length is power of two
