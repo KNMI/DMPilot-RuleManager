@@ -26,6 +26,7 @@ vim configuration.json
 #   "HOST": "0.0.0.0",
 #   "PORT": 8888,
 #   "LOGPATH": "/var/log/",
+#   "MAXIMUM_CORES": 1,
 #   "MONGO": {
 #        "HOST": "wfcatalog_mongo:27017/wfrepo",
 #   }
