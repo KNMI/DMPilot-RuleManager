@@ -74,13 +74,14 @@ docker-compose -f docker/dev/docker-compose.yml --project-directory ./ -p devenv
 aws s3 ls seismo-test-sds --profile knmi-sandbox-saml
 ```
 
-## 4) Clean-up
+## 4) Stop and clean-up
 ```
 # Bring environment down
 docker-compose -f docker/dev/docker-compose.yml --project-directory ./ -p devenv down
 
-# (Optional) Remove all Docker containers
-docker rm $(docker ps -a -q)
+# (Optional) Remove Docker volumes (data)
+docker volume rm devenv_wfcat_mongodb
+docker volume rm devenv_ppsd_mongodb
 
 # (Optional) Remove all Docker images
 docker rmi $(docker images -q)
