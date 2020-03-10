@@ -63,9 +63,6 @@ COPY ./requirements.txt /home/rulemanager-requirements.txt
 RUN pip3 install -r /home/rulemanager-requirements.txt
 RUN rm -v /home/rulemanager-requirements.txt
 
-# Apply ObsPy hack for PPSD computation
-COPY ./docker/obspy-spectral_estimation.py /usr/lib/python3/dist-packages/obspy/signal/spectral_estimation.py
-
 # Install AWS CLI to be able to make S3 queries
 RUN pip3 install awscli
 

@@ -67,9 +67,6 @@ COPY . .
 # Install python requirements
 RUN pip3 install -r ./requirements.txt
 
-# Apply ObsPy hack for PPSD computation
-COPY ./docker/obspy-spectral_estimation.py /usr/lib/python3/dist-packages/obspy/signal/spectral_estimation.py
-
 # Configure user
 RUN groupadd -g 23011 sysop && \
     useradd -u 23011 -g 23011 sysop
