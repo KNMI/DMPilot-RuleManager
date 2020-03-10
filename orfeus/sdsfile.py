@@ -391,7 +391,7 @@ class SDSFile():
         # Query our FDSNWS Webservice for the station location
         try:
             request = requests.get(os.path.join(self.fdsnws, self.queryStringTXT))
-        except Exception as ex:
+        except requests.exceptions.RequestException:
             return None
 
         # Any error just ignore

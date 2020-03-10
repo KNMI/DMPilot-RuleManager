@@ -262,9 +262,7 @@ def purgeRule(options, SDSFile):
         # Yeah let's be careful with this..
         # os.remove(SDSFile.filepath)
         logger.debug("Purged file %s from temporary archive." % SDSFile.filename)
-    except OSError as e:
-        if e.errno != errno.ENOENT:
-            raise
+    except FileNotFoundError:
         logger.debug("File %s not present in temporary archive." % SDSFile.filename)
 
 
