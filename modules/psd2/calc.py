@@ -166,7 +166,8 @@ def _welch(signal, fs, resp, nfft=1024, overlap=0.5):
 
         # Apply the window and do the FFT
         # Deconvolve the instrument response by divison in the frequency domain
-        yf = np.fft.rfft(window * segment) / resp
+        with np.errstate(divide='ignore', invalid='ignore'):
+            yf = np.fft.rfft(window * segment) / resp
 
         # Square FFT amplitudes to get the power
         # Half the spectrum is calculating using rfft; so double the power
