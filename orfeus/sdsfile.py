@@ -13,6 +13,7 @@ import requests
 import subprocess
 import base64
 import logging
+import ctypes
 
 from datetime import datetime, timedelta
 from zlib import adler32
@@ -229,7 +230,8 @@ class SDSFile():
     def checksum(self):
         """
         def SDSFile::checksum
-        Calculates the Adler-32 checksum for a given file
+        Calculates the Adler-32 checksum for a given file, converting it to a
+        signed int32 to save space in MongoDB documents
         """
 
         if self.stats is None:
@@ -237,7 +239,8 @@ class SDSFile():
 
         checksum = None
         with open(self.filepath, "rb") as f:
-            checksum = adler32(f.read())
+            checksum = adler32(f.read()) & 0xffffffff
+            checksum = ctypes.c_int32(checksum).value
         return checksum
 
     @property

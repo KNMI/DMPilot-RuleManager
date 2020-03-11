@@ -2,6 +2,7 @@ import numpy as np
 from obspy import read, UTCDateTime, Stream
 from zlib import adler32
 import logging
+import ctypes
 
 from .calc import compressSpectrum, smoothSpectrum, getInstrumentResponse, psdWelch
 from .constants import (DB_REFERENCE, MINIMUM_PERIOD, NUMBER_OF_FREQUENCIES,
@@ -320,7 +321,8 @@ class PSDCollector():
             offset, shift, binary = compressSpectrum(spectrum)
 
             # Compute a short and fast but not very safe checksum from response
-            resp_checksum = adler32(resp)
+            resp_checksum = adler32(resp) & 0xffffffff
+            resp_checksum = ctypes.c_int32(resp_checksum).value
 
             # Save all metadata in a record
             psd_record = {
