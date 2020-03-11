@@ -15,7 +15,7 @@ import base64
 import logging
 
 from datetime import datetime, timedelta
-from hashlib import sha256
+from zlib import adler32
 
 from obspy import read_inventory, UTCDateTime
 from configuration import config
@@ -226,28 +226,19 @@ class SDSFile():
         return self.getStat("modified")
 
     @property
-    def checksumTruncated(self):
-        """
-        def SDSFile::checksumTrunc
-        Returns truncated checksum value (8 base-64 characters)
-        """
-        return self.checksum[5:13]
-
-    @property
     def checksum(self):
         """
         def SDSFile::checksum
-        Calculates the SHA256 checksum for a given file prepended with sha2:
+        Calculates the Adler-32 checksum for a given file
         """
 
         if self.stats is None:
             return None
 
-        checksum = sha256()
+        checksum = None
         with open(self.filepath, "rb") as f:
-            for block in iter(lambda: f.read(0x10000), b""):
-                checksum.update(block)
-        return "sha2:" + base64.b64encode(checksum.digest()).decode()
+            checksum = adler32(f.read())
+        return checksum
 
     @property
     def queryStringTXT(self):
