@@ -372,7 +372,13 @@ class SDSFile():
 
         try:
             return read_inventory(request)
-        except Exception as ex:
+
+        # Re-raise in case this is the Rule Manager timeout going off
+        except TimeoutError:
+            raise
+
+        # Deal with an Exception from read_inventory
+        except Exception:
             return None
 
     @property

@@ -22,7 +22,12 @@ def getWFMetadata(SDSFile):
             # Mark documents with data warnings
             metadata.meta.update({"warnings": len(w) > 0})
 
-    except Exception as Ex:
+    # Re-raise in case this is the Rule Manager timeout going off
+    except TimeoutError:
+        raise
+
+    # Deal with an Exception from MSEEDMetadata
+    except Exception:
         return None
 
     return extractDatabaseDocument(SDSFile, metadata.meta)
