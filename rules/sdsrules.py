@@ -10,6 +10,9 @@ import logging
 import os
 import shutil
 
+from boto3.exceptions import S3UploadFailedError
+from core.exceptions import ExitPipelineException
+
 from modules.wfcatalog import getWFMetadata
 from modules.dublincore import extractDCMetadata
 
@@ -116,13 +119,23 @@ def ingestionS3Rule(options, SDSFile):
     ----------
     options : `dict`
         The rule's options.
+        - ``exitOnFailure``: Whether or not to exit the pipeline when the upload fails (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
+
+    Raises
+    ------
+    `ExitPipelineException`
+        Raised when upload fails and `exitOnFailure` is `True`.
     """
     logger.debug("Ingesting file %s." % SDSFile.filename)
 
-    # Upload file to S3
-    s3manager.put(SDSFile)
+    try:
+        # Upload file to S3
+        s3manager.put(SDSFile)
+    except S3UploadFailedError:
+        if options['exitOnFailure']:
+            raise ExitPipelineException
 
     # Check if checksum is saved
     logger.debug("Ingested file %s with checksum '%s'" % (
@@ -390,6 +403,11 @@ def quarantineRule(options, sdsFile):
         - ``dry_run``: If True, doesn't move/delete the files (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
+
+    Raises
+    ------
+    `ExitPipelineException`
+        Raised after file is quarantined (everytime rule is executed).
     """
 
     # Move the raw .D file
@@ -414,6 +432,8 @@ def quarantineRule(options, sdsFile):
         logger.info('Removed %s.', q_file_path)
 
     # TODO: Report
+
+    raise ExitPipelineException
 
 
 def testPrint(options, sdsFile):

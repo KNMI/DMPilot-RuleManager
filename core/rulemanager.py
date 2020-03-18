@@ -5,6 +5,7 @@ import jsonschema
 
 from functools import partial, wraps
 from core.rule import Rule
+from core.exceptions import ExitPipelineException
 from configuration import config
 from schema import JSON_RULE_SCHEMA
 
@@ -179,6 +180,14 @@ class RuleManager():
                     rule.apply(item)
                     self.logger.info("%s: Successfully executed rule '%s'."
                                      % (item.filename, rule.name))
+
+                # A rule called for the pipeline to be exited for this file
+                except ExitPipelineException:
+                    # It is expected that who raises this logs the error, so this is at INFO level
+                    self.logger.info("Exiting pipeline for file %s." % (item.filename))
+
+                    # The 'finally' block WILL be executed even after breaking
+                    break
 
                 # The rule was timed out
                 except TimeoutError:
