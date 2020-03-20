@@ -72,5 +72,3 @@ RUN groupadd -g 23011 sysop && \
     useradd -u 23011 -g 23011 sysop
 RUN chown -R sysop:sysop /home/rulemanager
 USER sysop
-
-# TODO: AWS credentials

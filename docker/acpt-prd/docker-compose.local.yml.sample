@@ -10,3 +10,7 @@ services:
       - ${HOME}/var/rulemanager:/var/rulemanager
       # Add your local log dir
       - ${HOME}/log:/tmp/rulemanager/logs
+    secrets:
+      # Add this if local user is not sysop
+      - source: aws_config
+        target: /.aws

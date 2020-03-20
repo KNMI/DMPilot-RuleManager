@@ -18,16 +18,17 @@ services:
     networks:
       - wfcatalog_net
       - ppsd_net
-#    environment:
-#      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-#      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     secrets:
       - source: rulemanager_config
         target: /home/rulemanager/configuration.py
+      - source: aws_config
+        target: /home/sysop/.aws
 
 secrets:
   rulemanager_config:
     file: ./configuration.py
+  aws_config:
+    file: ${HOME}/.aws
 networks:
   wfcatalog_net:
     external: true
