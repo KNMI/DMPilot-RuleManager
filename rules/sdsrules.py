@@ -279,8 +279,7 @@ def purgeRule(options, SDSFile):
     # Some other configurable rules
     logger.debug("Purging file %s from temporary archive." % SDSFile.filename)
     try:
-        # Yeah let's be careful with this..
-        # os.remove(SDSFile.filepath)
+        os.remove(SDSFile.filepath)
         logger.debug("Purged file %s from temporary archive." % SDSFile.filename)
     except FileNotFoundError:
         logger.debug("File %s not present in temporary archive." % SDSFile.filename)
