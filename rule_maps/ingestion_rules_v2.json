@@ -3,9 +3,9 @@
         "description": "Prunes and repacks the daily file. Saves a Q-quality file.",
         "functionName": "pruneRule",
         "options": {
-	    "cut_boundaries": true,
+            "cut_boundaries": true,
             "removeOverlap": false,
-	    "repack": false,
+            "repack": false,
             "repackRecordSize": 4096
         },
         "conditions": [
@@ -21,7 +21,7 @@
         "description": "Quarantines out-of-time D files. Deletes corresponding Q file.",
         "functionName": "quarantineRule",
         "options": {
-            "quarantine_path": "/tmp/quarantine/",
+            "quarantine_path": "/data/shared/rulemanager/quarantinesds/",
             "dry_run": true
         },
         "conditions": [
@@ -30,6 +30,12 @@
                 "options": {
                     "qualities": ["Q"]
                 }
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 7
+                }
             }
         ]
     },
@@ -37,8 +43,8 @@
         "description": "Puts the pruned file in the S3 bucket.",
         "functionName": "ingestionS3Rule",
         "options": {
-	    "exitOnFailure": true
-	},
+            "exitOnFailure": true
+        },
         "conditions": [
             {
                 "functionName": "assertQualityCondition",
@@ -57,7 +63,7 @@
     "WFCATALOG": {
         "description": "Writes waveform metadata to the WFCatalog.",
         "functionName": "waveformMetadataRule",
-        "timeout" : 5,
+        "timeout" : 15,
         "options": {},
         "conditions": [
             {
@@ -69,12 +75,6 @@
             {
                 "functionName": "assertWFCatalogNotExistsCondition",
                 "options": {}
-            },
-            {
-                "functionName": "assertS3ExistsCondition",
-                "options": {
-                    "check_checksum": true
-                }
             }
         ]
     },
@@ -105,7 +105,7 @@
     "PPSD": {
         "description": "Proceses PPSD metadata and stores it in a MongoDB.",
         "functionName": "ppsdMetadataRule",
-        "timeout" : 30,
+        "timeout" : 180,
         "options": {},
         "conditions": [
             {
@@ -117,12 +117,6 @@
             {
                 "functionName": "assertPPSDMetadataNotExistsCondition",
                 "options": {}
-            },
-            {
-                "functionName": "assertS3ExistsCondition",
-                "options": {
-                    "check_checksum": true
-                }
             }
         ]
     },
@@ -234,7 +228,7 @@
                 "options": {}
             },
             {
-                "functionName": "assertPPSDMetadataNotExistsCondition",
+                "functionName": "assertPPSDMetadataExistsCondition",
                 "options": {}
             },
             {

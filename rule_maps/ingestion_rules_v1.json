@@ -3,9 +3,9 @@
         "description": "Prunes and repacks the daily file. Saves a Q-quality file.",
         "functionName": "pruneRule",
         "options": {
-	    "cut_boundaries": true,
+            "cut_boundaries": true,
             "removeOverlap": false,
-	    "repack": false,
+            "repack": false,
             "repackRecordSize": 4096
         },
         "conditions": [
@@ -43,8 +43,8 @@
         "description": "Puts the pruned file in the S3 bucket.",
         "functionName": "ingestionS3Rule",
         "options": {
-	    "exitOnFailure": true
-	},
+            "exitOnFailure": true
+        },
         "conditions": [
             {
                 "functionName": "assertQualityCondition",
@@ -160,7 +160,7 @@
                 "options": {}
             },
             {
-                "functionName": "assertPPSDMetadataNotExistsCondition",
+                "functionName": "assertPPSDMetadataExistsCondition",
                 "options": {}
             },
             {
