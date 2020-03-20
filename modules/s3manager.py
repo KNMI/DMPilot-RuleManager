@@ -34,7 +34,7 @@ def put(sds_file):
     bucket = _get_bucket()
     new_object = bucket.Object(sds_file.s3Key)
     new_object.upload_file(sds_file.filepath,
-                           ExtraArgs={'Metadata': {'checksum': sds_file.checksum}})
+                           ExtraArgs={'Metadata': {'checksum': str(sds_file.checksum)}})
 
 
 def delete(sds_file):
@@ -48,7 +48,11 @@ def get_checksum(sds_file):
     bucket = _get_bucket()
     obj = bucket.Object(sds_file.s3Key)
     try:
-        return obj.metadata['checksum']
+        checksum = obj.metadata['checksum']
+        if type(sds_file.checksum) is int:
+            return int(checksum)
+        else:
+            return checksum
     except KeyError:
         return None
 
