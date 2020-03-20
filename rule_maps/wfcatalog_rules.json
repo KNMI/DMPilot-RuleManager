@@ -1,0 +1,36 @@
+{
+    "PRUNE": {
+        "description": "Prunes and repacks the daily file. Saves a Q-quality file.",
+        "functionName": "pruneRule",
+        "options": {
+            "removeOverlap": true,
+            "repackRecordSize": 4096
+        },
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["D"]
+                }
+            }
+        ]
+    },
+    "WFCATALOG": {
+        "description": "Writes waveform metadata to the WFCatalog.",
+        "functionName": "waveformMetadataRule",
+        "timeout" : 15,
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["D", "Q"]
+                }
+            },
+            {
+                "functionName": "assertWFCatalogNotExistsCondition",
+                "options": {}
+            }
+        ]
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "ruleMap" : "/home/rulemanager/rule_maps/wfcatalog_rules.json",
+    "sequence" : [
+        "PRUNE",
+        "WFCATALOG"
+    ]
+}

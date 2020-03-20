@@ -340,15 +340,22 @@ class PSDCollector():
                 'offset': offset,
                 'bin': binary
             }
-            if segmentStart == UTCDateTime(SDSFile.start):
-                psd_record['checksum_prev'] = SDSFile.previous.checksum
-            if segmentEnd >= UTCDateTime(SDSFile.end):
-                psd_record['checksum_next'] = SDSFile.next.checksum
 
             psdObjects.append(psd_record)
 
             # Modify the start time of the trace with 50% overlap
             segmentStart = segmentStart + 0.5 * SEGMENT_LENGTH
+
+        # Check if at least one document has been processed
+        if not psdObjects:
+            raise Exception("Unable to process PSD for any segment")
+
+        # Add checksum_prev to first segment and checksum_next to the last one,
+        # no matter if they are at the beggining of the day or not. This way,
+        # we can check if the file needs to be processed when previous/next
+        # files are added/modified, in all possible cases.
+        psdObjects[0]['checksum_prev'] = SDSFile.previous.checksum
+        psdObjects[-1]['checksum_next'] = SDSFile.next.checksum
 
         return psdObjects
 

@@ -18,30 +18,26 @@ cd <PPSD_WS_DIR>
 cp config.json.sample config.json
 
 # Clone WFCatalog webservice code (in a separate dir), export its directory and customise config
-git clone https://github.com/EIDA/wfcatalog.git <WFCAT_WS_DIR>
+git clone git@gitlab.com:KNMI/RDSA/webservices/wfcatalog-webservice.git <WFCAT_WS_DIR>
 export WFCAT_WS_DIR=<PPSD_WS_DIR>
-cd <WFCAT_WS_DIR>/service
-vim configuration.json
-# Edit in configuration.json the following values:
-#   "HOST": "0.0.0.0",
-#   "PORT": 8888,
-#   "LOGPATH": "/var/log/",
-#   "MAXIMUM_CORES": 1,
-#   "MONGO": {
-#        "HOST": "wfcatalog_mongo:27017/wfrepo",
-#   }
+cd <WFCAT_WS_DIR>
+cp configuration.json.sample configuration.json
 
-# Get temporary AWS credentials and put them in env variables to be used by containers
+# (Optional) Get temporary AWS credentials and put them in env variables to be used by containers
 aws-session knmi-sandbox
 export AWS_ACCESS_KEY_ID=$(aws --profile knmi-saml-session-credentials configure get aws_access_key_id)
 export AWS_SECRET_ACCESS_KEY=$(aws --profile knmi-saml-session-credentials configure get aws_secret_access_key)
 export AWS_SESSION_TOKEN=$(aws --profile knmi-saml-session-credentials configure get aws_session_token)
 export ADFS_USER=<YOUR_ADFS_USER>
 
-# Download SDS sample data
+# (Optional) Download SDS sample data
 mkdir -p docker/dev/data/sds/
 aws s3 cp s3://seismo-test-sds-samples/sds-sample-data.tar docker/dev/data/sds-sample-data.tar --profile knmi-sandbox-saml
 tar xvf docker/dev/data/sds-sample-data.tar -C docker/dev/data/sds/
+
+# Tip: use a .env file to save the env variables PPSD_WS_DIR, WFCAT_WS_DIR and ADFS_USER for next runs
+cp ./docker/dev/.env.sample .env
+vim .env
 ```
 
 ## 2) Create environment with docker-compose

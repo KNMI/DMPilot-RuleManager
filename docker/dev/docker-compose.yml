@@ -22,6 +22,24 @@ services:
     volumes:
       - wfcat_mongodb:/data/db
 
+  wfcatalog_service:
+    container_name: 'wfcatalog_service'
+    hostname: 'wfcatalog_service'
+    build:
+      context: ${WFCAT_WS_DIR}
+      dockerfile: ${WFCAT_WS_DIR}/Dockerfile
+    depends_on:
+      - wfcatalog_mongo
+    ports:
+      - 8888:8888
+
+  ppsd_mongo:
+    image: 'mongo'
+    hostname: 'ppsd_mongo'
+    container_name: 'ppsd_mongo'
+    volumes:
+      - ppsd_mongodb:/data/db
+
   ppsd_webservice:
     container_name: 'ppsd_webservice'
     build:
@@ -34,25 +52,6 @@ services:
     volumes:
       - ${PPSD_WS_DIR}/config.json:/usr/src/app/config.json
       - /dev/null:/tmp/ppsd-service/logs/PPSD-Webservice-Trace.log
-
-  ppsd_mongo:
-    image: 'mongo'
-    hostname: 'ppsd_mongo'
-    container_name: 'ppsd_mongo'
-    volumes:
-      - ppsd_mongodb:/data/db
-
-
-  wfcatalog_service:
-    container_name: 'wfcatalog_service'
-    hostname: 'wfcatalog_service'
-    build:
-      context: ${WFCAT_WS_DIR}/service
-      dockerfile: ${WFCAT_WS_DIR}/service/Dockerfile
-    depends_on:
-      - wfcatalog_mongo
-    ports:
-      - 8888:8888
 
 volumes:
   wfcat_mongodb:

@@ -4,15 +4,22 @@ config = {
     "FDSNWS_ADDRESS": "http://rdsa-test.knmi.nl/fdsnws/station/1/query",
     "MONGO": [
         {
-            "NAME": "WFCatalog",
-            "HOST": "wf_catalog_mongo",
+            "NAME": "WFCatalog-daily",
+            "HOST": "wfcatalog_mongo",
             "PORT": 27017,
             "DATABASE": "wfrepo",
             "COLLECTION": "daily_streams"
         },
         {
+            "NAME": "WFCatalog-segments",
+            "HOST": "wfcatalog_mongo",
+            "PORT": 27017,
+            "DATABASE": "wfrepo",
+            "COLLECTION": "c_segments"
+        },
+        {
             "NAME": "Dublin Core",
-            "HOST": "wf_catalog_mongo",
+            "HOST": "wfcatalog_mongo",
             "PORT": 27017,
             "DATABASE": "wfrepo",
             "COLLECTION": "dublin_core"

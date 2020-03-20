@@ -12,7 +12,7 @@ Example
 ```
 from mongomanager import mongo_pool
 ...
-mongo_pool.setMetadataDocument("collection_name", document)
+mongo_pool.setWFCatalogDailyDocument("collection_name", document)
 ```
 """
 
@@ -65,7 +65,8 @@ class MongoSession():
 
         # Initialize logger
         self._logger = logging.getLogger('RuleManager')
-        self._logger.debug("Initializing a new Mongo Session on %s:%s." % (self._host, self._port))
+        self._logger.debug("Initializing a new Mongo Session on %s:%s." % (
+                                                        self._host, self._port))
 
     def connect(self):
         """Creates a connection to the database. If the object already has a
@@ -85,19 +86,33 @@ class MongoSession():
 
     def findOne(self, query):
         """Finds a single document in the collection."""
-        return self.collection.find_one(query)
+        doc = self.collection.find_one(query)
+        if doc is not None:
+            self._logger.debug("Found 1 document in '%s' collection",
+                                 self._collection_name)
+        return doc
 
     def findMany(self, query):
         """Finds documents in the collection."""
-        return self.collection.find(query)
+        count = self.collection.count_documents(query)
+        cur = self.collection.find(query)
+        self._logger.debug("Found %d document(s) in '%s' collection",
+                             count, self._collection_name)
+        return cur
 
     def deleteOne(self, query):
         """Deletes a single document from the collection."""
-        return self.collection.delete_one(query)
+        res = self.collection.delete_one(query)
+        if res.acknowledged:
+            self._logger.debug("Deleted %d document(s) from '%s' collection",
+                                 res.deleted_count, self._collection_name)
 
     def deleteMany(self, query):
         """Deletes many documents from the collection."""
-        return self.collection.delete_many(query)
+        res = self.collection.delete_many(query)
+        if res.acknowledged:
+            self._logger.debug("Deleted %d document(s) from '%s' collection",
+                                 res.deleted_count, self._collection_name)
 
     def save(self, document, overwrite=True):
         """Saves a document."""
@@ -106,19 +121,22 @@ class MongoSession():
         if overwrite:
             res = self.collection.delete_many({"fileId": document["fileId"]})
             if res.acknowledged and res.deleted_count > 0:
-                self._logger.debug("Deleted %d documents from '%s' collection with fileId = %s" % (
-                                     res.deleted_count, self._collection_name, document["fileId"]))
+                self._logger.debug(
+                                "Deleted %d document(s) from '%s' collection",
+                                 res.deleted_count, self._collection_name)
 
         # Second, insert new document
         res = self.collection.insert_one(document)
         if res.acknowledged:
-            self._logger.debug("Inserted document into '%s' collection with fileId = %s" % (
-                                 self._collection_name, document["fileId"]))
+            self._logger.debug("Inserted 1 document into '%s' collection",
+                                self._collection_name)
 
     def saveMany(self, documents):
         """Save a list of documents."""
-        return self.collection.insert_many(documents)
-
+        res = self.collection.insert_many(documents)
+        if res.acknowledged:
+            self._logger.debug("Inserted %d document(s) into '%s' collection",
+                                len(res.inserted_ids), self._collection_name)
 
 class MongoManager():
     """Stores all the MongoDB sessions from the configuration. Reads all
@@ -132,25 +150,24 @@ class MongoManager():
     """
 
     def __init__(self):
-        self._logger = logging.getLogger('RuleManager')
-        self.sessions = {db_info['NAME']: MongoSession(db_info) for db_info in config['MONGO']}
+        self.sessions = {db_info['NAME']: MongoSession(db_info)
+                           for db_info in config['MONGO']}
 
         # TODO: connect later
         for session_name in self.sessions:
             self.sessions[session_name].connect()
 
     def saveDCDocument(self, document):
-        """Saves a Dublin Core metadata document."""
-
+        """Saves a Dublin Core document."""
         self.sessions["Dublin Core"].save(document)
 
     def getDCDocument(self, SDSFile):
-        """Returns a Dublin Core metadata document corresponding to a file."""
-
-        return self.sessions["Dublin Core"].findOne({"fileId": SDSFile.filename})
+        """Returns a Dublin Core document corresponding to a file."""
+        return self.sessions["Dublin Core"].findOne(
+                                                {"fileId": SDSFile.filename})
 
     def deleteDCDocument(self, SDSFile):
-        """Updates the Dublin Core metadata document corresponding to a file
+        """Updates the Dublin Core document corresponding to a file
         marking it as deleted."""
 
         return self.sessions["Dublin Core"].collection.update_many(
@@ -160,41 +177,49 @@ class MongoManager():
                 'checksum': 'DELETED'
             }})
 
-    def setMetadataDocument(self, document):
-        """Saves a waveform metadata document."""
+    def setWFCatalogDailyDocument(self, document):
+        """Saves a WFCatalog-daily document."""
+        self.sessions["WFCatalog-daily"].save(document)
 
-        self.sessions["WFCatalog"].save(document)
+    def getWFCatalogDailyDocument(self, SDSFile):
+        """Returns a WFCatalog-daily document corresponding to a file."""
+        return self.sessions["WFCatalog-daily"].findOne(
+                                                {"fileId": SDSFile.filename})
 
-    def getMetadataDocument(self, SDSFile):
-        """Returns a waveform metadata document corresponding to a file."""
+    def deleteWFCatalogDailyDocument(self, SDSFile):
+        """Delete one WFCatalog-daily document corresponding to a file."""
+        return self.sessions["WFCatalog-daily"].deleteOne(
+                                                {"fileId": SDSFile.filename})
 
-        return self.sessions["WFCatalog"].findOne({"fileId": SDSFile.filename})
+    def saveWFCatalogSegmentsDocuments(self, documents):
+        """Save a list of WFCatalog-segments documents."""
+        self.sessions["WFCatalog-segments"].saveMany(documents)
 
-    def deleteMetadataDocument(self, SDSFile):
-        """Delete one waveform metadata document corresponding to a file."""
+    def getWFCatalogSegmentsDocuments(self, SDSFile):
+        """Return the WFCatalog-segments documents that correspond to a file."""
+        return list(self.sessions["WFCatalog-segments"].findMany(
+                                                {"fileId": SDSFile.filename}))
 
-        return self.sessions["WFCatalog"].deleteOne({"fileId": SDSFile.filename})
+    def deleteWFCatalogSegmentsDocuments(self, SDSFile):
+        """Delete the WFCatalog-segments documents corresponding to a file."""
+        self.sessions["WFCatalog-segments"].deleteMany(
+                                                {"fileId": SDSFile.filename})
 
     def savePPSDDocument(self, document):
-        """Saves a PPSD metadata document."""
-
+        """Saves a PPSD document."""
         self.sessions["PPSD"].save(document, overwrite=False)
 
     def savePPSDDocuments(self, documents):
-        """Save a list of PPSD metadata documents."""
-        res = self.sessions["PPSD"].saveMany(documents)
-        self._logger.debug("Inserted %d documents in the PPSD collection", len(res.inserted_ids))
+        """Save a list of PPSD documents."""
+        self.sessions["PPSD"].saveMany(documents)
 
     def getPPSDDocuments(self, SDSFile):
         """Return the PPSD documents that correspond to a file."""
-        return list(self.sessions["PPSD"].findMany({"fileId": SDSFile.filename}))
+        return list(self.sessions["PPSD"].findMany(
+                                                {"fileId": SDSFile.filename}))
 
     def deletePPSDDocuments(self, SDSFile):
         """Delete the PPSD documents corresponding to a file."""
-        res = self.sessions["PPSD"].deleteMany({"fileId": SDSFile.filename})
-        self._logger.debug("Deleted %d documents from PPSD collection with fileId = %s" % (
-                             res.deleted_count, SDSFile.filename))
-        return res
-
+        self.sessions["PPSD"].deleteMany({"fileId": SDSFile.filename})
 
 mongo_pool = MongoManager()

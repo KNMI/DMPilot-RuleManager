@@ -332,16 +332,21 @@ def waveformMetadataRule(options, SDSFile):
     """
 
     # Get waveform metadata
-    document = getWFMetadata(SDSFile)
-    if document is None:
-        return logger.error("Could not get the waveform metadata.")
+    (doc_daily, docs_segments) = getWFMetadata(SDSFile)
 
     logger.debug("Saving waveform metadata for %s." % SDSFile.filename)
 
-    # Save the metadata document
-    mongo_pool.setMetadataDocument(document)
-    logger.debug("Saved waveform metadata for %s." % SDSFile.filename)
+    # Save the daily metadata document
+    mongo_pool.setWFCatalogDailyDocument(doc_daily)
 
+    # Save the continuous segments documents
+    if docs_segments is None:
+        return logger.debug("No continuous segments to save for %s." % SDSFile.filename)
+    else:
+        mongo_pool.deleteWFCatalogSegmentsDocuments(SDSFile)
+        mongo_pool.saveWFCatalogSegmentsDocuments(docs_segments)
+
+    logger.debug("Saved waveform metadata for %s." % SDSFile.filename)
 
 def deleteWaveformMetadataRule(options, SDSFile):
     """Delete waveform metadata of an SDS file.
@@ -356,7 +361,8 @@ def deleteWaveformMetadataRule(options, SDSFile):
 
     logger.debug("Deleting waveform metadata for %s." % SDSFile.filename)
 
-    mongo_pool.deleteMetadataDocument(SDSFile)
+    mongo_pool.deleteWFCatalogDailyDocument(SDSFile)
+    mongo_pool.deleteWFCatalogSegmentsDocuments(SDSFile)
     logger.debug("Deleted waveform metadata for %s." % SDSFile.filename)
 
 

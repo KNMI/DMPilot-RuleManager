@@ -16,6 +16,7 @@ services:
       - /data/seismo/rulemanager:/var/rulemanager
       - /home/sysop/log:/tmp/rulemanager/logs
     networks:
+      - wfcatalog_net
       - ppsd_net
 #    environment:
 #      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -28,5 +29,7 @@ secrets:
   rulemanager_config:
     file: ./configuration.py
 networks:
+  wfcatalog_net:
+    external: true
   ppsd_net:
     external: true
