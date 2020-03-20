@@ -3,7 +3,9 @@
         "description": "Prunes and repacks the daily file. Saves a Q-quality file.",
         "functionName": "pruneRule",
         "options": {
-            "removeOverlap": true,
+	    "cut_boundaries": true,
+            "removeOverlap": false,
+	    "repack": false,
             "repackRecordSize": 4096
         },
         "conditions": [

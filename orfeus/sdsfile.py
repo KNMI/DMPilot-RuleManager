@@ -423,19 +423,33 @@ class SDSFile():
 
         return map(UTCDateTime, map(lambda x: self.start + timedelta(minutes=(30 * x)), range(48)))
 
-    def prune(self, recordLength=4096, removeOverlap=True):
-        """
-        def SDSFile::prune
-        Uses IRIS dataselect to prune a file on the sample level
-        and sets the quality indicator to Q
+    def prune(self, cut_boundaries=True, removeOverlap=False, repack=False, recordLength=4096):
+        """Preprocess file using IRIS dataselect and msrepack, and saves the resulting file
+        with the quality indicator set to Q.
 
-        QUALITIES:
+        Due to `dataselect` running as the first step, always sorts the records. `msrepack`
+        only runs when `repack` is set to True.
+
+        Qualities:
         D - The state of quality control of the data is indeterminate
         R - Raw Waveform Data with no Quality Control
         Q - Quality Controlled Data, some processes have been applied to the data.
         M - Data center modified, time-series values have not been changed.
-        """
 
+        Parameters
+        ----------
+        `cut_boundaries` : `bool`
+            Whether or not to cut the file at the day boundaries ---
+            00:00 of the day and of the following day. (default `True`)
+        `removeOverlap` : `bool`
+            Whether or not to prune the file and remove overlaps at the
+            sample level --- equates to the '-Ps' option of dataselect. (default `False`)
+        `repack` : `bool`
+            Whether or not to repack records using msrepack. (default `False`)
+        `recordLength` : `int`
+            Size of record to repack if `repack` is `True`. (default 4096)
+
+        """
         # Record length within some bounds
         if recordLength < 512 or recordLength > 65536:
             raise ValueError("Record length is invalid")
@@ -455,46 +469,53 @@ class SDSFile():
         # Get neighbours
         neighbours = list(map(lambda x: x.filepath, self.neighbours))
 
-        # Check if overlap needs to be removed
-        if removeOverlap:
-            pruneFlag = "-Ps"
-        else:
-            pruneFlag = "-Pe"
-
-        # Create a dataselect process
+        # Define dataselect arguments
         # -Ps prunes to sample level
         # -Q set quality indicator to Q
         # -ts, -te are start & end time of sample respectively (INCLUSIVE)
         # -szs remove records with 0 samples (may result in empty pruned files)
         # -o - write to stdout
-        dataselect = subprocess.Popen([
-            "dataselect",
-            pruneFlag,
-            "-Q", "Q",
-            "-ts", self.sampleStart,
-            "-te", self.sampleEnd,
-            "-szs",
-            "-o", "-",
-        ] + neighbours, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        dataselect_args = ["-Q", "Q", "-szs"]
+
+        # Cut file at the day boundaries if requested
+        if cut_boundaries:
+            dataselect_args.extend(["-ts", self.sampleStart, "-te", self.sampleEnd])
+
+        # Check if overlap needs to be removed
+        if removeOverlap:
+            dataselect_args.append("-Ps")
+        else:
+            dataselect_args.append("-Pe")
+
+        # If the file is going to be repacked, write to stdout
+        if repack:
+            dataselect_args.extend(["-o", "-"])
+        else:
+            dataselect_args.extend(["-o", qualityFile.filepath])
+
+        # Create a dataselect process
+        dataselect = subprocess.Popen(["dataselect"] + dataselect_args + neighbours,
+                                      stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
         # Open a msrepack process and connect stdin to dataselect stdout
         # -R repack record size to recordLength
         # -o output file for pruned data
         # - read from STDIN
-        msrepack = subprocess.Popen([
-           "msrepack",
-           "-R", str(recordLength),
-           "-o", qualityFile.filepath,
-           "-"
-        ], stdin=dataselect.stdout, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if repack:
+            msrepack = subprocess.Popen([
+               "msrepack",
+               "-R", str(recordLength),
+               "-o", qualityFile.filepath,
+               "-"
+            ], stdin=dataselect.stdout, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # Not sure why we need this
         dataselect.stdout.close()
 
         # Wait for child processes to terminate
-        if msrepack.wait() != 0 or dataselect.wait() != 0:
-            raise Exception("Unable to prune file (dataselect returned %s, msrepack returned %s)" % (
-                            str(dataselect.returncode), str(msrepack.returncode)))
+        if dataselect.wait() != 0 or (repack and msrepack.wait() != 0):
+            raise Exception("Unable to prune file (dataselect returned %s, msrepack returned %s)"
+                            % (str(dataselect.returncode), str(msrepack.returncode)))
 
         # Check that quality file has been created
         if os.path.exists(qualityFile.filepath):

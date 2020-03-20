@@ -62,13 +62,18 @@ def deletePPSDMetadataRule(options, SDSFile):
 def pruneRule(options, SDSFile):
     """Handler for the file pruning/repacking rule.
 
+    Due to the way `SDSFile.prune()` runs `dataselect` as its first step, always sorts
+    the records, independently of other options configured. On the other hand, `msrepack`
+    only runs when `repack` is set to True.
+
     Parameters
     ----------
     options : `dict`
         The rule's options.
-        - ``repackRecordSize``: The new record size (`int`)
+        - ``cut_boundaries``: Whether or not to cut the file at the day boundaries (`bool`)
+        - ``repack``: Whether or not to repack records (`bool`)
+        - ``repackRecordSize``: The new record size if `repack` is `True` (`int`)
         - ``removeOverlap``: Whether or not to remove overlaps (`bool`)
-        - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
     SDSFile : `SDSFile`
         The file to be processed.
     """
@@ -76,7 +81,9 @@ def pruneRule(options, SDSFile):
     logger.debug("Pruning file %s." % SDSFile.filename)
 
     # Prune the file to a .Q quality file in the temporary archive
-    SDSFile.prune(recordLength=options["repackRecordSize"],
+    SDSFile.prune(cut_boundaries=options["cut_boundaries"],
+                  repack=options["repack"],
+                  recordLength=options["repackRecordSize"],
                   removeOverlap=options["removeOverlap"])
 
     logger.debug("Pruned file %s." % SDSFile.filename)
