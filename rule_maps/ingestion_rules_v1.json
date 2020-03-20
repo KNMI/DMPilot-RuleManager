@@ -21,7 +21,7 @@
         "description": "Quarantines out-of-time D files. Deletes corresponding Q file.",
         "functionName": "quarantineRule",
         "options": {
-            "quarantine_path": "/tmp/quarantine/",
+            "quarantine_path": "/data/shared/rulemanager/quarantinesds/",
             "dry_run": true
         },
         "conditions": [
@@ -29,6 +29,12 @@
                 "functionName": "assertQualityCondition",
                 "options": {
                     "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 7
                 }
             }
         ]
@@ -57,7 +63,7 @@
     "WFCATALOG": {
         "description": "Writes waveform metadata to the WFCatalog.",
         "functionName": "waveformMetadataRule",
-        "timeout" : 5,
+        "timeout" : 15,
         "options": {},
         "conditions": [
             {
@@ -69,19 +75,13 @@
             {
                 "functionName": "assertWFCatalogNotExistsCondition",
                 "options": {}
-            },
-            {
-                "functionName": "assertS3ExistsCondition",
-                "options": {
-                    "check_checksum": true
-                }
             }
         ]
     },
     "PPSD": {
         "description": "Proceses PPSD metadata and stores it in a MongoDB.",
         "functionName": "ppsdMetadataRule",
-        "timeout" : 30,
+        "timeout" : 180,
         "options": {},
         "conditions": [
             {
@@ -93,12 +93,6 @@
             {
                 "functionName": "assertPPSDMetadataNotExistsCondition",
                 "options": {}
-            },
-            {
-                "functionName": "assertS3ExistsCondition",
-                "options": {
-                    "check_checksum": true
-                }
             }
         ]
     },
