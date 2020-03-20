@@ -1,6 +1,6 @@
 {
     "ruleMap" : "/home/rulemanager/rule_maps/deletion_rules_v1.json",
     "sequence" : [
-        "DELETE_PPSD"
+        "DELETE_WFCATALOG"
     ]
 }

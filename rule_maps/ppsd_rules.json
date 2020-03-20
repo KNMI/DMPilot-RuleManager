@@ -8,7 +8,7 @@
             {
                 "functionName": "assertQualityCondition",
                 "options": {
-                    "qualities": ["D"]
+                    "qualities": ["D", "Q"]
                 }
             },
             {
@@ -16,11 +16,5 @@
                 "options": {}
             }
         ]
-    },
-    "DELETE_PPSD": {
-        "description": "Deletes PPSD metadata.",
-        "functionName": "deletePPSDMetadataRule",
-        "options": {},
-        "conditions": []
     }
 }
