@@ -514,8 +514,13 @@ class SDSFile():
 
         # Wait for child processes to terminate
         if dataselect.wait() != 0 or (repack and msrepack.wait() != 0):
-            raise Exception("Unable to prune file (dataselect returned %s, msrepack returned %s)"
-                            % (str(dataselect.returncode), str(msrepack.returncode)))
+            if repack:
+                raise Exception(("Unable to prune file "
+                                 "(dataselect returned %s, msrepack returned %s)")
+                                % (str(dataselect.returncode), str(msrepack.returncode)))
+            else:
+                raise Exception("Unable to prune file (dataselect returned %s)"
+                                % (str(dataselect.returncode)))
 
         # Check that quality file has been created
         if os.path.exists(qualityFile.filepath):
