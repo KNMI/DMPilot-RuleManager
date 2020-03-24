@@ -18,8 +18,8 @@
         ]
     },
     "QUARANTINE": {
-        "description": "Quarantines out-of-time D files. Deletes corresponding Q file.",
-        "functionName": "quarantineRule",
+        "description": "Quarantines out-of-time D files.",
+        "functionName": "quarantineRawFileRule",
         "options": {
             "quarantine_path": "/data/shared/rulemanager/quarantinesds/",
             "dry_run": true
@@ -28,7 +28,7 @@
             {
                 "functionName": "assertQualityCondition",
                 "options": {
-                    "qualities": ["Q"]
+                    "qualities": ["D"]
                 }
             },
             {

@@ -400,7 +400,42 @@ def printWithMessage(options, sdsFile):
     print(sdsFile.filename, options["message"])
 
 
-def quarantineRule(options, sdsFile):
+def quarantineRawFileRule(options, sdsFile):
+    """Moves the file to another directory where it can be further analyzed by a human.
+
+    This does not check any related file to quarantine along.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``quarantine_path``: Directory for the quarantine area (`str`)
+        - ``dry_run``: If True, doesn't move/delete the files (`bool`)
+    SDSFile : `SDSFile`
+        The file to be processed.
+
+    Raises
+    ------
+    `ExitPipelineException`
+        Raised after file is quarantined (every time rule is executed).
+
+    """
+    # Move the raw file
+    source_path = sdsFile.filepath
+    dest_dir = sdsFile.customPath(options['quarantine_path'])
+    if options['dry_run']:
+        logger.info('Would move %s to %s.', source_path, dest_dir)
+    else:
+        os.makedirs(dest_dir, exist_ok=True)
+        shutil.move(source_path, dest_dir)
+        logger.info('Moved %s to %s.', source_path, dest_dir)
+
+    # TODO: Report
+
+    raise ExitPipelineException
+
+
+def quarantinePrunedFileRule(options, sdsFile):
     """Moves the file to another directory where it can be further analyzed by a human.
 
     It should be called with the .Q file, but acts on both of them. It moves the raw
@@ -419,9 +454,9 @@ def quarantineRule(options, sdsFile):
     Raises
     ------
     `ExitPipelineException`
-        Raised after file is quarantined (everytime rule is executed).
-    """
+        Raised after file is quarantined (every time rule is executed).
 
+    """
     # Move the raw .D file
     d_file_path = os.path.join(sdsFile.archiveRoot,
                                sdsFile.custom_quality_subdir('D'),
