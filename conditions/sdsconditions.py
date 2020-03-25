@@ -95,17 +95,70 @@ def assertWFCatalogExistsCondition(options, sds_file):
                                             db_name="WFCatalog",
                                             use_checksum_prev=True)
 
+
 def assertWFCatalogNotExistsCondition(options, sds_file):
 
     return not assertWFCatalogExistsCondition(options, sds_file)
 
 
 def assertModificationTimeYoungerThan(options, sds_file):
+    """Assert that the file was last modified less than `options['days']` days ago.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``days``: The number of days used to test the file against (`int`)
+    sds_file : `SDSFile`
+        The file being processed.
+
+    """
     return sds_file.modified > (datetime.now() - timedelta(days=options["days"]))
 
 
 def assertModificationTimeOlderThan(options, sds_file):
+    """Assert that the file was last modified more than `options['days']` days ago.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``days``: The number of days used to test the file against (`int`)
+    sds_file : `SDSFile`
+        The file being processed.
+
+    """
     return sds_file.modified < (datetime.now() - timedelta(days=options["days"]))
+
+
+def assertDataTimeYoungerThan(options, sds_file):
+    """Assert that the date the file data corresponds to (in the filename) is less than `options['days']` days ago.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``days``: The number of days used to test the file against (`int`)
+    sds_file : `SDSFile`
+        The file being processed.
+
+    """
+    return sds_file.start > (datetime.now() - timedelta(days=options["days"]))
+
+
+def assertDataTimeOlderThan(options, sds_file):
+    """Assert that the date the file data corresponds to (in the filename) is more than `options['days']` days ago.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``days``: The number of days used to test the file against (`int`)
+    sds_file : `SDSFile`
+        The file being processed.
+
+    """
+    return sds_file.start < (datetime.now() - timedelta(days=options["days"]))
 
 
 def assertDCMetadataExistsCondition(options, sds_file):
@@ -198,8 +251,7 @@ def assertPPSDMetadataNotExistsCondition(options, sds_file):
 
 
 def assertPrunedFileExistsCondition(options, sds_file):
-    """Aserts that the pruned version of the SDS file is in the temporary archive."""
-
+    """Assert that the pruned version of the SDS file is in the temporary archive."""
     # Create a phantom SDSFile with a different quality idenfier
     qualityFile = SDSFile(sds_file.filename, sds_file.archiveRoot)
     qualityFile.quality = "Q"
