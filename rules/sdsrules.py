@@ -422,7 +422,7 @@ def quarantineRawFileRule(options, sdsFile):
     """
     # Move the raw file
     source_path = sdsFile.filepath
-    dest_dir = sdsFile.customPath(options['quarantine_path'])
+    dest_dir = sdsFile.customDirectory(options['quarantine_path'])
     if options['dry_run']:
         logger.info('Would move %s to %s.', source_path, dest_dir)
     else:
