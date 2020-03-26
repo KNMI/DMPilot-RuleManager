@@ -101,64 +101,117 @@ def assertWFCatalogNotExistsCondition(options, sds_file):
     return not assertWFCatalogExistsCondition(options, sds_file)
 
 
+def _get_neighbor(sds_file, neighbor):
+    """Get the 'current', 'next', or 'previous' SDSFile in relation to a given SDSFile.
+
+    Returns
+    -------
+    `SDSFile` or `None`
+        The requested `SDSFile` or `None` if the file does not exist.
+
+    """
+    queried_file = None
+    if neighbor == 'current':
+        queried_file = sds_file
+    elif neighbor == 'next':
+        queried_file = sds_file.next
+    elif neighbor == 'previous':
+        queried_file = sds_file.previous
+
+    if os.path.isfile(queried_file.filepath):
+        return queried_file
+    else:
+        return None
+
+
 def assertModificationTimeYoungerThan(options, sds_file):
     """Assert that the file was last modified less than `options['days']` days ago.
+
+    In case the file does not exist, returns False.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
         - ``days``: The number of days used to test the file against (`int`)
+        - ``apply_to``: Which file to apply the rule ---
+                        'previous' | 'current' (default) | 'next'
     sds_file : `SDSFile`
         The file being processed.
 
     """
-    return sds_file.modified > (datetime.now() - timedelta(days=options["days"]))
+    file_to_apply = _get_neighbor(sds_file, options.get('apply_to', 'current'))
+    if file_to_apply is None:
+        return False
+    return file_to_apply.modified > (datetime.now() - timedelta(days=options["days"]))
 
 
 def assertModificationTimeOlderThan(options, sds_file):
     """Assert that the file was last modified more than `options['days']` days ago.
 
+    In case the file does not exist, returns True.
+
     Parameters
     ----------
     options : `dict`
         The rule's options.
         - ``days``: The number of days used to test the file against (`int`)
+        - ``apply_to``: Which file to apply the rule ---
+                        'previous' | 'current' (default) | 'next'
     sds_file : `SDSFile`
         The file being processed.
 
     """
-    return sds_file.modified < (datetime.now() - timedelta(days=options["days"]))
+    file_to_apply = _get_neighbor(sds_file, options.get('apply_to', 'current'))
+    if file_to_apply is None:
+        return True
+    return file_to_apply.modified < (datetime.now() - timedelta(days=options["days"]))
 
 
 def assertDataTimeYoungerThan(options, sds_file):
-    """Assert that the date the file data corresponds to (in the filename) is less than `options['days']` days ago.
+    """Assert that the date the file data corresponds to (in the filename) is less than
+    `options['days']` days ago.
+
+    In case the file does not exist, returns False.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
         - ``days``: The number of days used to test the file against (`int`)
+        - ``apply_to``: Which file to apply the rule ---
+                        'previous' | 'current' (default) | 'next'
     sds_file : `SDSFile`
         The file being processed.
 
     """
-    return sds_file.start > (datetime.now() - timedelta(days=options["days"]))
+    file_to_apply = _get_neighbor(sds_file, options.get('apply_to', 'current'))
+    if file_to_apply is None:
+        return False
+    return file_to_apply.start > (datetime.now() - timedelta(days=options["days"]))
 
 
 def assertDataTimeOlderThan(options, sds_file):
-    """Assert that the date the file data corresponds to (in the filename) is more than `options['days']` days ago.
+    """Assert that the date the file data corresponds to (in the filename) is more than
+    `options['days']` days ago.
+
+    In case the file does not exist, returns True.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
         - ``days``: The number of days used to test the file against (`int`)
+        - ``apply_to``: Which file to apply the rule ---
+                        'previous' | 'current' (default) | 'next'
     sds_file : `SDSFile`
         The file being processed.
 
     """
-    return sds_file.start < (datetime.now() - timedelta(days=options["days"]))
+    file_to_apply = _get_neighbor(sds_file, options.get('apply_to', 'current'))
+    if file_to_apply is None:
+        return True
+    return file_to_apply.start < (datetime.now() - timedelta(days=options["days"]))
 
 
 def assertDCMetadataExistsCondition(options, sds_file):
