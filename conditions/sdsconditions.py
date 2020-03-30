@@ -124,7 +124,7 @@ def _get_neighbor(sds_file, neighbor):
         return None
 
 
-def assertModificationTimeYoungerThan(options, sds_file):
+def assertModificationTimeNewerThan(options, sds_file):
     """Assert that the file was last modified less than `options['days']` days ago.
 
     In case the file does not exist, returns False.
@@ -168,7 +168,7 @@ def assertModificationTimeOlderThan(options, sds_file):
     return file_to_apply.modified < (datetime.now() - timedelta(days=options["days"]))
 
 
-def assertDataTimeYoungerThan(options, sds_file):
+def assertDataTimeNewerThan(options, sds_file):
     """Assert that the date the file data corresponds to (in the filename) is less than
     `options['days']` days ago.
 
