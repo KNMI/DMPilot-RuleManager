@@ -14,11 +14,42 @@
                 "options": {
                     "qualities": ["D"]
                 }
+            },
+            {
+                "functionName": "assertModificationTimeNewerThan",
+                "options": {
+                    "days": 5
+                }
             }
         ]
     },
-    "QUARANTINE": {
-        "description": "Quarantines out-of-time D files.",
+    "PRUNE_NEIGHBOR": {
+        "description": "Prunes and repacks the daily file if previous neighbor changed. Saves a Q-quality file.",
+        "functionName": "pruneRule",
+        "options": {
+            "cut_boundaries": true,
+            "removeOverlap": false,
+            "repack": false,
+            "repackRecordSize": 4096
+        },
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["D"]
+                }
+            },
+            {
+                "functionName": "assertModificationTimeNewerThan",
+                "options": {
+		    "apply_to": "previous",
+                    "days": 1
+                }
+            }
+        ]
+    },
+    "QUARANTINE_OLD": {
+        "description": "Quarantines recently modified D files that are too old.",
         "functionName": "quarantineRawFileRule",
         "options": {
             "quarantine_path": "/data/shared/rulemanager/quarantinesds/",
@@ -32,9 +63,37 @@
                 }
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "functionName": "assertModificationTimeNewerThan",
                 "options": {
-                    "days": 7
+                    "days": 1
+                }
+            },
+            {
+                "functionName": "assertDataTimeOlderThan",
+                "options": {
+                    "days": 6
+                }
+            }
+        ]
+    },
+    "QUARANTINE_FUTURE": {
+        "description": "Quarantines D files dated in the future.",
+        "functionName": "quarantineRawFileRule",
+        "options": {
+            "quarantine_path": "/data/shared/rulemanager/quarantinesds/",
+            "dry_run": true
+        },
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["D"]
+                }
+            },
+            {
+                "functionName": "assertModificationTimeNewerThan",
+                "options": {
+                    "days": -1
                 }
             }
         ]
@@ -134,6 +193,13 @@
                 "functionName": "assertModificationTimeOlderThan",
                 "options": {
                     "days": 7
+                }
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+		    "apply_to": "next",
+                    "days": 6
                 }
             }
         ]

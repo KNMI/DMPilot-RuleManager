@@ -1,8 +1,10 @@
 {
     "ruleMap" : "/home/rulemanager/rule_maps/ingestion_rules_v2.json",
     "sequence" : [
-        "QUARANTINE",
+        "QUARANTINE_FUTURE",
+        "QUARANTINE_OLD",
         "PRUNE",
+        "PRUNE_NEIGHBOR",
         "INGESTION",
         "WFCATALOG",
         "DCAT",
