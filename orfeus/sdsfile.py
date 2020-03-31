@@ -75,6 +75,12 @@ class SDSFile():
         # Initialize logger
         self.logger = logging.getLogger('RuleManager')
 
+        # Initialize costly properties
+        self._checksum = None
+        self._inventory = None
+        self._traces = None
+        self._location = None
+
     # Returns the filename
     @property
     def filename(self):
@@ -234,6 +240,9 @@ class SDSFile():
         signed int32 to save space in MongoDB documents
         """
 
+        if self._checksum is not None:
+            return self._checksum
+
         if self.stats is None:
             return None
 
@@ -241,7 +250,8 @@ class SDSFile():
         with open(self.filepath, "rb") as f:
             checksum = adler32(f.read()) & 0xffffffff
             checksum = ctypes.c_int32(checksum).value
-        return checksum
+        self._checksum = checksum
+        return self._checksum
 
     @property
     def queryStringTXT(self):
@@ -304,6 +314,9 @@ class SDSFile():
         Returns a list of traces
         """
 
+        if self._traces is not None:
+            return self._traces
+
         def parseMSIOutput(line):
             """
             def SDSFile::traces::parseMSIOutput
@@ -349,7 +362,8 @@ class SDSFile():
         dataselect.wait()
 
         # Skip first header & final line
-        return list(map(parseMSIOutput, lines[1:-1]))
+        self._traces = list(map(parseMSIOutput, lines[1:-1]))
+        return self._traces
 
     @property
     def isPressureChannel(self):
@@ -367,11 +381,14 @@ class SDSFile():
         Returns the FDSNWSXML inventory
         """
 
+        if self._inventory is not None:
+            return self._inventory
+
         # Query our FDSNWS Webservice for the station location
         request = os.path.join(self.fdsnws, self.queryStringXML)
 
         try:
-            return read_inventory(request)
+            self._inventory = read_inventory(request)
 
         # Re-raise in case this is the Rule Manager timeout going off
         except TimeoutError:
@@ -381,12 +398,17 @@ class SDSFile():
         except Exception:
             return None
 
+        return self._inventory
+
     @property
     def location(self):
         """
         def SDSFile::location
         Returns the geographical location of the stream
         """
+
+        if self._location is not None:
+            return self._location
 
         # Query our FDSNWS Webservice for the station location
         try:
@@ -407,11 +429,12 @@ class SDSFile():
         # Some magic parsing: fields 4, 5, 6 on the 2nd line
         (latitude, longitude, elevation) = lines[1].split("|")[4:7]
 
-        return {
+        self._location = {
             "longitude": float(longitude),
             "latitude": float(latitude),
             "elevation": float(elevation)
         }
+        return self._location
 
     @property
     def psdBins(self):
