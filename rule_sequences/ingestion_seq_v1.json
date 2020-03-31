@@ -7,6 +7,9 @@
         "PRUNE_NEIGHBOR",
         "INGESTION",
         "WFCATALOG",
-        "PPSD"
+        "PPSD",
+        "PURGE_UNKNOWN",
+        "PURGE_RAW",
+        "PURGE_PRUNED"
     ]
 }
