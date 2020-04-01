@@ -42,7 +42,7 @@
             {
                 "functionName": "assertModificationTimeNewerThan",
                 "options": {
-		    "apply_to": "previous",
+                    "apply_to": "previous",
                     "days": 1
                 }
             }
@@ -264,7 +264,7 @@
             {
                 "functionName": "assertModificationTimeOlderThan",
                 "options": {
-		    "apply_to": "next",
+                    "apply_to": "next",
                     "days": 6
                 }
             }
