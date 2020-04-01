@@ -55,6 +55,9 @@ ENV PATH="$PATH:/home/bin"
 # Declare volume for temporary archive
 VOLUME /data/temp_archive
 
+# Declare volume for quarantined data
+VOLUME /data/quarantine
+
 # Declare volume for var files (i.e.: deletion.db)
 VOLUME /var/rulemanager
 

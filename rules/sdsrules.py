@@ -410,6 +410,7 @@ def quarantineRawFileRule(options, sdsFile):
     options : `dict`
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
+        - ``exitOnFailure``: Whether or not to exit the pipeline when the quarantine fails (`bool`)
         - ``dry_run``: If True, doesn't move/delete the files (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
@@ -420,17 +421,24 @@ def quarantineRawFileRule(options, sdsFile):
         Raised after file is quarantined (every time rule is executed).
 
     """
-    # Move the raw file
-    source_path = sdsFile.filepath
-    dest_dir = sdsFile.customDirectory(options['quarantine_path'])
-    if options['dry_run']:
-        logger.info('Would move %s to %s.', source_path, dest_dir)
-    else:
-        os.makedirs(dest_dir, exist_ok=True)
-        shutil.move(source_path, dest_dir)
-        logger.info('Moved %s to %s.', source_path, dest_dir)
+    try:
+        # Move the raw file
+        source_path = sdsFile.filepath
+        dest_dir = sdsFile.customDirectory(options['quarantine_path'])
+        if options['dry_run']:
+            logger.info('Would move %s to %s/', source_path, dest_dir)
+        else:
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.move(source_path, dest_dir)
+            logger.info('Moved %s to %s/', source_path, dest_dir)
 
-    # TODO: Report
+        # TODO: Report
+
+    except (KeyError, shutil.Error, PermissionError) as ex:
+        if options['exitOnFailure']:
+            logger.error('%s: Unable to quarantine file: %s',
+                            sdsFile.filename, str(ex))
+            raise ExitPipelineException
 
     raise ExitPipelineException
 
@@ -447,6 +455,7 @@ def quarantinePrunedFileRule(options, sdsFile):
     options : `dict`
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
+        - ``exitOnFailure``: Whether or not to exit the pipeline when the quarantine fails (`bool`)
         - ``dry_run``: If True, doesn't move/delete the files (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
@@ -457,28 +466,35 @@ def quarantinePrunedFileRule(options, sdsFile):
         Raised after file is quarantined (every time rule is executed).
 
     """
-    # Move the raw .D file
-    d_file_path = os.path.join(sdsFile.archiveRoot,
-                               sdsFile.custom_quality_subdir('D'),
-                               sdsFile.custom_quality_filename('D'))
-    dest_dir = os.path.join(options['quarantine_path'],
-                            sdsFile.custom_quality_subdir('D'))
-    if options['dry_run']:
-        logger.info('Would move %s to %s.', d_file_path, dest_dir)
-    else:
-        os.makedirs(dest_dir, exist_ok=True)
-        shutil.move(d_file_path, dest_dir)
-        logger.info('Moved %s to %s.', d_file_path, dest_dir)
+    try:
+        # Move the raw .D file
+        d_file_path = os.path.join(sdsFile.archiveRoot,
+                                   sdsFile.custom_quality_subdir('D'),
+                                   sdsFile.custom_quality_filename('D'))
+        dest_dir = os.path.join(options['quarantine_path'],
+                                sdsFile.custom_quality_subdir('D'))
+        if options['dry_run']:
+            logger.info('Would move %s to %s/', d_file_path, dest_dir)
+        else:
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.move(d_file_path, dest_dir)
+            logger.info('Moved %s to %s/', d_file_path, dest_dir)
 
-    # Delete the .Q file
-    q_file_path = sdsFile.filepath
-    if options['dry_run']:
-        logger.info('Would remove %s.', q_file_path)
-    else:
-        os.remove(q_file_path)
-        logger.info('Removed %s.', q_file_path)
+        # Delete the .Q file
+        q_file_path = sdsFile.filepath
+        if options['dry_run']:
+            logger.info('Would remove %s', q_file_path)
+        else:
+            os.remove(q_file_path)
+            logger.info('Removed %s', q_file_path)
 
-    # TODO: Report
+        # TODO: Report
+
+    except (KeyError, shutil.Error, PermissionError) as ex:
+        if options['exitOnFailure']:
+            logger.error('%s: Unable to quarantine file: %s',
+                            sdsFile.filename, str(ex))
+            raise ExitPipelineException
 
     raise ExitPipelineException
 

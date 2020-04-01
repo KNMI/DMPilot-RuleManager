@@ -13,5 +13,6 @@ deletion.db
 *.a
 *.in
 docker/dev/data/
+docker/dev/quarantine/
 *.local.yml
 .env

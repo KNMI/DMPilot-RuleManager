@@ -10,6 +10,7 @@ services:
     volumes:
       - ./:/home/rulemanager
       - ./docker/dev/data/sds:/data/temp_archive
+      - ./docker/dev/data/quarantine:/data/quarantine
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}

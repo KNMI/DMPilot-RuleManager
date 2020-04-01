@@ -6,6 +6,8 @@ services:
     volumes:
       # Add your local SDS dir
       - ${HOME}/data/sds:/data/temp_archive
+      # Add your local quarantine dir
+      - ${HOME}/data/quarantinesds:/data/quarantine
       # Add your local var dir (for i.e.: deletion.db)
       - ${HOME}/var/rulemanager:/var/rulemanager
       # Add your local log dir

@@ -1,4 +1,5 @@
 docker/dev/data/
+docker/dev/quarantine/
 configuration.py
 .git/
 *~

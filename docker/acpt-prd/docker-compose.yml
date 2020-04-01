@@ -13,6 +13,7 @@ services:
     user: sysop:sysop
     volumes:
       - /data/shared/sds:/data/temp_archive:ro
+      - /data/shared/quarantinesds:/data/quarantine:ro
       - /data/seismo/rulemanager:/var/rulemanager
       - /home/sysop/log:/tmp/rulemanager/logs
     networks:

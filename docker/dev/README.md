@@ -11,6 +11,10 @@ The files in this directory help creating a local environment based on Docker fo
 cp ./docker/dev/configuration.sample.py ./configuration.py
 vim ./configuration.py
 
+# Make dirs for sds and quarantine data
+mkdir -p docker/dev/data/sds/
+mkdir -p docker/dev/data/quarantine/
+
 # Clone PPSD webservice code (in a separate dir), export its directory and customise config
 git clone git@gitlab.com:KNMI/RDSA/ppsd-webservice.git <PPSD_WS_DIR>
 export PPSD_WS_DIR=<PPSD_WS_DIR>
@@ -31,7 +35,6 @@ export AWS_SESSION_TOKEN=$(aws --profile knmi-saml-session-credentials configure
 export ADFS_USER=<YOUR_ADFS_USER>
 
 # (Optional) Download SDS sample data
-mkdir -p docker/dev/data/sds/
 aws s3 cp s3://seismo-test-sds-samples/sds-sample-data.tar docker/dev/data/sds-sample-data.tar --profile knmi-sandbox-saml
 tar xvf docker/dev/data/sds-sample-data.tar -C docker/dev/data/sds/
 
