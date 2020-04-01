@@ -52,8 +52,7 @@
         "description": "Quarantines recently modified D files that are too old.",
         "functionName": "quarantineRawFileRule",
         "options": {
-            "quarantine_path": "/data/shared/rulemanager/quarantinesds/",
-            "dry_run": true
+            "quarantine_path": "/data/shared/rulemanager/quarantinesds/"
         },
         "conditions": [
             {
@@ -80,8 +79,7 @@
         "description": "Quarantines D files dated in the future.",
         "functionName": "quarantineRawFileRule",
         "options": {
-            "quarantine_path": "/data/shared/rulemanager/quarantinesds/",
-            "dry_run": true
+            "quarantine_path": "/data/shared/rulemanager/quarantinesds/"
         },
         "conditions": [
             {
@@ -227,7 +225,7 @@
             {
                 "functionName": "assertQualityCondition",
                 "options": {
-                    "qualities": ["R", "E", "M"]
+                    "qualities": ["R", "E", "M", "T"]
                 }
             },
             {
