@@ -40,6 +40,9 @@ def main():
                             help=("collect all files with modification date older that last "
                                   "midnight plus the given number of minutes"),
                             type=int)
+        parser.add_argument("--sort",
+                            help="sort collected files by name before processing them",
+                            action="store_true")
         parsedargs = vars(parser.parse_args())
 
         # Check collection parameters
@@ -66,6 +69,10 @@ def main():
             fileCollector.filterFromFileList(filename_list)
         if parsedargs["collect_finished"] is not None:
             fileCollector.filterFinishedFiles(parsedargs["collect_finished"])
+
+        # Sort files alphabetically
+        if parsedargs["sort"]:
+            fileCollector.sortFiles()
 
         # Apply the sequence of rules on files
         RM.sequence(fileCollector.files)

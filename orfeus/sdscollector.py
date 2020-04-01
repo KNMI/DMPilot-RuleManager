@@ -164,3 +164,7 @@ class SDSFileCollector(FileCollector):
         """Filter files that are in a list of filenames."""
 
         self.files = list(filter(lambda x: x.filename in file_list, self.files))
+
+    def sortFiles(self):
+        """Sort files by filename."""
+        self.files = sorted(self.files, key=lambda sdsfile: sdsfile.filename)

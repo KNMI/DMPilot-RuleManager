@@ -37,6 +37,9 @@ def main():
         parser.add_argument("-o", "--output",
                             help="output, a file name or stdout if not provided",
                             type=argparse.FileType('w'), default=sys.stdout)
+        parser.add_argument("--sort",
+                            help="sort collected files by name before processing them",
+                            action="store_true")
         parsedargs = parser.parse_args()
 
         # Check collection parameters
@@ -51,6 +54,10 @@ def main():
             fileCollector.filterFromWildcardsArray(parsedargs.collect_wildcards)
         if parsedargs.collect_finished is not None:
             fileCollector.filterFinishedFiles(parsedargs.collect_finished)
+
+        # Sort files alphabetically
+        if parsedargs.sort:
+            fileCollector.sortFiles()
 
         # Write to output (file or stdout)
         with parsedargs.output as list_file:
