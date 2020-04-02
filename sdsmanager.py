@@ -41,8 +41,11 @@ def main():
                                   "midnight plus the given number of minutes"),
                             type=int)
         parser.add_argument("--sort",
-                            help="sort collected files by name before processing them",
-                            action="store_true")
+                            help=("whether (and how) to sort collected files "
+                                  "by name before processing them "
+                                  "(defaults to none)"),
+                            choices=['none', 'asc', 'desc'],
+                            default='none')
         parsedargs = vars(parser.parse_args())
 
         # Check collection parameters
@@ -71,8 +74,8 @@ def main():
             fileCollector.filterFinishedFiles(parsedargs["collect_finished"])
 
         # Sort files alphabetically
-        if parsedargs["sort"]:
-            fileCollector.sortFiles()
+        if parsedargs["sort"] != 'none':
+            fileCollector.sortFiles(parsedargs["sort"])
 
         # Apply the sequence of rules on files
         RM.sequence(fileCollector.files)

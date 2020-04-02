@@ -23,7 +23,7 @@ def main():
         # Parse command line arguments
         parser = argparse.ArgumentParser()
         parser.add_argument("--dir",
-                            help=("directory containing the files to collect"
+                            help=("directory containing the files to collect "
                                   "(defaults to the value in configuration.py)"),
                             default=config["DATA_DIR"])
         parser.add_argument("--collect_wildcards", nargs='+',
@@ -38,8 +38,11 @@ def main():
                             help="output, a file name or stdout if not provided",
                             type=argparse.FileType('w'), default=sys.stdout)
         parser.add_argument("--sort",
-                            help="sort collected files by name before processing them",
-                            action="store_true")
+                            help=("whether (and how) to sort collected files "
+                                  "by name before processing them "
+                                  "(defaults to none)"),
+                            choices=['none', 'asc', 'desc'],
+                            default='none')
         parsedargs = parser.parse_args()
 
         # Check collection parameters
@@ -56,8 +59,8 @@ def main():
             fileCollector.filterFinishedFiles(parsedargs.collect_finished)
 
         # Sort files alphabetically
-        if parsedargs.sort:
-            fileCollector.sortFiles()
+        if parsedargs.sort != 'none':
+            fileCollector.sortFiles(parsedargs.sort)
 
         # Write to output (file or stdout)
         with parsedargs.output as list_file:

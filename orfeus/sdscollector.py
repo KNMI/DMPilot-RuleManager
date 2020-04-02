@@ -165,6 +165,9 @@ class SDSFileCollector(FileCollector):
 
         self.files = list(filter(lambda x: x.filename in file_list, self.files))
 
-    def sortFiles(self):
+    def sortFiles(self, order):
         """Sort files by filename."""
-        self.files = sorted(self.files, key=lambda sdsfile: sdsfile.filename)
+        self.logger.debug("Sorting files by filename (%s)" % order)
+        self.files = sorted(self.files, key=lambda sdsfile: sdsfile.filename,
+                            reverse=(order == "desc"))
+        self.logger.debug("Sorting finished")
