@@ -1,5 +1,5 @@
 {
-    "ruleMap" : "/home/rulemanager/rule_maps/ingestion_rules_v2.json",
+    "ruleMap" : "/home/rulemanager/rule_maps/ingestion_rules.json",
     "sequence" : [
         "QUARANTINE_FUTURE",
         "QUARANTINE_OLD",
@@ -13,6 +13,6 @@
         "REPLICATION",
         "PURGE_UNKNOWN",
         "PURGE_RAW",
-        "PURGE_PRUNED"
+        "PURGE_PRUNED_V2"
     ]
 }

@@ -139,6 +139,30 @@
             }
         ]
     },
+    "DCAT": {
+        "description": "Writes Dublin Core metadata to the WFCatalog.",
+        "functionName": "dcMetadataRule",
+        "timeout" : 5,
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertDCMetadataNotExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+                    "check_checksum": true
+                }
+            }
+        ]
+    },
     "PPSD": {
         "description": "Proceses PPSD metadata and stores it in a MongoDB.",
         "functionName": "ppsdMetadataRule",
@@ -154,6 +178,46 @@
             {
                 "functionName": "assertPPSDMetadataNotExistsCondition",
                 "options": {}
+            }
+        ]
+    },
+    "PID": {
+        "description": "Assigns a PID to the file using B2HANDLE.",
+        "functionName": "pidRule",
+        "timeout" : 5,
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            }
+        ]
+    },
+    "REPLICATION": {
+        "description": "Replicates the file in a federated iRODS, using B2SAFE",
+        "functionName": "replicationRule",
+        "timeout" : 5,
+        "options": {
+            "replicationRoot": "/remoteZone/home/rods#localZone/"
+        },
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                            "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertPIDCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+                    "check_checksum": true
+                }
             }
         ]
     },
@@ -206,7 +270,7 @@
             }
         ]
     },
-    "PURGE_PRUNED": {
+    "PURGE_PRUNED_V1": {
         "description": "Deletes pruned files that have been successfully processed.",
         "functionName": "purgeRule",
         "options": {},
@@ -230,6 +294,60 @@
             {
                 "functionName": "assertPPSDMetadataExistsCondition",
                 "options": {}
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "days": 7
+                }
+            },
+            {
+                "functionName": "assertModificationTimeOlderThan",
+                "options": {
+                    "apply_to": "next",
+                    "days": 6
+                }
+            }
+        ]
+    },
+    "PURGE_PRUNED_V2": {
+        "description": "Deletes pruned files that have been successfully processed.",
+        "functionName": "purgeRule",
+        "options": {},
+        "conditions": [
+            {
+                "functionName": "assertQualityCondition",
+                "options": {
+                    "qualities": ["Q"]
+                }
+            },
+            {
+                "functionName": "assertS3ExistsCondition",
+                "options": {
+                    "check_checksum": true
+                }
+            },
+            {
+                "functionName": "assertWFCatalogExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertDCMetadataExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertPPSDMetadataExistsCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertPIDCondition",
+                "options": {}
+            },
+            {
+                "functionName": "assertFileReplicatedCondition",
+                "options": {
+                    "replicationRoot": "/remoteZone/home/rods#localZone/"
+                }
             },
             {
                 "functionName": "assertModificationTimeOlderThan",
