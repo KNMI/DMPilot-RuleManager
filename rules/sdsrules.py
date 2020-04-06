@@ -142,7 +142,7 @@ def ingestionS3Rule(options, SDSFile):
         s3manager.put(SDSFile)
     except S3UploadFailedError:
         if options['exitOnFailure']:
-            raise ExitPipelineException
+            raise ExitPipelineException(True, 'Upload failed')
 
     # Check if checksum is saved
     logger.debug("Ingested file %s with checksum '%s'" % (
@@ -437,10 +437,10 @@ def quarantineRawFileRule(options, sdsFile):
     except (KeyError, shutil.Error, PermissionError) as ex:
         if options['exitOnFailure']:
             logger.error('%s: Unable to quarantine file: %s',
-                            sdsFile.filename, str(ex))
-            raise ExitPipelineException
+                         sdsFile.filename, str(ex))
+            raise ExitPipelineException(True, 'Quarantine failed')
 
-    raise ExitPipelineException
+    raise ExitPipelineException(False, 'File quarantined')
 
 
 def quarantinePrunedFileRule(options, sdsFile):
@@ -494,9 +494,9 @@ def quarantinePrunedFileRule(options, sdsFile):
         if options['exitOnFailure']:
             logger.error('%s: Unable to quarantine file: %s',
                             sdsFile.filename, str(ex))
-            raise ExitPipelineException
+            raise ExitPipelineException(True, 'Quarantine failed')
 
-    raise ExitPipelineException
+    raise ExitPipelineException(False, 'File quarantined')
 
 
 def testPrint(options, sdsFile):

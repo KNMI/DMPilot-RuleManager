@@ -182,8 +182,16 @@ class RuleManager():
                                      % (item.filename, rule.name))
 
                 # A rule called for the pipeline to be exited for this file
-                except ExitPipelineException:
-                    # It is expected that who raises this logs the error, so this is at INFO level
+                except ExitPipelineException as e:
+                    if e.is_error:
+                        # The exception came from an error
+                        self.logger.error("%s: Rule execution '%s' failed: %s"
+                                          % (item.filename, rule.name, e.message))
+                    else:
+                        # A rule executed successfully and called for an exit
+                        self.logger.info("%s: Successfully executed rule '%s'."
+                                         % (item.filename, rule.name))
+
                     self.logger.info("%s: Exiting pipeline for this file" % (item.filename))
 
                     # The 'finally' block WILL be executed even after breaking
