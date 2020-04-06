@@ -144,6 +144,8 @@ def ingestionS3Rule(options, SDSFile):
     except (CredentialRetrievalError, S3UploadFailedError) as e:
         if options['exitOnFailure']:
             raise ExitPipelineException(True, str(e))
+        else:
+            raise
 
     # Check if checksum is saved
     logger.debug("Ingested file %s with checksum '%s'" % (
