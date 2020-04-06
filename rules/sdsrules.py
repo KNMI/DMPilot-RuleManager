@@ -10,6 +10,7 @@ import logging
 import os
 import shutil
 
+from botocore.exceptions import CredentialRetrievalError
 from boto3.exceptions import S3UploadFailedError
 from core.exceptions import ExitPipelineException
 
@@ -140,6 +141,9 @@ def ingestionS3Rule(options, SDSFile):
     try:
         # Upload file to S3
         s3manager.put(SDSFile)
+    except CredentialRetrievalError as e:
+        if options['exitOnFailure']:
+            raise ExitPipelineException(True, str(e))
     except S3UploadFailedError:
         if options['exitOnFailure']:
             raise ExitPipelineException(True, 'Upload failed')
