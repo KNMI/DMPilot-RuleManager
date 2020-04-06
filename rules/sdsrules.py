@@ -413,7 +413,6 @@ def quarantineRawFileRule(options, sdsFile):
     options : `dict`
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
-        - ``exitOnFailure``: Whether or not to exit the pipeline when the quarantine fails (`bool`)
         - ``dry_run``: If True, doesn't move/delete the files (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
@@ -438,8 +437,7 @@ def quarantineRawFileRule(options, sdsFile):
         # TODO: Report
 
     except (KeyError, shutil.Error, PermissionError) as ex:
-        if options['exitOnFailure']:
-            raise ExitPipelineException(True, str(ex))
+        raise ExitPipelineException(True, str(ex))
 
     raise ExitPipelineException(False, 'File quarantined')
 
@@ -456,7 +454,6 @@ def quarantinePrunedFileRule(options, sdsFile):
     options : `dict`
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
-        - ``exitOnFailure``: Whether or not to exit the pipeline when the quarantine fails (`bool`)
         - ``dry_run``: If True, doesn't move/delete the files (`bool`)
     SDSFile : `SDSFile`
         The file to be processed.
@@ -492,8 +489,7 @@ def quarantinePrunedFileRule(options, sdsFile):
         # TODO: Report
 
     except (KeyError, shutil.Error, PermissionError) as ex:
-        if options['exitOnFailure']:
-            raise ExitPipelineException(True, str(ex))
+        raise ExitPipelineException(True, str(ex))
 
     raise ExitPipelineException(False, 'File quarantined')
 
