@@ -78,7 +78,7 @@ class PSDCollector():
     def __init__(self):
 
         # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
+        self.logger = logging.getLogger("RuleManager")
         self.logger.debug("Initializing PSD Collector.")
 
     def __getResponseChecksum(self, inventory):

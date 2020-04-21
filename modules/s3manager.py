@@ -11,7 +11,7 @@ PROFILE = config["S3"]["PROFILE"]
 def _get_bucket():
     """Returns the Bucket resource object for the SDS archive."""
     session = boto3.session.Session(profile_name=PROFILE)
-    s3_resource = session.resource('s3')
+    s3_resource = session.resource("s3")
     return s3_resource.Bucket(name=BUCKET_NAME)
 
 
@@ -22,7 +22,7 @@ def exists(sds_file):
     try:
         bucket.Object(sds_file.s3Key).load()
     except ClientError as e:
-        if int(e.response['Error']['Code']) == 404:
+        if int(e.response["Error"]["Code"]) == 404:
             return False
         else:
             raise
@@ -34,7 +34,7 @@ def put(sds_file):
     bucket = _get_bucket()
     new_object = bucket.Object(sds_file.s3Key)
     new_object.upload_file(sds_file.filepath,
-                           ExtraArgs={'Metadata': {'checksum': str(sds_file.checksum)}})
+                           ExtraArgs={"Metadata": {"checksum": str(sds_file.checksum)}})
 
 
 def delete(sds_file):
@@ -48,7 +48,7 @@ def get_checksum(sds_file):
     bucket = _get_bucket()
     obj = bucket.Object(sds_file.s3Key)
     try:
-        checksum = obj.metadata['checksum']
+        checksum = obj.metadata["checksum"]
         if type(sds_file.checksum) is int:
             return int(checksum)
         else:

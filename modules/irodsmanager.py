@@ -2,16 +2,16 @@
 This module implements an iRODS session manager as a _fake singleton_.
 
 Instead of calling the IRODSManager() constructor, use the
-irodsSession variable, that is already created and connected to iRODS
+irods_session variable, that is already created and connected to iRODS
 when the module is loaded.
 
 Example
 -------
 
 ```
-from irodsmanager import irodsSession
-irodsSession.createCollection(sdsFile.irodsDirectory)
-irodsSession.createDataObject(sdsFile)
+from irodsmanager import irods_session
+irods_session.create_collection(sds_file.irods_directory)
+irods_session.create_data_object(sds_file)
 ```
 """
 
@@ -39,7 +39,7 @@ class IRODSManager():
     def __init__(self):
 
         # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
+        self.logger = logging.getLogger("RuleManager")
         self.logger.debug("Initializing a new iRODS Session.")
 
         self.session = None
@@ -77,31 +77,31 @@ class IRODSManager():
 
         self.session.cleanup()
 
-    def getCollection(self, path):
+    def get_collection(self, path):
         """Returns the collection named by `path`."""
         return self.session.collections.get(path)
 
-    def createCollection(self, collection):
+    def create_collection(self, collection):
         """Creates a collection in the iRODS catalog. Does nothing if it is already there."""
         self.session.collections.create(collection)
 
-    def getDataObjects(self, path):
-        return self.getCollection(path).data_objects
+    def get_data_objects(self, path):
+        return self.get_collection(path).data_objects
 
-    def executeRule(self, rulePath, input_parameters):
+    def execute_rule(self, rule_path, input_parameters):
 
         """
         Executes a rule from given file path with input parameters
         """
 
-        rule = Rule(self.session, rulePath, params=input_parameters, output="ruleExecOut")
+        rule = Rule(self.session, rule_path, params=input_parameters, output="ruleExecOut")
 
         output = rule.execute()
 
         # This is insane but the output of writeLine is here
         return output.MsParam_PI[0].inOutStruct.stdoutBuf.buf.decode("utf-8").strip("\x00")
 
-    def assignPID(self, SDSFile):
+    def assign_pid(self, sds_file):
         """Assigns a persistent identifier to a SDSFile.
 
         Returns
@@ -113,23 +113,23 @@ class IRODSManager():
             The PID assigned to the object.
         """
 
-        if self.getPID(SDSFile):
-            self.logger.error("File %s already has a PID registered in iRODS" % SDSFile.filename)
+        if self.get_pid(sds_file):
+            self.logger.error("File %s already has a PID registered in iRODS" % sds_file.filename)
             return
 
         # Path to the rule
         RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
                                  "irods", "rules", "pid.r")
 
-        inputParameters = {
-            "*path": "'%s'" % SDSFile.irodsPath,
+        input_parameters = {
+            "*path": "'%s'" % sds_file.irods_path,
             "*parent_pid": "'None'",
             "*ror": "'None'",
             "*fio": "'None'",
             "*fixed": "'false'"
         }
 
-        response_str = self.executeRule(RULE_PATH, inputParameters).strip()
+        response_str = self.execute_rule(RULE_PATH, input_parameters).strip()
         [status, pid] = response_str.split()
 
         is_new = None
@@ -142,14 +142,14 @@ class IRODSManager():
 
         return is_new, pid
 
-    def eudatReplication(self, SDSFile, replicationRoot):
+    def eudat_replication(self, sds_file, replication_root):
         """Execute a replication using EUDAT rules.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             The file to replicate.
-        replicationRoot : `str`
+        replication_root : `str`
             Root replication collection.
 
         Returns
@@ -164,15 +164,15 @@ class IRODSManager():
         RULE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..",
                                  "irods", "rules", "replicate.r")
 
-        inputParameters = {
-            "*source": "'%s'" % SDSFile.irodsPath,
-            "*destination": "'%s'" % SDSFile.customPath(replicationRoot)
+        input_parameters = {
+            "*source": "'%s'" % sds_file.irods_path,
+            "*destination": "'%s'" % sds_file.custom_path(replication_root)
         }
 
         # Create the collection if it does not exist
-        self.createCollection(SDSFile.customDirectory(replicationRoot))
+        self.create_collection(sds_file.custom_directory(replication_root))
 
-        response_str = self.executeRule(RULE_PATH, inputParameters).strip()
+        response_str = self.execute_rule(RULE_PATH, input_parameters).strip()
 
         status = response_str.split()[0]
         response = response_str[len(status): + 1]
@@ -182,115 +182,110 @@ class IRODSManager():
             success = True
 
         # Trim cache
-        dataObject = self.getDataObject(SDSFile)
-        options = {kw.REPL_NUM_KW: str(dataObject.replicas[-1].number)}
-        dataObject.unlink(**options)
+        data_object = self.get_data_object(sds_file)
+        options = {kw.REPL_NUM_KW: str(data_object.replicas[-1].number)}
+        data_object.unlink(**options)
 
         return success, response
 
-    def createDataObject(self, SDSFile,
-                         rescName="demoResc",
-                         purgeCache=False,
-                         registerChecksum=False):
-        """
-        def IRODSManager::createDataObject
-        Inserts an SDS data object into iRODS at a collection given by
-        `SDSFile.irodsDirectory`.
+    def create_data_object(self, sds_file,
+                           resc_name="demoResc",
+                           purge_cache=False,
+                           register_checksum=False):
+        """Insert an SDS data object into iRODS at a collection given by
+        `sds_file.irods_directory`.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             An SDS file descriptor.
-        rescName : `str`, optional
+        resc_name : `str`, optional
             Name of the resource to save the data object.
-        purgeCache : `bool`, optional
+        purge_cache : `bool`, optional
             Whether or not to purge the cache, in case the resource is compound.
-        registerChecksum : `bool`, optional
+        register_checksum : `bool`, optional
             Whether or not to register the SHA256 checksum of the object in iCAT.
         """
 
         # Create the collection if it does not exist
-        self.createCollection(SDSFile.irodsDirectory)
+        self.create_collection(sds_file.irods_directory)
 
         # Attempt to get the data object
-        dataObject = self.getDataObject(SDSFile)
-        if dataObject is not None:
+        data_object = self.get_data_object(sds_file)
+        if data_object is not None:
 
             # Checksum of file did not change vs. iRODS checksum
-            if dataObject.checksum == SDSFile.checksum:
+            if data_object.checksum == sds_file.checksum:
                 self.logger.debug("File already registered, cancelling ingestion.")
                 return
 
         # Some put options
         options = {
-            kw.RESC_NAME_KW: rescName,
-            kw.PURGE_CACHE_KW: purgeCache,
-            kw.REG_CHKSUM_KW: registerChecksum
+            kw.RESC_NAME_KW: resc_name,
+            kw.PURGE_CACHE_KW: purge_cache,
+            kw.REG_CHKSUM_KW: register_checksum
         }
 
         # Add the data object
-        self.session.data_objects.put(SDSFile.filepath, SDSFile.irodsPath, **options)
+        self.session.data_objects.put(sds_file.filepath, sds_file.irods_path, **options)
 
-    def deleteDataObject(self, SDSFile, force=False):
-        """
-        def IRODSManager::removeDataObject
-        Delete an SDS data object from iRODS at a collection given by
-        `SDSFile.irodsDirectory`.
+    def delete_data_object(self, sds_file, force=False):
+        """Delete an SDS data object from iRODS at a collection given by
+        `sds_file.irods_directory`.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             An SDS file descriptor.
         force : `bool`
             Whether to force the deletion.
         """
 
         # Attempt to get the data object
-        dataObject = self.getDataObject(SDSFile)
-        if dataObject is None:
+        data_object = self.get_data_object(sds_file)
+        if data_object is None:
             self.logger.debug("File not registered, cancelling deletion.")
             return
 
         # Unlink the data object
-        dataObject.unlink(force=force)
+        data_object.unlink(force=force)
 
-    def remotePut(self, SDSFile, rootCollection,
-                  rescName="demoResc",
-                  purgeCache=False,
-                  registerChecksum=False):
-        """
-        Inserts an SDS data object into iRODS at a collection rooted at `rootCollection`.
+    def remote_put(self, sds_file, root_collection,
+                   resc_name="demoResc",
+                   purge_cache=False,
+                   register_checksum=False):
+        """Insert an SDS data object into iRODS at a collection rooted at `root_collection`.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             An SDS file descriptor.
-        rootCollection : `str`
+        root_collection : `str`
             The root collection to save the data object.
-        rescName : `str`, optional
+        resc_name : `str`, optional
             Name of the resource to save the data object.
-        purgeCache : `bool`, optional
+        purge_cache : `bool`, optional
             Whether or not to purge the cache, in case the resource is compound.
-        registerChecksum : `bool`, optional
+        register_checksum : `bool`, optional
             Whether or not to register the SHA256 checksum of the object in iCAT.
         """
 
         # Create the collection if it does not exist
-        self.createCollection(SDSFile.customDirectory(rootCollection))
+        self.create_collection(sds_file.custom_directory(root_collection))
 
         # Some put options
         options = {
-            kw.RESC_NAME_KW: rescName,
-            kw.PURGE_CACHE_KW: purgeCache,
-            kw.REG_CHKSUM_KW: registerChecksum
+            kw.RESC_NAME_KW: resc_name,
+            kw.PURGE_CACHE_KW: purge_cache,
+            kw.REG_CHKSUM_KW: register_checksum
         }
 
         # Add the data object
-        self.session.data_objects.put(SDSFile.filepath,
-                                      SDSFile.customPath(rootCollection),
+        self.session.data_objects.put(sds_file.filepath,
+                                      sds_file.custom_path(root_collection),
                                       **options)
 
-    def getFederatedDataObject(self, SDSFile, rootCollection):
+    def get_federated_data_object(self, sds_file, root_collection):
         """Retrieves a data object from a federated iRODS and returns None if it does not exist.
 
         The irods-pythonclient library does not support a get() for a
@@ -299,33 +294,33 @@ class IRODSManager():
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             File to search.
-        rootCollection : `str`
+        root_collection : `str`
             The archive's root collection.
         """
 
         # Get collection
         try:
-            fed_col = self.getCollection(SDSFile.customDirectory(rootCollection))
+            fed_col = self.get_collection(sds_file.custom_directory(root_collection))
         except CollectionDoesNotExist:
             return None
 
         # Iterate over the collection objects looking for the right file
         for obj in fed_col.data_objects:
-            if SDSFile.filename == obj.name:
+            if sds_file.filename == obj.name:
                 return obj
 
         return None
 
-    def federatedExists(self, SDSFile, rootCollection):
+    def federated_exists(self, sds_file, root_collection):
         """Check whether a data object is present in a federated iRODS zone with the same checksum.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             File to search.
-        rootCollection : `str`
+        root_collection : `str`
             The archive's root collection.
 
         Raises
@@ -334,43 +329,43 @@ class IRODSManager():
             Raised if more than one different versions of the file exist in remote location.
         """
         # Query iRODS
-        q = (irodsSession.session.query(Collection.name, DataObject.name, DataObject.checksum)
-             .filter(Collection.name == SDSFile.customDirectory(rootCollection))
-             .filter(DataObject.name == SDSFile.filename))
+        q = (irods_session.session.query(Collection.name, DataObject.name, DataObject.checksum)
+             .filter(Collection.name == sds_file.custom_directory(root_collection))
+             .filter(DataObject.name == sds_file.filename))
         results = q.all()
 
         # No file found
         if len(results) == 0:
             self.logger.debug("File %s does not exist in root collection %s."
-                              % (SDSFile.filename, rootCollection))
+                              % (sds_file.filename, root_collection))
             return False
 
         # Read checksum(s) into a set to eliminate repeats
         checksum_set = {r[DataObject.checksum] for r in results}
         if len(checksum_set) > 1:
-            raise MultipleResultsFound('File %s has more than one different versions.'
-                                       % SDSFile.customPath(rootCollection))
+            raise MultipleResultsFound("File %s has more than one different version."
+                                       % sds_file.custom_path(root_collection))
         remote_checksum = checksum_set.pop()
 
         # Compare checksums
-        if SDSFile.checksum == remote_checksum:
+        if sds_file.checksum == remote_checksum:
             self.logger.debug("File %s does exist in iRODS, with same checksum (%s)."
-                              % (SDSFile.filename, SDSFile.checksum))
+                              % (sds_file.filename, sds_file.checksum))
             return True
 
         self.logger.debug(
             "File %s does exist in iRODS, but with a different checksum (%s vs %s)."
-            % (SDSFile.filename, remote_checksum, SDSFile.checksum))
+            % (sds_file.filename, remote_checksum, sds_file.checksum))
         return False
 
-    def getFederatedPID(self, SDSFile, rootCollection):
+    def get_federated_pid(self, sds_file, root_collection):
         """Get the PID of a data object in a federated iRODS.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             File to search.
-        rootCollection : `str`
+        root_collection : `str`
             The archive's root collection.
 
         Returns
@@ -384,107 +379,107 @@ class IRODSManager():
             Raised if file has more than one different PID assigned to it.
         """
         # Query iRODS
-        q = (irodsSession.session
+        q = (irods_session.session
              .query(Collection.name, DataObject.name, DataObjectMeta.value)
-             .filter(Collection.name == SDSFile.customDirectory(rootCollection))
-             .filter(DataObject.name == SDSFile.filename)
-             .filter(DataObjectMeta.name == 'PID'))
+             .filter(Collection.name == sds_file.custom_directory(root_collection))
+             .filter(DataObject.name == sds_file.filename)
+             .filter(DataObjectMeta.name == "PID"))
         results = q.all()
 
         # No file or PID found
         if len(results) == 0:
             self.logger.debug("File %s does not exist or does not have a PID registered."
-                              % SDSFile.filename)
+                              % sds_file.filename)
             return None
 
         # Read PID(s) into a set to eliminate repeats
         pid_set = {r[DataObjectMeta.value] for r in results}
         if len(pid_set) > 1:
-            raise MultipleResultsFound('File %s has more than one PID.'
-                                       % SDSFile.customPath(rootCollection))
+            raise MultipleResultsFound("File %s has more than one PID."
+                                       % sds_file.custom_path(root_collection))
 
         # Return the PID
         pid = pid_set.pop()
-        self.logger.debug("File %s has PID %s." % (SDSFile.filename, pid))
+        self.logger.debug("File %s has PID %s." % (sds_file.filename, pid))
         return pid
 
-    def getDataObject(self, SDSFile, rootCollection=None):
+    def get_data_object(self, sds_file, root_collection=None):
         """
         Retrieves a data object from iRODS and returns None if it does not exist.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             File to search.
-        rootCollection : `str`, optional
+        root_collection : `str`, optional
             The archive's root collection.
         """
 
         # Attempt to get the file from iRODS
         # If it does not exists an exception is raised and we return None
         try:
-            if rootCollection is None:
-                return self.session.data_objects.get(SDSFile.irodsPath)
-            return self.getFederatedDataObject(SDSFile, rootCollection)
+            if root_collection is None:
+                return self.session.data_objects.get(sds_file.irods_path)
+            return self.get_federated_data_object(sds_file, root_collection)
         except (DataObjectDoesNotExist, CollectionDoesNotExist):
             return None
 
-    def exists(self, SDSFile, rootCollection=None):
+    def exists(self, sds_file, root_collection=None):
         """Check whether the file, with the same checksum, is registered in iRODS.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             The file we want to check.
-        rootCollection : `str`, optional
+        root_collection : `str`, optional
             The archive's root collection, to search in a non-default collection,
             e.g., a replication site.
         """
 
         # Attempt to get the data object
-        dataObject = self.getDataObject(SDSFile, rootCollection=rootCollection)
-        if dataObject is None:
-            self.logger.debug("File %s does not exist in iRODS." % SDSFile.filename)
+        data_object = self.get_data_object(sds_file, root_collection=root_collection)
+        if data_object is None:
+            self.logger.debug("File %s does not exist in iRODS." % sds_file.filename)
             return False
         else:
             # Compare checksum
-            if dataObject.checksum == SDSFile.checksum:
+            if data_object.checksum == sds_file.checksum:
                 self.logger.debug("File %s does exist in iRODS, with same checksum (%s)." % (
-                                    SDSFile.filename, SDSFile.checksum))
+                    sds_file.filename, sds_file.checksum))
                 return True
             else:
                 self.logger.debug(
                     "File %s does exist in iRODS, but with a different checksum (%s vs %s)."
-                    % (SDSFile.filename, dataObject.checksum, SDSFile.checksum))
+                    % (sds_file.filename, data_object.checksum, sds_file.checksum))
                 return False
 
-    def getPID(self, SDSFile, rootCollection=None):
+    def get_pid(self, sds_file, root_collection=None):
         """Get the PID assigned to the file, or None if the file has no PID.
 
         Parameters
         ----------
-        SDSFile : `SDSFile`
+        sds_file : `SDSFile`
             The file we want to check.
-        rootCollection : `str`, optional
+        root_collection : `str`, optional
             The archive's root collection, to search in a non-default collection,
             e.g., a replication site.
         """
 
         # Attempt to get the data object
-        dataObject = self.getDataObject(SDSFile, rootCollection=rootCollection)
-        if dataObject is None:
-            self.logger.error("File %s does not exist in iRODS." % SDSFile.filename)
+        data_object = self.get_data_object(sds_file, root_collection=root_collection)
+        if data_object is None:
+            self.logger.error("File %s does not exist in iRODS." % sds_file.filename)
             return None
 
-        pid_query = dataObject.metadata.get_all('PID')
+        pid_query = data_object.metadata.get_all("PID")
         if len(pid_query) == 0:
             return None
         elif len(pid_query) > 1:
-            self.logger.error("File %s has more than one PID assigned to it." % SDSFile.filename)
+            self.logger.error("File %s has more than one PID assigned to it." % sds_file.filename)
             return None
 
         return pid_query[0].value
 
 
-irodsSession = IRODSManager()
-irodsSession.connect()
+irods_session = IRODSManager()
+irods_session.connect()

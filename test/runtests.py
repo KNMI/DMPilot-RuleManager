@@ -14,12 +14,12 @@ CWD = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(CWD))
 from core.rulemanager import RuleManager
 
-from orfeus.sdscollector import SDSFileCollector
+from sds.sdscollector import SDSFileCollector
 
 # Modules
 from modules.irodsmanager import irodsSession
 from modules.psdcollector import psdCollector
-from orfeus.sdsfile import SDSFile
+from sds.sdsfile import SDSFile
 
 # Cleanup
 sys.path.pop()
@@ -250,7 +250,7 @@ class TestRuleManager(unittest.TestCase):
         todayFile = self.createSDSFile(now.strftime("NL.HGN.02.BHZ.D.%Y.%j"))
 
         # Mock files returned by the file collector
-        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files:
+        with patch("sds.sdscollector.SDSFileCollector.files", new_callable=PropertyMock) as mock_files:
 
             # Fake SDS file from today, yesterday, and day before
             mock_files.return_value = [
@@ -274,7 +274,7 @@ class TestRuleManager(unittest.TestCase):
         Tests collection of SDSFiles from wildcards
         """
 
-        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files:
+        with patch("sds.sdscollector.SDSFileCollector.files", new_callable=PropertyMock) as mock_files:
 
             # Fake SDS file from today, yesterday, and day before
             mock_files.return_value = [
@@ -318,7 +318,7 @@ class TestRuleManager(unittest.TestCase):
         todayFile = self.createSDSFile(now.strftime("NL.HGN.02.BHZ.D.%Y.%j"))
 
         # Mock files returned by the file collector
-        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files:
+        with patch("sds.sdscollector.SDSFileCollector.files", new_callable=PropertyMock) as mock_files:
 
             # Fake SDS file from today, yesterday, and day before
             mock_files.return_value = [
@@ -362,8 +362,8 @@ class TestRuleManager(unittest.TestCase):
         """
 
         # Mock files returned by the file collector and modified property of SDSFile
-        with patch('orfeus.sdscollector.SDSFileCollector.files', new_callable=PropertyMock) as mock_files, \
-            patch('orfeus.sdsfile.SDSFile.modified', new_callable=PropertyMock) as mock_modified:
+        with patch("sds.sdscollector.SDSFileCollector.files", new_callable=PropertyMock) as mock_files, \
+            patch("sds.sdsfile.SDSFile.modified", new_callable=PropertyMock) as mock_modified:
 
             mock_files.return_value = [self.createSDSFile("NL.HGN.02.LHZ.D.2019.001")]
             mock_modified.return_value = datetime(2020, 1, 1)
@@ -418,7 +418,7 @@ class TestRuleManager(unittest.TestCase):
             self.assertEqual(segment["cha"], "BHZ")
 
         # Mock the inventory property to avoid HTTP request
-        with patch('orfeus.sdsfile.SDSFile.inventory', new_callable=PropertyMock) as mock_inventory:
+        with patch("sds.sdsfile.SDSFile.inventory", new_callable=PropertyMock) as mock_inventory:
 
             # Read a static response file
             mock_inventory.return_value = read_inventory(os.path.join(CWD, "data/inventory.xml"))
@@ -432,5 +432,5 @@ class TestRuleManager(unittest.TestCase):
         map(testSegment, enumerate(result))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

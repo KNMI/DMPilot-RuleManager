@@ -8,7 +8,7 @@ from scipy.signal import detrend, welch, tukey
 import logging
 
 
-logger = logging.getLogger('RuleManager')
+logger = logging.getLogger("RuleManager")
 
 
 def getInstrumentResponse(stats):
@@ -166,7 +166,7 @@ def _welch(signal, fs, resp, nfft=1024, overlap=0.5):
 
         # Apply the window and do the FFT
         # Deconvolve the instrument response by divison in the frequency domain
-        with np.errstate(divide='ignore', invalid='ignore'):
+        with np.errstate(divide="ignore", invalid="ignore"):
             yf = np.fft.rfft(window * segment) / resp
 
         # Square FFT amplitudes to get the power

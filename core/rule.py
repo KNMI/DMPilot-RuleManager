@@ -9,7 +9,7 @@ class Rule():
 
     def __init__(self, call, conditions, name=None):
         """
-        Rule.__init__ 
+        Rule.__init__
         Initializes a rule with a rule and condition
         """
         self.call = call
@@ -17,7 +17,7 @@ class Rule():
         self.name = name
 
         # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
+        self.logger = logging.getLogger("RuleManager")
 
     def apply(self, SDSFile):
         """
@@ -26,24 +26,22 @@ class Rule():
         """
 
         # Assert the conditions
-        self.assertPolicies(SDSFile)
+        self.assert_policies(SDSFile)
 
         # Call the rule
         self.call(SDSFile)
 
-    def assertPolicies(self, SDSFile):
-        """
-        Rule.assertPolicies
-        Asserts whether all conditions evaluate to True
-        """
+    def assert_policies(self, sds_file):
+        """Assert whether all conditions evaluate to True."""
 
         # Go over each configured condition and assert the condition evaluates to True
         for condition in self.conditions:
-            self.logger.debug("%s: Asserting condition '%s'." % (SDSFile.filename, condition.func.__name__))
-            if not condition(SDSFile):
+            self.logger.debug("%s: Asserting condition '%s'." % (sds_file.filename,
+                                                                 condition.func.__name__))
+            if not condition(sds_file):
 
                 # If a __wrapped__ attribute exists the function was inverted
                 if "__wrapped__" in dir(condition.func):
-                  raise AssertionError("!%s" % condition.func.__name__)
+                    raise AssertionError("!%s" % condition.func.__name__)
                 else:
-                  raise AssertionError(condition.func.__name__)
+                    raise AssertionError(condition.func.__name__)

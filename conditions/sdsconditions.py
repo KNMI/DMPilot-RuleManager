@@ -7,26 +7,26 @@ import logging
 from datetime import datetime, timedelta
 import os
 
-from orfeus.sdsfile import SDSFile
+from sds.sdsfile import SDSFile
 
 import modules.s3manager as s3manager
-from modules.irodsmanager import irodsSession
+from modules.irodsmanager import irods_session
 from modules.mongomanager import mongo_pool
 
 # Initialize logger
-logger = logging.getLogger('RuleManager')
+logger = logging.getLogger("RuleManager")
 
 
-def assertQualityCondition(options, sds_file):
+def assert_quality_condition(options, sds_file):
     """Asserts that the SDSFile quality is in options."""
     return sds_file.quality in options["qualities"]
 
 
-def assertIRODSExistsCondition(options, sds_file):
-    return irodsSession.exists(sds_file)
+def assert_irods_exists_condition(options, sds_file):
+    return irods_session.exists(sds_file)
 
 
-def assertS3ExistsCondition(options, sds_file):
+def assert_s3_exists_condition(options, sds_file):
     if "check_checksum" in options:
         if options["check_checksum"]:
             return (s3manager.exists(sds_file)
@@ -36,14 +36,14 @@ def assertS3ExistsCondition(options, sds_file):
     return s3manager.exists(sds_file)
 
 
-def assertIRODSNotExistCondition(options, sds_file):
+def assert_irods_not_exist_condition(options, sds_file):
     """Asserts that the SDSFile is not in iRODS."""
     # The file was not already ingested by iRODS
-    return not irodsSession.exists(sds_file)
+    return not irods_session.exists(sds_file)
 
 
-def _assertExistsAndHashesinDocument(sds_file, document, db_name="mongoDB",
-                            use_checksum_prev=False, use_checksum_next=False):
+def _assert_exists_and_hashes_in_document(sds_file, document, db_name="mongoDB",
+                                          use_checksum_prev=False, use_checksum_next=False):
     """Asserts that the document exists with the same checksum(s) as SDSFile"""
 
     # Document exists and has the same hash: it exists
@@ -85,24 +85,24 @@ def _assertExistsAndHashesinDocument(sds_file, document, db_name="mongoDB",
     logger.debug(msg)
     return exists and same_hash
 
-def assertWFCatalogExistsCondition(options, sds_file):
+
+def assert_wfcatalog_exists_condition(options, sds_file):
 
     # Extract the current metadata object from the database
-    metadataObject = mongo_pool.getWFCatalogDailyDocument(sds_file)
+    metadata_object = mongo_pool.get_wfcatalog_daily_document(sds_file)
 
     # Document exists and has the same hash: it exists
-    return _assertExistsAndHashesinDocument(sds_file, metadataObject,
-                                            db_name="WFCatalog",
-                                            use_checksum_prev=True)
+    return _assert_exists_and_hashes_in_document(sds_file, metadata_object,
+                                                 db_name="WFCatalog",
+                                                 use_checksum_prev=True)
 
 
-def assertWFCatalogNotExistsCondition(options, sds_file):
-
-    return not assertWFCatalogExistsCondition(options, sds_file)
+def assert_wfcatalog_not_exists_condition(options, sds_file):
+    return not assert_wfcatalog_exists_condition(options, sds_file)
 
 
 def _get_neighbor(sds_file, neighbor):
-    """Get the 'current', 'next', or 'previous' SDSFile in relation to a given SDSFile.
+    """Get the "current", "next", or "previous" SDSFile in relation to a given SDSFile.
 
     Returns
     -------
@@ -111,11 +111,11 @@ def _get_neighbor(sds_file, neighbor):
 
     """
     queried_file = None
-    if neighbor == 'current':
+    if neighbor == "current":
         queried_file = sds_file
-    elif neighbor == 'next':
+    elif neighbor == "next":
         queried_file = sds_file.next
-    elif neighbor == 'previous':
+    elif neighbor == "previous":
         queried_file = sds_file.previous
 
     if os.path.isfile(queried_file.filepath):
@@ -124,8 +124,8 @@ def _get_neighbor(sds_file, neighbor):
         return None
 
 
-def assertModificationTimeNewerThan(options, sds_file):
-    """Assert that the file was last modified less than `options['days']` days ago.
+def assert_modification_time_newer_than(options, sds_file):
+    """Assert that the file was last modified less than `options["days"]` days ago.
 
     In case the file does not exist, returns False.
 
@@ -135,19 +135,19 @@ def assertModificationTimeNewerThan(options, sds_file):
         The rule's options.
         - ``days``: The number of days used to test the file against (`int`)
         - ``apply_to``: Which file to apply the rule ---
-                        'previous' | 'current' (default) | 'next'
+                        "previous" | "current" (default) | "next"
     sds_file : `SDSFile`
         The file being processed.
 
     """
-    file_to_apply = _get_neighbor(sds_file, options.get('apply_to', 'current'))
+    file_to_apply = _get_neighbor(sds_file, options.get("apply_to", "current"))
     if file_to_apply is None:
         return False
     return file_to_apply.modified > (datetime.now() - timedelta(days=options["days"]))
 
 
-def assertModificationTimeOlderThan(options, sds_file):
-    """Assert that the file was last modified more than `options['days']` days ago.
+def assert_modification_time_older_than(options, sds_file):
+    """Assert that the file was last modified more than `options["days"]` days ago.
 
     In case the file does not exist, returns True.
 
@@ -157,20 +157,20 @@ def assertModificationTimeOlderThan(options, sds_file):
         The rule's options.
         - ``days``: The number of days used to test the file against (`int`)
         - ``apply_to``: Which file to apply the rule ---
-                        'previous' | 'current' (default) | 'next'
+                        "previous" | "current" (default) | "next"
     sds_file : `SDSFile`
         The file being processed.
 
     """
-    file_to_apply = _get_neighbor(sds_file, options.get('apply_to', 'current'))
+    file_to_apply = _get_neighbor(sds_file, options.get("apply_to", "current"))
     if file_to_apply is None:
         return True
     return file_to_apply.modified < (datetime.now() - timedelta(days=options["days"]))
 
 
-def assertDataTimeNewerThan(options, sds_file):
+def assert_data_time_newer_than(options, sds_file):
     """Assert that the date the file data corresponds to (in the filename) is less than
-    `options['days']` days ago.
+    `options["days"]` days ago.
 
     In case the file does not exist, returns False.
 
@@ -180,20 +180,20 @@ def assertDataTimeNewerThan(options, sds_file):
         The rule's options.
         - ``days``: The number of days used to test the file against (`int`)
         - ``apply_to``: Which file to apply the rule ---
-                        'previous' | 'current' (default) | 'next'
+                        "previous" | "current" (default) | "next"
     sds_file : `SDSFile`
         The file being processed.
 
     """
-    file_to_apply = _get_neighbor(sds_file, options.get('apply_to', 'current'))
+    file_to_apply = _get_neighbor(sds_file, options.get("apply_to", "current"))
     if file_to_apply is None:
         return False
     return file_to_apply.start > (datetime.now() - timedelta(days=options["days"]))
 
 
-def assertDataTimeOlderThan(options, sds_file):
+def assert_data_time_older_than(options, sds_file):
     """Assert that the date the file data corresponds to (in the filename) is more than
-    `options['days']` days ago.
+    `options["days"]` days ago.
 
     In case the file does not exist, returns True.
 
@@ -203,32 +203,32 @@ def assertDataTimeOlderThan(options, sds_file):
         The rule's options.
         - ``days``: The number of days used to test the file against (`int`)
         - ``apply_to``: Which file to apply the rule ---
-                        'previous' | 'current' (default) | 'next'
+                        "previous" | "current" (default) | "next"
     sds_file : `SDSFile`
         The file being processed.
 
     """
-    file_to_apply = _get_neighbor(sds_file, options.get('apply_to', 'current'))
+    file_to_apply = _get_neighbor(sds_file, options.get("apply_to", "current"))
     if file_to_apply is None:
         return True
     return file_to_apply.start < (datetime.now() - timedelta(days=options["days"]))
 
 
-def assertDCMetadataExistsCondition(options, sds_file):
+def assert_dc_metadata_exists_condition(options, sds_file):
 
     # Get the existing Dublin Core Object
-    dublinCoreObject = mongo_pool.getDCDocument(sds_file)
+    dublin_core_object = mongo_pool.get_dc_document(sds_file)
 
     # Document exists and has the same hash: it exists
-    return _assertExistsAndHashesinDocument(sds_file, dublinCoreObject,
-                                            db_name="DublinCoreMetadata")
-
-def assertDCMetadataNotExistsCondition(options, sds_file):
-
-    return not assertDCMetadataExistsCondition(options, sds_file)
+    return _assert_exists_and_hashes_in_document(sds_file, dublin_core_object,
+                                                 db_name="DublinCoreMetadata")
 
 
-def assertPPSDMetadataExistsCondition(options, sds_file):
+def assert_dc_metadata_not_exists_condition(options, sds_file):
+    return not assert_dc_metadata_exists_condition(options, sds_file)
+
+
+def assert_ppsd_metadata_exists_condition(options, sds_file):
     """Assert that the PPSD metadata related to the file is present in the database.
 
     Returns
@@ -243,16 +243,16 @@ def assertPPSDMetadataExistsCondition(options, sds_file):
     """
 
     # Get the existing PPSD documents for this file
-    ppsd_documents = mongo_pool.getPPSDDocuments(sds_file)
+    ppsd_documents = mongo_pool.get_ppsd_documents(sds_file)
 
     # Document exists and has the same hash: it exists
     if ppsd_documents:
         # Get all checksums
-        checksum = {doc['checksum'] for doc in ppsd_documents}
-        checksum_prev = {doc['checksum_prev'] for doc in ppsd_documents
-                         if 'checksum_prev' in doc}
-        checksum_next = {doc['checksum_next'] for doc in ppsd_documents
-                         if 'checksum_next' in doc}
+        checksum = {doc["checksum"] for doc in ppsd_documents}
+        checksum_prev = {doc["checksum_prev"] for doc in ppsd_documents
+                         if "checksum_prev" in doc}
+        checksum_next = {doc["checksum_next"] for doc in ppsd_documents
+                         if "checksum_next" in doc}
 
         # Verify they are all unique
         if len(checksum) != 1 or len(checksum_prev) != 1 or len(checksum_next) != 1:
@@ -298,25 +298,24 @@ def assertPPSDMetadataExistsCondition(options, sds_file):
         return False
 
 
-def assertPPSDMetadataNotExistsCondition(options, sds_file):
+def assert_ppsd_metadata_not_exists_condition(options, sds_file):
+    return not assert_ppsd_metadata_exists_condition(options, sds_file)
 
-    return not assertPPSDMetadataExistsCondition(options, sds_file)
 
-
-def assertPrunedFileExistsCondition(options, sds_file):
+def assert_pruned_file_exists_condition(options, sds_file):
     """Assert that the pruned version of the SDS file is in the temporary archive."""
     # Create a phantom SDSFile with a different quality idenfier
-    qualityFile = SDSFile(sds_file.filename, sds_file.archiveRoot)
-    qualityFile.quality = "Q"
-    return os.path.exists(qualityFile.filepath)
+    quality_file = SDSFile(sds_file.filename, sds_file.archive_root)
+    quality_file.quality = "Q"
+    return os.path.exists(quality_file.filepath)
 
 
-def assertTempArchiveExistCondition(options, SDSFile):
+def assert_temp_archive_exist_condition(options, sds_file):
     """Assert that the file exists in the temporary archive."""
-    return os.path.isfile(SDSFile.filepath)
+    return os.path.isfile(sds_file.filepath)
 
 
-def assertFileReplicatedCondition(options, sds_file):
+def assert_file_replicated_condition(options, sds_file):
     """Assert that the file has been replicated.
 
     Checks replication by verifying that the file is present in iRODS,
@@ -326,20 +325,20 @@ def assertFileReplicatedCondition(options, sds_file):
     ----------
     options : `dict`
         The rule's options.
-        - ``replicationRoot``: Root replication collection (`str`)
+        - ``replication_root``: Root replication collection (`str`)
     sds_file : `SDSFile`
         The file being processed.
     """
-    return irodsSession.federatedExists(sds_file, options["replicationRoot"])
+    return irods_session.federated_exists(sds_file, options["replication_root"])
 
 
-def assertPIDCondition(options, sds_file):
+def assert_pid_condition(options, sds_file):
     """Assert that a PID was assigned to the file on iRODS."""
-    return irodsSession.getPID(sds_file) is not None
+    return irods_session.get_pid(sds_file) is not None
 
 
-def assertReplicaPIDCondition(options, sds_file):
+def assert_replica_pid_condition(options, sds_file):
     """Assert that a PID was assigned to the file on the replication
     iRODS. Also returns False if the file is not present at the replica
     site."""
-    return irodsSession.getFederatedPID(sds_file, options["replicationRoot"]) is not None
+    return irods_session.get_federated_pid(sds_file, options["replication_root"]) is not None

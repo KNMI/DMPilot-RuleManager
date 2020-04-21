@@ -6,7 +6,7 @@ from obspy.signal.quality_control import MSEEDMetadata
 # Version of the WFCatalog collector (saved in the DB)
 WCATALOG_COLLECTOR_VERSION = "1.0.0"
 
-def getWFMetadata(SDSFile):
+def get_wf_metadata(SDSFile):
     """
         Calls the ObsPy metadata quality class to get metrics.
         Returns a tuple with the daily document and the documents of the
@@ -27,28 +27,28 @@ def getWFMetadata(SDSFile):
         # Mark documents with data warnings
         metadata.meta.update({"warnings": len(w) > 0})
 
-    return (extractDailyDocument(SDSFile, metadata.meta),
-            extractSegmentDocuments(SDSFile, metadata.meta))
+    return (extract_daily_document(SDSFile, metadata.meta),
+            extract_segment_documents(SDSFile, metadata.meta))
 
 
-def extractDailyDocument(SDSFile, trace):
+def extract_daily_document(sds_file, trace):
     """Document parser for daily granule."""
 
     # Determine the number of continuous segments
-    nSegments = len(trace.get("c_segments") or [])
+    n_segments = len(trace.get("c_segments") or [])
 
     # Source document for granules
     source = {
         "created": datetime.now(),
-        "checksum": SDSFile.checksum,
-        "checksum_prev": SDSFile.previous.checksum,
+        "checksum": sds_file.checksum,
+        "checksum_prev": sds_file.previous.checksum,
         "collector": WCATALOG_COLLECTOR_VERSION,
         "warnings": trace["warnings"],
         "status": "open",
         "format": "mSEED",
-        "fileId": SDSFile.filename,
-        "type": ("seismic" if not SDSFile.isPressureChannel else "acoustic"),
-        "nseg": nSegments,
+        "fileId": sds_file.filename,
+        "type": ("seismic" if not sds_file.is_pressure_channel else "acoustic"),
+        "nseg": n_segments,
         "continuous": trace["num_gaps"] == 0,
         "network": trace["network"],
         "station": trace["station"],
@@ -82,22 +82,19 @@ def extractDailyDocument(SDSFile, trace):
     }
 
     # Add timing qualities
-    source.update(extractTimingQuality(trace))
+    source.update(extract_timing_quality(trace))
 
     # Add mSEED header flags
-    source.update(extractHeaderFlags(trace))
+    source.update(extract_header_flags(trace))
 
     return source
 
 
-def extractTimingQuality(trace):
+def extract_timing_quality(trace):
     """Writes timing quality parameters and correction to source document."""
 
-    def __floatOrNone(value):
-        """
-        Collector.extractTimingQuality::__floatOrNone
-        Returns None or value to float
-        """
+    def __float_or_none(value):
+        """Returns None or value to float."""
 
         if value is None:
             return None
@@ -108,29 +105,29 @@ def extractTimingQuality(trace):
 
     # Add the timing correction
     return {
-        "timing_correction": __floatOrNone(trace["timing_correction"]),
-        "timing_quality_min": __floatOrNone(trace["timing_quality_min"]),
-        "timing_quality_max": __floatOrNone(trace["timing_quality_max"]),
-        "timing_quality_mean": __floatOrNone(trace["timing_quality_mean"]),
-        "timing_quality_median": __floatOrNone(trace["timing_quality_median"]),
-        "timing_quality_upper_quartile": __floatOrNone(trace["timing_quality_upper_quartile"]),
-        "timing_quality_lower_quartile": __floatOrNone(trace["timing_quality_lower_quartile"])
+        "timing_correction": __float_or_none(trace["timing_correction"]),
+        "timing_quality_min": __float_or_none(trace["timing_quality_min"]),
+        "timing_quality_max": __float_or_none(trace["timing_quality_max"]),
+        "timing_quality_mean": __float_or_none(trace["timing_quality_mean"]),
+        "timing_quality_median": __float_or_none(trace["timing_quality_median"]),
+        "timing_quality_upper_quartile": __float_or_none(trace["timing_quality_upper_quartile"]),
+        "timing_quality_lower_quartile": __float_or_none(trace["timing_quality_lower_quartile"])
     }
 
 
-def extractHeaderFlags(trace):
+def extract_header_flags(trace):
     """Writes mSEED header flag percentages to source document."""
 
     header = trace["miniseed_header_percentages"]
 
     return {
-      "io_and_clock_flags": mapHeaderFlags(header, "io_and_clock_flags"),
-      "data_quality_flags": mapHeaderFlags(header, "data_quality_flags"),
-      "activity_flags": mapHeaderFlags(header, "activity_flags")
+      "io_and_clock_flags": map_header_flags(header, "io_and_clock_flags"),
+      "data_quality_flags": map_header_flags(header, "data_quality_flags"),
+      "activity_flags": map_header_flags(header, "activity_flags")
     }
 
 
-def mapHeaderFlags(trace, flag_type):
+def map_header_flags(trace, flag_type):
     """Returns MongoDB document structure for miniseed header percentages."""
 
     trace = trace[flag_type]
@@ -178,7 +175,7 @@ def mapHeaderFlags(trace, flag_type):
     return source
 
 
-def extractSegmentDocuments(SDSFile, trace):
+def extract_segment_documents(sds_file, trace):
     """Return documents for continuous segments if trace is not continuous."""
 
     # If trace is continuous (no gaps), return None
@@ -188,30 +185,30 @@ def extractSegmentDocuments(SDSFile, trace):
     # Loop continuous segments
     segment_docs = []
     for segment in trace["c_segments"]:
-        segment_docs.append(parseSegment(segment, SDSFile.filename))
+        segment_docs.append(parse_segment(segment, sds_file.filename))
 
     return segment_docs
 
 
-def parseSegment(segment, file_id):
+def parse_segment(segment, file_id):
     """Document parser for 1 continuous segment."""
 
     # Source document for continuous segment
     source = {
-      'fileId': file_id,
-      'sample_min': int(segment['sample_min']),
-      'sample_max': int(segment['sample_max']),
-      'sample_mean': float(segment['sample_mean']),
-      'sample_median': float(segment['sample_median']),
-      'sample_stdev': float(segment['sample_stdev']),
-      'sample_rms': float(segment['sample_rms']),
-      'sample_upper_quartile': float(segment['sample_upper_quartile']),
-      'sample_lower_quartile': float(segment['sample_lower_quartile']),
-      'num_samples': int(segment['num_samples']),
-      'sample_rate': float(segment['sample_rate']),
-      'start_time': segment['start_time'].datetime,
-      'end_time': segment['end_time'].datetime,
-      'segment_length': float(segment['segment_length'])
+      "fileId": file_id,
+      "sample_min": int(segment["sample_min"]),
+      "sample_max": int(segment["sample_max"]),
+      "sample_mean": float(segment["sample_mean"]),
+      "sample_median": float(segment["sample_median"]),
+      "sample_stdev": float(segment["sample_stdev"]),
+      "sample_rms": float(segment["sample_rms"]),
+      "sample_upper_quartile": float(segment["sample_upper_quartile"]),
+      "sample_lower_quartile": float(segment["sample_lower_quartile"]),
+      "num_samples": int(segment["num_samples"]),
+      "sample_rate": float(segment["sample_rate"]),
+      "start_time": segment["start_time"].datetime,
+      "end_time": segment["end_time"].datetime,
+      "segment_length": float(segment["segment_length"])
     }
 
     return source

@@ -1,93 +1,93 @@
 {
     "CHECK_INGESTION": {
         "description": "Check if the file is in S3.",
-        "functionName": "printWithMessage",
+        "function_name": "print_with_message",
         "options": {"message": "Failed S3 ingestion"},
         "conditions": [
             {
-                "functionName": "!assertS3ExistsCondition",
+                "function_name": "!assert_s3_exists_condition",
                 "options": {}
             }
         ]
     },
     "CHECK_WFCATALOG": {
         "description": "Check if waveform metadata for the file exists.",
-        "functionName": "printWithMessage",
+        "function_name": "print_with_message",
         "timeout" : 5,
         "options": {"message": "Failed WFCatalog"},
         "conditions": [
             {
-                "functionName": "!assertWFCatalogExistsCondition",
+                "function_name": "!assert_wfcatalog_exists_condition",
                 "options": {}
             }
         ]
     },
     "CHECK_DCAT": {
         "description": "Check if Dublin Core metadata for the file exists.",
-        "functionName": "printWithMessage",
+        "function_name": "print_with_message",
         "timeout" : 5,
         "options": {"message": "Failed DC metadata"},
         "conditions": [
             {
-                "functionName": "!assertDCMetadataExistsCondition",
+                "function_name": "!assert_dc_metadata_exists_condition",
                 "options": {}
             }
         ]
     },
     "CHECK_PPSD": {
         "description": "Check if PPSD metadata for the file exists.",
-        "functionName": "printWithMessage",
+        "function_name": "print_with_message",
         "timeout" : 5,
         "options": {"message": "Failed PPSD metadata"},
         "conditions": [
             {
-                "functionName": "!assertPPSDMetadataExistsCondition",
+                "function_name": "!assert_ppsd_metadata_exists_condition",
                 "options": {}
             }
         ]
     },
     "CHECK_PID": {
         "description": "Check if the file has a PID in the local iRODS.",
-        "functionName": "printWithMessage",
+        "function_name": "print_with_message",
         "timeout" : 5,
         "options": {"message": "Failed PID"},
         "conditions": [
             {
-                "functionName": "!assertPIDCondition",
+                "function_name": "!assert_pid_condition",
                 "options": {}
             }
         ]
     },
     "CHECK_REPLICATION": {
         "description": "Check if the file is replicated.",
-        "functionName": "printWithMessage",
+        "function_name": "print_with_message",
         "timeout" : 5,
         "options": {
             "message": "Failed replica",
-            "replicationRoot": "/remoteZone/home/rods#localZone/"
+            "replication_root": "/remoteZone/home/rods#localZone/"
         },
         "conditions": [
             {
-                "functionName": "!assertFileReplicatedCondition",
+                "function_name": "!assert_file_replicated_condition",
                 "options": {
-                    "replicationRoot": "/remoteZone/home/rods#localZone/"
+                    "replication_root": "/remoteZone/home/rods#localZone/"
                 }
             }
         ]
     },
     "CHECK_REPLICA_PID": {
         "description": "Check if the replica has a PID.",
-        "functionName": "printWithMessage",
+        "function_name": "print_with_message",
         "timeout" : 5,
         "options": {
             "message": "Failed replica PID",
-            "replicationRoot": "/remoteZone/home/rods#localZone/"
+            "replication_root": "/remoteZone/home/rods#localZone/"
         },
         "conditions": [
             {
-                "functionName": "!assertReplicaPIDCondition",
+                "function_name": "!assert_replica_pid_condition",
                 "options": {
-                    "replicationRoot": "/remoteZone/home/rods#localZone/"
+                    "replication_root": "/remoteZone/home/rods#localZone/"
                 }
             }
         ]

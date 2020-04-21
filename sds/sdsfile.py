@@ -49,11 +49,11 @@ class SDSFile():
     """
 
     # Save some configuration to the class
-    irodsRoot = config["IRODS_ROOT"]
+    irods_root = config["IRODS_ROOT"]
     fdsnws = config["FDSNWS_ADDRESS"]
-    s3Prefix = config["S3"]["PREFIX"]
+    s3_prefix = config["S3"]["PREFIX"]
 
-    def __init__(self, filename, archiveRoot):
+    def __init__(self, filename, archive_root):
         """
         Create a filestream from a given filename
         """
@@ -70,10 +70,10 @@ class SDSFile():
         except ValueError:
             raise ValueError("Invalid SDS file submitted.")
 
-        self.archiveRoot = archiveRoot
+        self.archive_root = archive_root
 
         # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
+        self.logger = logging.getLogger("RuleManager")
 
         # Initialize costly properties
         self._checksum = None
@@ -107,23 +107,23 @@ class SDSFile():
         )
 
     # Returns custom filepath for a given file
-    def customPath(self, root):
-        return os.path.join(self.customDirectory(root), self.filename)
+    def custom_path(self, root):
+        return os.path.join(self.custom_directory(root), self.filename)
 
     # Returns filepath for a given file
     @property
     def filepath(self):
-        return self.customPath(self.archiveRoot)
+        return self.custom_path(self.archive_root)
 
     # Returns iRODS filepath for a given file
     @property
-    def irodsPath(self):
-        return self.customPath(self.irodsRoot)
+    def irods_path(self):
+        return self.custom_path(self.irods_root)
 
     # Returns the S3 key for a given file
     @property
-    def s3Key(self):
-        return self.customPath(self.s3Prefix)
+    def s3_key(self):
+        return self.custom_path(self.s3_prefix)
 
     # Returns the stream identifier
     @property
@@ -137,43 +137,43 @@ class SDSFile():
 
     # Returns the subdirectory
     @property
-    def subDirectory(self):
+    def sub_directory(self):
         return os.path.join(
             self.year,
             self.net,
             self.sta,
-            self.channelDirectory
+            self.channel_directory
         )
 
-    def customDirectory(self, root):
+    def custom_directory(self, root):
         return os.path.join(
             root,
-            self.subDirectory
+            self.sub_directory
         )
 
     @property
-    def irodsDirectory(self):
-        return self.customDirectory(self.irodsRoot)
+    def irods_directory(self):
+        return self.custom_directory(self.irods_root)
 
     # Returns the file directory based on SDS structure
     @property
     def directory(self):
-        return self.customDirectory(self.archiveRoot)
+        return self.custom_directory(self.archive_root)
 
     # Returns channel directory
     @property
-    def channelDirectory(self):
+    def channel_directory(self):
         return ".".join([self.cha, self.quality])
 
     # Returns next file in stream
     @property
     def next(self):
-        return self.__getAdjacentFile(1)
+        return self._get_adjacent_file(1)
 
     # Returns previous file in stream
     @property
     def previous(self):
-        return self.__getAdjacentFile(-1)
+        return self._get_adjacent_file(-1)
 
     # Returns start time of file
     @property
@@ -187,12 +187,12 @@ class SDSFile():
 
     # Start for dataselect pruning (start is INCLUSIVE)
     @property
-    def sampleStart(self):
+    def sample_start(self):
         return self.start.strftime("%Y,%j,00,00,00.000000")
 
     # End for dataselect pruning (end is INCLUSIVE)
     @property
-    def sampleEnd(self):
+    def sample_end(self):
         return self.start.strftime("%Y,%j,23,59,59.999999")
 
     # Returns list of files neighbouring a file
@@ -207,7 +207,7 @@ class SDSFile():
         except FileNotFoundError:
             return None
 
-    def getStat(self, enum):
+    def get_stat(self, enum):
 
         # Check if none and propagate
         if self.stats is None:
@@ -222,15 +222,15 @@ class SDSFile():
 
     @property
     def size(self):
-        return self.getStat("size")
+        return self.get_stat("size")
 
     @property
     def created(self):
-        return self.getStat("created")
+        return self.get_stat("created")
 
     @property
     def modified(self):
-        return self.getStat("modified")
+        return self.get_stat("modified")
 
     @property
     def checksum(self):
@@ -254,27 +254,24 @@ class SDSFile():
         return self._checksum
 
     @property
-    def queryStringTXT(self):
+    def query_string_txt(self):
 
-        return self.queryString + "&" + "&".join([
+        return self.query_string + "&" + "&".join([
             "format=text",
             "level=channel"
         ])
 
     @property
-    def queryStringXML(self):
+    def query_string_xml(self):
 
-        return self.queryString + "&" + "&".join([
+        return self.query_string + "&" + "&".join([
             "format=fdsnxml",
             "level=response"
         ])
 
     @property
-    def queryString(self):
-        """
-        def SDSFile::queryString
-        Returns the query string for a particular SDS file
-        """
+    def query_string(self):
+        """Return the query string for a particular SDS file."""
 
         return "?" + "&".join([
             "start=%s" % self.start.isoformat(),
@@ -317,11 +314,8 @@ class SDSFile():
         if self._traces is not None:
             return self._traces
 
-        def parseMSIOutput(line):
-            """
-            def SDSFile::traces::parseMSIOutput
-            Parses the MSI output
-            """
+        def parse_msi_output(line):
+            """Parse the MSI output."""
 
             # Format for seed dates e.g. 2005,068,00:00:01.000000
             SEED_DATE_FMT = "%Y,%j,%H:%M:%S.%f"
@@ -339,17 +333,17 @@ class SDSFile():
         # Cut to day boundary on sample level
         dataselect = subprocess.Popen([
             "dataselect",
-            "-ts", self.sampleStart,
-            "-te", self.sampleEnd,
+            "-ts", self.sample_start,
+            "-te", self.sample_end,
             "-Ps",
             "-szs",
             "-o", "-",
         ] + list(map(lambda x: x.filepath, self.neighbours)), stdout=subprocess.PIPE)
 
         lines = subprocess.check_output([
-            "msi", 
-            "-ts", self.sampleStart,
-            "-te", self.sampleEnd,
+            "msi",
+            "-ts", self.sample_start,
+            "-te", self.sample_end,
             "-T",
             "-"
         ], stdin=dataselect.stdout, stderr=subprocess.DEVNULL).splitlines()
@@ -362,15 +356,12 @@ class SDSFile():
         dataselect.wait()
 
         # Skip first header & final line
-        self._traces = list(map(parseMSIOutput, lines[1:-1]))
+        self._traces = list(map(parse_msi_output, lines[1:-1]))
         return self._traces
 
     @property
-    def isPressureChannel(self):
-        """
-        def SDSFile::isPressureChannel
-        Returns true when the channel is an infrasound channel
-        """
+    def is_pressure_channel(self):
+        """Return true when the channel is an infrasound channel."""
 
         return self.cha.endswith("DF")
 
@@ -385,7 +376,7 @@ class SDSFile():
             return self._inventory
 
         # Query our FDSNWS Webservice for the station location
-        request = os.path.join(self.fdsnws, self.queryStringXML)
+        request = os.path.join(self.fdsnws, self.query_string_xml)
 
         try:
             self._inventory = read_inventory(request)
@@ -412,7 +403,7 @@ class SDSFile():
 
         # Query our FDSNWS Webservice for the station location
         try:
-            request = requests.get(os.path.join(self.fdsnws, self.queryStringTXT))
+            request = requests.get(os.path.join(self.fdsnws, self.query_string_txt))
         except requests.exceptions.RequestException:
             return None
 
@@ -437,16 +428,12 @@ class SDSFile():
         return self._location
 
     @property
-    def psdBins(self):
-        """
-        def SDSFile::psdBins
-        Returns 48 times starting at the start of the SDSFile
-        with 30 minute increments
-        """
+    def psd_bins(self):
+        """Return 48 times starting at the start of the SDSFile with 30 minute increments."""
 
         return map(UTCDateTime, map(lambda x: self.start + timedelta(minutes=(30 * x)), range(48)))
 
-    def prune(self, cut_boundaries=True, removeOverlap=False, repack=False, recordLength=4096):
+    def prune(self, cut_boundaries=True, remove_overlap=False, repack=False, record_length=4096):
         """Preprocess file using IRIS dataselect and msrepack, and saves the resulting file
         with the quality indicator set to Q.
 
@@ -464,30 +451,30 @@ class SDSFile():
         `cut_boundaries` : `bool`
             Whether or not to cut the file at the day boundaries ---
             00:00 of the day and of the following day. (default `True`)
-        `removeOverlap` : `bool`
+        `remove_overlap` : `bool`
             Whether or not to prune the file and remove overlaps at the
-            sample level --- equates to the '-Ps' option of dataselect. (default `False`)
+            sample level --- equates to the "-Ps" option of dataselect. (default `False`)
         `repack` : `bool`
             Whether or not to repack records using msrepack. (default `False`)
-        `recordLength` : `int`
+        `record_length` : `int`
             Size of record to repack if `repack` is `True`. (default 4096)
 
         """
         # Record length within some bounds
-        if recordLength < 512 or recordLength > 65536:
+        if record_length < 512 or record_length > 65536:
             raise ValueError("Record length is invalid")
 
         # Confirm record length is power of two
-        if recordLength & (recordLength - 1) != 0:
+        if record_length & (record_length - 1) != 0:
             raise ValueError("Record length is not is a power of two")
 
         # Create a phantom SDSFile with a different quality idenfier
-        qualityFile = SDSFile(self.filename, self.archiveRoot)
-        qualityFile.quality = "Q"
+        quality_file = SDSFile(self.filename, self.archive_root)
+        quality_file.quality = "Q"
 
         # Create directories for the pruned file (quality Q)
-        if not os.path.exists(qualityFile.directory):
-            os.makedirs(qualityFile.directory)
+        if not os.path.exists(quality_file.directory):
+            os.makedirs(quality_file.directory)
 
         # Get neighbours
         neighbours = list(map(lambda x: x.filepath, self.neighbours))
@@ -502,10 +489,10 @@ class SDSFile():
 
         # Cut file at the day boundaries if requested
         if cut_boundaries:
-            dataselect_args.extend(["-ts", self.sampleStart, "-te", self.sampleEnd])
+            dataselect_args.extend(["-ts", self.sample_start, "-te", self.sample_end])
 
         # Check if overlap needs to be removed
-        if removeOverlap:
+        if remove_overlap:
             dataselect_args.append("-Ps")
         else:
             dataselect_args.append("-Pe")
@@ -514,21 +501,21 @@ class SDSFile():
         if repack:
             dataselect_args.extend(["-o", "-"])
         else:
-            dataselect_args.extend(["-o", qualityFile.filepath])
+            dataselect_args.extend(["-o", quality_file.filepath])
 
         # Create a dataselect process
         dataselect = subprocess.Popen(["dataselect"] + dataselect_args + neighbours,
                                       stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
         # Open a msrepack process and connect stdin to dataselect stdout
-        # -R repack record size to recordLength
+        # -R repack record size to record_length
         # -o output file for pruned data
         # - read from STDIN
         if repack:
             msrepack = subprocess.Popen([
                "msrepack",
-               "-R", str(recordLength),
-               "-o", qualityFile.filepath,
+               "-R", str(record_length),
+               "-o", quality_file.filepath,
                "-"
             ], stdin=dataselect.stdout, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -546,31 +533,28 @@ class SDSFile():
                                 % (str(dataselect.returncode)))
 
         # Check that quality file has been created
-        if os.path.exists(qualityFile.filepath):
-            self.logger.debug("Created pruned file %s" % qualityFile.filename)
+        if os.path.exists(quality_file.filepath):
+            self.logger.debug("Created pruned file %s" % quality_file.filename)
         else:
-            raise Exception("Pruned file %s has not been created!" % qualityFile.filename)
+            raise Exception("Pruned file %s has not been created!" % quality_file.filename)
 
-    def __getAdjacentFile(self, direction):
-        """
-        def SDSFile::__getAdjacentFile
-        Private function that returns adjacent SDSFile based on direction
-        """
+    def _get_adjacent_file(self, direction):
+        """Private function that returns adjacent SDSFile based on direction."""
 
-        newDate = self.start + timedelta(days=direction)
+        new_date = self.start + timedelta(days=direction)
 
         # The year and day may change
-        newYear = newDate.strftime("%Y")
-        newDay = newDate.strftime("%j")
+        new_year = new_date.strftime("%Y")
+        new_day = new_date.strftime("%j")
 
-        newFilename = ".".join([
+        new_filename = ".".join([
             self.net,
             self.sta,
             self.loc,
             self.cha,
             self.quality,
-            newYear,
-            newDay
+            new_year,
+            new_day
         ])
 
-        return SDSFile(newFilename, self.archiveRoot)
+        return SDSFile(new_filename, self.archive_root)

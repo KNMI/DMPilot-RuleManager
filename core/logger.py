@@ -11,7 +11,7 @@ Example
 import logging
 import core.logger
 ...
-logger = logging.getLogger('RuleManager')
+logger = logging.getLogger("RuleManager")
 logger.info("Running SDS Manager.")
 ```
 """
@@ -36,7 +36,7 @@ def ini_logger():
         format="%(asctime)s - %(module)s - %(levelname)s - %(message)s",
         filename=filename
     )
-    logger = logging.getLogger('RuleManager')
+    logger = logging.getLogger("RuleManager")
     logger.setLevel(level)
 
     logger.debug("Initialized logger.")

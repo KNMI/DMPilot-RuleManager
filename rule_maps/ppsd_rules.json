@@ -1,18 +1,18 @@
 {
     "PPSD": {
         "description": "Proceses PPSD metadata and stores it in a MongoDB.",
-        "functionName": "ppsdMetadataRule",
+        "function_name": "ppsd_metadata_rule",
         "timeout" : 180,
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["D", "Q"]
                 }
             },
             {
-                "functionName": "assertPPSDMetadataNotExistsCondition",
+                "function_name": "assert_ppsd_metadata_not_exists_condition",
                 "options": {}
             }
         ]

@@ -1,22 +1,22 @@
 {
     "PRUNE": {
         "description": "Prunes and repacks the daily file. Saves a Q-quality file.",
-        "functionName": "pruneRule",
+        "function_name": "prune_rule",
         "options": {
             "cut_boundaries": true,
-            "removeOverlap": false,
+            "remove_overlap": false,
             "repack": false,
-            "repackRecordSize": 4096
+            "repack_record_size": 4096
         },
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["D"]
                 }
             },
             {
-                "functionName": "assertModificationTimeNewerThan",
+                "function_name": "assert_modification_time_newer_than",
                 "options": {
                     "days": 5
                 }
@@ -25,22 +25,22 @@
     },
     "PRUNE_NEIGHBOR": {
         "description": "Prunes and repacks the daily file if previous neighbor changed. Saves a Q-quality file.",
-        "functionName": "pruneRule",
+        "function_name": "prune_rule",
         "options": {
             "cut_boundaries": true,
-            "removeOverlap": false,
+            "remove_overlap": false,
             "repack": false,
-            "repackRecordSize": 4096
+            "repack_record_size": 4096
         },
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["D"]
                 }
             },
             {
-                "functionName": "assertModificationTimeNewerThan",
+                "function_name": "assert_modification_time_newer_than",
                 "options": {
                     "apply_to": "previous",
                     "days": 1
@@ -50,26 +50,26 @@
     },
     "QUARANTINE_OLD": {
         "description": "Quarantines recently modified D files that are too old.",
-        "functionName": "quarantineRawFileRule",
+        "function_name": "quarantine_raw_file_rule",
         "options": {
             "quarantine_path": "/data/quarantine/",
             "dry_run": false
         },
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["D"]
                 }
             },
             {
-                "functionName": "assertModificationTimeNewerThan",
+                "function_name": "assert_modification_time_newer_than",
                 "options": {
                     "days": 1
                 }
             },
             {
-                "functionName": "assertDataTimeOlderThan",
+                "function_name": "assert_data_time_older_than",
                 "options": {
                     "days": 6
                 }
@@ -78,20 +78,20 @@
     },
     "QUARANTINE_FUTURE": {
         "description": "Quarantines D files dated in the future.",
-        "functionName": "quarantineRawFileRule",
+        "function_name": "quarantine_raw_file_rule",
         "options": {
             "quarantine_path": "/data/quarantine/",
             "dry_run": false
         },
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["D"]
                 }
             },
             {
-                "functionName": "assertModificationTimeNewerThan",
+                "function_name": "assert_modification_time_newer_than",
                 "options": {
                     "days": -1
                 }
@@ -100,19 +100,19 @@
     },
     "INGESTION": {
         "description": "Puts the pruned file in the S3 bucket.",
-        "functionName": "ingestionS3Rule",
+        "function_name": "ingestion_s3_rule",
         "options": {
-            "exitOnFailure": true
+            "exit_on_failure": true
         },
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["Q"]
                 }
             },
             {
-                "functionName": "!assertS3ExistsCondition",
+                "function_name": "!assert_s3_exists_condition",
                 "options": {
                     "check_checksum": true
                 }
@@ -121,40 +121,40 @@
     },
     "WFCATALOG": {
         "description": "Writes waveform metadata to the WFCatalog.",
-        "functionName": "waveformMetadataRule",
+        "function_name": "waveform_metadata_rule",
         "timeout" : 15,
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["Q"]
                 }
             },
             {
-                "functionName": "assertWFCatalogNotExistsCondition",
+                "function_name": "assert_wfcatalog_not_exists_condition",
                 "options": {}
             }
         ]
     },
     "DCAT": {
         "description": "Writes Dublin Core metadata to the WFCatalog.",
-        "functionName": "dcMetadataRule",
+        "function_name": "dc_metadata_rule",
         "timeout" : 5,
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["Q"]
                 }
             },
             {
-                "functionName": "assertDCMetadataNotExistsCondition",
+                "function_name": "assert_dc_metadata_not_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "assertS3ExistsCondition",
+                "function_name": "assert_s3_exists_condition",
                 "options": {
                     "check_checksum": true
                 }
@@ -163,30 +163,30 @@
     },
     "PPSD": {
         "description": "Proceses PPSD metadata and stores it in a MongoDB.",
-        "functionName": "ppsdMetadataRule",
+        "function_name": "ppsd_metadata_rule",
         "timeout" : 180,
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["Q"]
                 }
             },
             {
-                "functionName": "assertPPSDMetadataNotExistsCondition",
+                "function_name": "assert_ppsd_metadata_not_exists_condition",
                 "options": {}
             }
         ]
     },
     "PID": {
         "description": "Assigns a PID to the file using B2HANDLE.",
-        "functionName": "pidRule",
+        "function_name": "pid_rule",
         "timeout" : 5,
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["Q"]
                 }
@@ -195,24 +195,24 @@
     },
     "REPLICATION": {
         "description": "Replicates the file in a federated iRODS, using B2SAFE",
-        "functionName": "replicationRule",
+        "function_name": "replication_rule",
         "timeout" : 5,
         "options": {
-            "replicationRoot": "/remoteZone/home/rods#localZone/"
+            "replication_root": "/remoteZone/home/rods#localZone/"
         },
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
-                            "qualities": ["Q"]
+                    "qualities": ["Q"]
                 }
             },
             {
-                "functionName": "assertPIDCondition",
+                "function_name": "assert_pid_condition",
                 "options": {}
             },
             {
-                "functionName": "assertS3ExistsCondition",
+                "function_name": "assert_s3_exists_condition",
                 "options": {
                     "check_checksum": true
                 }
@@ -221,17 +221,17 @@
     },
     "PURGE_UNKNOWN": {
         "description": "Deletes [REM]-quality local files that are older than 2 days.",
-        "functionName": "purgeRule",
+        "function_name": "purge_rule",
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["R", "E", "M", "T"]
                 }
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "function_name": "assert_modification_time_older_than",
                 "options": {
                     "days": 2
                 }
@@ -240,27 +240,27 @@
     },
     "PURGE_RAW": {
         "description": "Deletes D-quality files that have been pruned.",
-        "functionName": "purgeRule",
+        "function_name": "purge_rule",
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["D"]
                 }
             },
             {
-                "functionName": "assertPrunedFileExistsCondition",
+                "function_name": "assert_pruned_file_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "function_name": "assert_modification_time_older_than",
                 "options": {
                     "days": 7
                 }
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "function_name": "assert_modification_time_older_than",
                 "options": {
                     "apply_to": "next",
                     "days": 6
@@ -270,37 +270,37 @@
     },
     "PURGE_PRUNED_V1": {
         "description": "Deletes pruned files that have been successfully processed.",
-        "functionName": "purgeRule",
+        "function_name": "purge_rule",
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["Q"]
                 }
             },
             {
-                "functionName": "assertS3ExistsCondition",
+                "function_name": "assert_s3_exists_condition",
                 "options": {
                     "check_checksum": true
                 }
             },
             {
-                "functionName": "assertWFCatalogExistsCondition",
+                "function_name": "assert_wfcatalog_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "assertPPSDMetadataExistsCondition",
+                "function_name": "assert_ppsd_metadata_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "function_name": "assert_modification_time_older_than",
                 "options": {
                     "days": 7
                 }
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "function_name": "assert_modification_time_older_than",
                 "options": {
                     "apply_to": "next",
                     "days": 6
@@ -310,51 +310,51 @@
     },
     "PURGE_PRUNED_V2": {
         "description": "Deletes pruned files that have been successfully processed.",
-        "functionName": "purgeRule",
+        "function_name": "purge_rule",
         "options": {},
         "conditions": [
             {
-                "functionName": "assertQualityCondition",
+                "function_name": "assert_quality_condition",
                 "options": {
                     "qualities": ["Q"]
                 }
             },
             {
-                "functionName": "assertS3ExistsCondition",
+                "function_name": "assert_s3_exists_condition",
                 "options": {
                     "check_checksum": true
                 }
             },
             {
-                "functionName": "assertWFCatalogExistsCondition",
+                "function_name": "assert_wfcatalog_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "assertDCMetadataExistsCondition",
+                "function_name": "assert_dc_metadata_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "assertPPSDMetadataExistsCondition",
+                "function_name": "assert_ppsd_metadata_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "assertPIDCondition",
+                "function_name": "assert_pid_condition",
                 "options": {}
             },
             {
-                "functionName": "assertFileReplicatedCondition",
+                "function_name": "assert_file_replicated_condition",
                 "options": {
-                    "replicationRoot": "/remoteZone/home/rods#localZone/"
+                    "replication_root": "/remoteZone/home/rods#localZone/"
                 }
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "function_name": "assert_modification_time_older_than",
                 "options": {
                     "days": 7
                 }
             },
             {
-                "functionName": "assertModificationTimeOlderThan",
+                "function_name": "assert_modification_time_older_than",
                 "options": {
                     "apply_to": "next",
                     "days": 6

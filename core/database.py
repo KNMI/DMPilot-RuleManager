@@ -15,7 +15,7 @@ class DeletionDatabase():
     def __init__(self):
 
         # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
+        self.logger = logging.getLogger("RuleManager")
         self.logger.debug("Initializing the Deletion Database.")
 
         # Connect to (file) database
