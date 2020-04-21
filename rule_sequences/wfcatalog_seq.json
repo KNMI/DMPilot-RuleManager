@@ -1,5 +1,5 @@
 {
-    "ruleMap" : "/home/rulemanager/rule_maps/wfcatalog_rules.json",
+    "rule_map" : "/home/rulemanager/rule_maps/wfcatalog_rules.json",
     "sequence" : [
         "PRUNE",
         "WFCATALOG"

@@ -14,56 +14,56 @@ from botocore.exceptions import CredentialRetrievalError
 from boto3.exceptions import S3UploadFailedError
 from core.exceptions import ExitPipelineException
 
-from modules.wfcatalog import getWFMetadata
-from modules.dublincore import extractDCMetadata
+from modules.wfcatalog import get_wf_metadata
+from modules.dublincore import extract_dc_metadata
 
 import modules.s3manager as s3manager
-from modules.irodsmanager import irodsSession
+from modules.irodsmanager import irods_session
 from modules.mongomanager import mongo_pool
 from modules.psd2.psd import PSDCollector
 
-logger = logging.getLogger('RuleManager')
+logger = logging.getLogger("RuleManager")
 
 
-def ppsdMetadataRule(options, SDSFile):
+def ppsd_metadata_rule(options, sds_file):
     """Handler for PPSD calculation.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Computing PPSD metadata for %s." % SDSFile.filename)
+    logger.debug("Computing PPSD metadata for %s." % sds_file.filename)
 
     # Process PPSD
-    documents = PSDCollector(connect_sql=False).process(SDSFile, cache_response=False)
+    documents = PSDCollector(connect_sql=False).process(sds_file, cache_response=False)
 
     # Save to the database
-    mongo_pool.deletePPSDDocuments(SDSFile)
-    mongo_pool.savePPSDDocuments(documents)
-    logger.debug("Saved PPSD metadata for %s." % SDSFile.filename)
+    mongo_pool.delete_ppsd_documents(sds_file)
+    mongo_pool.save_ppsd_documents(documents)
+    logger.debug("Saved PPSD metadata for %s." % sds_file.filename)
 
 
-def deletePPSDMetadataRule(options, SDSFile):
+def delete_ppsd_metadata_rule(options, sds_file):
     """Delete PPSD metadata of an SDS file.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Deleting PPSD metadata for %s." % SDSFile.filename)
-    mongo_pool.deletePPSDDocuments(SDSFile)
-    logger.debug("Deleted PPSD metadata for %s." % SDSFile.filename)
+    logger.debug("Deleting PPSD metadata for %s." % sds_file.filename)
+    mongo_pool.delete_ppsd_documents(sds_file)
+    logger.debug("Deleted PPSD metadata for %s." % sds_file.filename)
 
 
-def pruneRule(options, SDSFile):
+def prune_rule(options, sds_file):
     """Handler for the file pruning/repacking rule.
 
     Due to the way `SDSFile.prune()` runs `dataselect` as its first step, always sorts
@@ -76,59 +76,59 @@ def pruneRule(options, SDSFile):
         The rule's options.
         - ``cut_boundaries``: Whether or not to cut the file at the day boundaries (`bool`)
         - ``repack``: Whether or not to repack records (`bool`)
-        - ``repackRecordSize``: The new record size if `repack` is `True` (`int`)
-        - ``removeOverlap``: Whether or not to remove overlaps (`bool`)
-    SDSFile : `SDSFile`
+        - ``repack_record_size``: The new record size if `repack` is `True` (`int`)
+        - ``remove_overlap``: Whether or not to remove overlaps (`bool`)
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Pruning file %s." % SDSFile.filename)
+    logger.debug("Pruning file %s." % sds_file.filename)
 
     # Prune the file to a .Q quality file in the temporary archive
-    SDSFile.prune(cut_boundaries=options["cut_boundaries"],
-                  repack=options["repack"],
-                  recordLength=options["repackRecordSize"],
-                  removeOverlap=options["removeOverlap"])
+    sds_file.prune(cut_boundaries=options["cut_boundaries"],
+                   repack=options["repack"],
+                   record_length=options["repack_record_size"],
+                   remove_overlap=options["remove_overlap"])
 
-    logger.debug("Pruned file %s." % SDSFile.filename)
+    logger.debug("Pruned file %s." % sds_file.filename)
 
 
-def ingestionIrodsRule(options, SDSFile):
+def ingestion_irods_rule(options, sds_file):
     """Handler for the ingestion rule.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-        - ``rescName``: Name of the iRODS resource to save the object (`str`)
-        - ``purgeCache``: Whether or not to purge the cache,
-                          in case the resource is compound (`bool`)
-    SDSFile : `SDSFile`
+        - ``resc_name``: Name of the iRODS resource to save the object (`str`)
+        - ``purge_cache``: Whether or not to purge the cache,
+                           in case the resource is compound (`bool`)
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Ingesting file %s." % SDSFile.filename)
+    logger.debug("Ingesting file %s." % sds_file.filename)
 
     # Attempt to ingest to iRODS
-    irodsSession.createDataObject(SDSFile,
-                                  rescName="compResc",
-                                  purgeCache=True,
-                                  registerChecksum=True)
+    irods_session.create_data_object(sds_file,
+                                     resc_name="compResc",
+                                     purge_cache=True,
+                                     register_checksum=True)
 
     # Check if checksum is saved
     logger.debug("Ingested file %s with checksum '%s'" % (
-            SDSFile.filename, irodsSession.getDataObject(SDSFile).checksum))
+        sds_file.filename, irods_session.get_data_object(sds_file).checksum))
 
 
-def ingestionS3Rule(options, SDSFile):
+def ingestion_s3_rule(options, sds_file):
     """Handler for the ingestion rule.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-        - ``exitOnFailure``: Whether or not to exit the pipeline when the upload fails (`bool`)
-    SDSFile : `SDSFile`
+        - ``exit_on_failure``: Whether or not to exit the pipeline when the upload fails (`bool`)
+    sds_file : `SDSFile`
         The file to be processed.
 
     Raises
@@ -136,114 +136,114 @@ def ingestionS3Rule(options, SDSFile):
     `ExitPipelineException`
         Raised when upload fails and `exitOnFailure` is `True`.
     """
-    logger.debug("Ingesting file %s." % SDSFile.filename)
+    logger.debug("Ingesting file %s." % sds_file.filename)
 
     try:
         # Upload file to S3
-        s3manager.put(SDSFile)
+        s3manager.put(sds_file)
     except (CredentialRetrievalError, S3UploadFailedError) as e:
-        if options['exitOnFailure']:
+        if options["exit_on_failure"]:
             raise ExitPipelineException(True, str(e))
         else:
             raise
 
     # Check if checksum is saved
     logger.debug("Ingested file %s with checksum '%s'" % (
-            SDSFile.filename, SDSFile.checksum))
+        sds_file.filename, sds_file.checksum))
 
 
-def pidRule(options, SDSFile):
+def pid_rule(options, sds_file):
     """Handler for the PID assignment rule.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Assigning PID to file %s." % SDSFile.filename)
+    logger.debug("Assigning PID to file %s." % sds_file.filename)
 
     # Attempt to assign PID
-    is_new, pid = irodsSession.assignPID(SDSFile)
+    is_new, pid = irods_session.assign_pid(sds_file)
 
     if is_new is None:
-        logger.error("Error while assigning PID to file %s." % SDSFile.filename)
+        logger.error("Error while assigning PID to file %s." % sds_file.filename)
     elif is_new:
-        logger.info("Assigned PID %s to file %s." % (pid, SDSFile.filename))
+        logger.info("Assigned PID %s to file %s." % (pid, sds_file.filename))
     elif not is_new:
-        logger.info("File %s was already previously assigned PID %s." % (SDSFile.filename, pid))
+        logger.info("File %s was already previously assigned PID %s." % (sds_file.filename, pid))
 
 
-def addPidToWFCatalogRule(options, SDSFile):
+def add_pid_to_wfcatalog_rule(options, sds_file):
     """Updates the WFCatalog with the file PID from the local iRODS archive.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Updating WFCatalog with the PID of file %s." % SDSFile.filename)
+    logger.debug("Updating WFCatalog with the PID of file %s." % sds_file.filename)
 
-    pid = irodsSession.getPID(SDSFile)
+    pid = irods_session.get_pid(sds_file)
 
     if pid is not None:
-        mongo_pool.update_many({"fileId": SDSFile.filename},
+        mongo_pool.update_many({"fileId": sds_file.filename},
                                {"$set": {"dc_identifier": pid}})
-        logger.info("Entry for file %s updated with PID %s." % (SDSFile.filename, pid))
+        logger.info("Entry for file %s updated with PID %s." % (sds_file.filename, pid))
     else:
-        logger.error("File %s has no PID." % SDSFile.filename)
+        logger.error("File %s has no PID." % sds_file.filename)
 
 
-def replicationRule(options, SDSFile):
+def replication_rule(options, sds_file):
     """Handler for the PID assignment rule.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-        - ``replicationRoot``: Root replication collection (`str`)
-    SDSFile : `SDSFile`
+        - ``replication_root``: Root replication collection (`str`)
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Replicating file %s." % SDSFile.filename)
+    logger.debug("Replicating file %s." % sds_file.filename)
 
     # Attempt to replicate file
-    success, response = irodsSession.eudatReplication(SDSFile, options["replicationRoot"])
+    success, response = irods_session.eudat_replication(sds_file, options["replication_root"])
 
     if success:
-        logger.debug("Replicated file %s to collection %s." % (SDSFile.filename,
-                                                               options["replicationRoot"]))
+        logger.debug("Replicated file %s to collection %s." % (sds_file.filename,
+                                                               options["replication_root"]))
     else:
-        logger.error("Error replicating file %s: %s" % (SDSFile.filename, response))
+        logger.error("Error replicating file %s: %s" % (sds_file.filename, response))
 
 
-def deleteArchiveRule(options, SDSFile):
+def delete_archive_rule(options, sds_file):
     """Handler for the rule that deletes a file from the iRODS archive.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The description of the file to be deleted.
     """
 
-    logger.debug("Deleting file %s." % SDSFile.filename)
+    logger.debug("Deleting file %s." % sds_file.filename)
 
     # Attempt to delete from iRODS
-    irodsSession.deleteDataObject(SDSFile)
+    irods_session.delete_data_object(sds_file)
 
     # Check if checksum is saved
-    logger.debug("Deleted file %s." % SDSFile.filename)
+    logger.debug("Deleted file %s." % sds_file.filename)
 
 
-def federatedIngestionRule(options, SDSFile):
+def federated_ingestion_rule(options, sds_file):
     """Handler for a federated ingestion rule. Puts the object in a given
     root collection, potentially in a federated zone.
 
@@ -251,44 +251,44 @@ def federatedIngestionRule(options, SDSFile):
     ----------
     options : `dict`
         The rule's options.
-        - ``remoteRoot``: Name of the root collection to put the object (`str`)
+        - ``remote_root``: Name of the root collection to put the object (`str`)
         - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Ingesting file %s." % SDSFile.customPath(options["remoteRoot"]))
+    logger.debug("Ingesting file %s." % sds_file.custom_path(options["remote_root"]))
 
     # Attempt to ingest to iRODS
-    irodsSession.remotePut(SDSFile,
-                           options["remoteRoot"],
-                           purgeCache=True,
-                           registerChecksum=True)
+    irods_session.remote_put(sds_file,
+                             options["remote_root"],
+                             purge_cache=True,
+                             register_checksum=True)
 
-    logger.debug("Ingested file %s" % SDSFile.customPath(options["remoteRoot"]))
+    logger.debug("Ingested file %s" % sds_file.custom_path(options["remote_root"]))
 
 
-def purgeRule(options, SDSFile):
+def purge_rule(options, sds_file):
     """Handler for the temporary archive purge rule.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
     # Some other configurable rules
-    logger.debug("Purging file %s from temporary archive." % SDSFile.filename)
+    logger.debug("Purging file %s from temporary archive." % sds_file.filename)
     try:
-        os.remove(SDSFile.filepath)
-        logger.debug("Purged file %s from temporary archive." % SDSFile.filename)
+        os.remove(sds_file.filepath)
+        logger.debug("Purged file %s from temporary archive." % sds_file.filename)
     except FileNotFoundError:
-        logger.debug("File %s not present in temporary archive." % SDSFile.filename)
+        logger.debug("File %s not present in temporary archive." % sds_file.filename)
 
 
-def dcMetadataRule(options, SDSFile):
+def dc_metadata_rule(options, sds_file):
     """Process and save Dublin Core metadata of an SDS file.
 
     Parameters
@@ -296,38 +296,38 @@ def dcMetadataRule(options, SDSFile):
     options : `dict`
         The rule's options.
         - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Saving Dublin Core metadata for %s." % SDSFile.filename)
+    logger.debug("Saving Dublin Core metadata for %s." % sds_file.filename)
 
     # Get the existing Dublin Core Object
-    document = extractDCMetadata(SDSFile, irodsSession.getPID(SDSFile).upper())
+    document = extract_dc_metadata(sds_file, irods_session.get_pid(sds_file).upper())
 
     # Save to the database
     if document:
-        mongo_pool.saveDCDocument(document)
-        logger.debug("Saved Dublin Core metadata for %s." % SDSFile.filename)
+        mongo_pool.save_dc_document(document)
+        logger.debug("Saved Dublin Core metadata for %s." % sds_file.filename)
 
 
-def deleteDCMetadataRule(options, SDSFile):
+def delete_dc_metadata_rule(options, sds_file):
     """Delete Dublin Core metadata of an SDS file.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Marking %s as deleted in Dublin Core metadata." % SDSFile.filename)
-    mongo_pool.deleteDCDocument(SDSFile)
-    logger.debug("Marked %s as deleted in Dublin Core metadata." % SDSFile.filename)
+    logger.debug("Marking %s as deleted in Dublin Core metadata." % sds_file.filename)
+    mongo_pool.delete_dc_document(sds_file)
+    logger.debug("Marked %s as deleted in Dublin Core metadata." % sds_file.filename)
 
 
-def waveformMetadataRule(options, SDSFile):
+def waveform_metadata_rule(options, sds_file):
     """Handler for the WFCatalog metadata rule.
     TODO XXX
 
@@ -336,60 +336,60 @@ def waveformMetadataRule(options, SDSFile):
     options : `dict`
         The rule's options.
         - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
     # Get waveform metadata
-    (doc_daily, docs_segments) = getWFMetadata(SDSFile)
+    (doc_daily, docs_segments) = get_wf_metadata(sds_file)
 
-    logger.debug("Saving waveform metadata for %s." % SDSFile.filename)
+    logger.debug("Saving waveform metadata for %s." % sds_file.filename)
 
     # Save the daily metadata document
-    mongo_pool.setWFCatalogDailyDocument(doc_daily)
+    mongo_pool.set_wfcatalog_daily_document(doc_daily)
 
     # Save the continuous segments documents
     if docs_segments is None:
-        return logger.debug("No continuous segments to save for %s." % SDSFile.filename)
+        return logger.debug("No continuous segments to save for %s." % sds_file.filename)
     else:
-        mongo_pool.deleteWFCatalogSegmentsDocuments(SDSFile)
-        mongo_pool.saveWFCatalogSegmentsDocuments(docs_segments)
+        mongo_pool.delete_wfcatalog_segments_documents(sds_file)
+        mongo_pool.save_wfcatalog_segments_documents(docs_segments)
 
-    logger.debug("Saved waveform metadata for %s." % SDSFile.filename)
+    logger.debug("Saved waveform metadata for %s." % sds_file.filename)
 
-def deleteWaveformMetadataRule(options, SDSFile):
+def delete_waveform_metadata_rule(options, sds_file):
     """Delete waveform metadata of an SDS file.
 
     Parameters
     ----------
     options : `dict`
         The rule's options.
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Deleting waveform metadata for %s." % SDSFile.filename)
+    logger.debug("Deleting waveform metadata for %s." % sds_file.filename)
 
-    mongo_pool.deleteWFCatalogDailyDocument(SDSFile)
-    mongo_pool.deleteWFCatalogSegmentsDocuments(SDSFile)
-    logger.debug("Deleted waveform metadata for %s." % SDSFile.filename)
+    mongo_pool.delete_wfcatalog_daily_document(sds_file)
+    mongo_pool.delete_wfcatalog_segments_documents(sds_file)
+    logger.debug("Deleted waveform metadata for %s." % sds_file.filename)
 
 
-def removeFromDeletionDatabaseRule(options, SDSFile):
+def remove_from_deletion_database_rule(options, sds_file):
     """Removes the file from the deletion database.
 
     To be used after a successful deletion of the file from all desired archives.
     """
 
-    logger.debug("Removing deletion entry for %s." % SDSFile.filename)
+    logger.debug("Removing deletion entry for %s." % sds_file.filename)
 
     from core.database import deletion_database
-    deletion_database.remove(SDSFile)
+    deletion_database.remove(sds_file)
 
-    logger.debug("Removed deletion entry for %s." % SDSFile.filename)
+    logger.debug("Removed deletion entry for %s." % sds_file.filename)
 
 
-def printWithMessage(options, sdsFile):
+def print_with_message(options, sds_file):
     """Prints the filename followed by a message.
 
     Parameters
@@ -397,13 +397,13 @@ def printWithMessage(options, sdsFile):
     options : `dict`
         The rule's options.
         - ``message``: Message to print (`str`)
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
     """
-    print(sdsFile.filename, options["message"])
+    print(sds_file.filename, options["message"])
 
 
-def quarantineRawFileRule(options, sdsFile):
+def quarantine_raw_file_rule(options, sds_file):
     """Moves the file to another directory where it can be further analyzed by a human.
 
     This does not check any related file to quarantine along.
@@ -414,7 +414,7 @@ def quarantineRawFileRule(options, sdsFile):
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
         - ``dry_run``: If True, doesn't move/delete the files (`bool`)
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
 
     Raises
@@ -425,24 +425,24 @@ def quarantineRawFileRule(options, sdsFile):
     """
     try:
         # Move the raw file
-        source_path = sdsFile.filepath
-        dest_dir = sdsFile.customDirectory(options['quarantine_path'])
-        if options['dry_run']:
-            logger.info('Would move %s to %s/', source_path, dest_dir)
+        source_path = sds_file.filepath
+        dest_dir = sds_file.custom_directory(options["quarantine_path"])
+        if options["dry_run"]:
+            logger.info("Would move %s to %s/", source_path, dest_dir)
         else:
             os.makedirs(dest_dir, exist_ok=True)
             shutil.move(source_path, dest_dir)
-            logger.info('Moved %s to %s/', source_path, dest_dir)
+            logger.info("Moved %s to %s/", source_path, dest_dir)
 
         # TODO: Report
 
     except (KeyError, shutil.Error, PermissionError) as ex:
         raise ExitPipelineException(True, str(ex))
 
-    raise ExitPipelineException(False, 'File quarantined')
+    raise ExitPipelineException(False, "File quarantined")
 
 
-def quarantinePrunedFileRule(options, sdsFile):
+def quarantine_pruned_file_rule(options, sds_file):
     """Moves the file to another directory where it can be further analyzed by a human.
 
     It should be called with the .Q file, but acts on both of them. It moves the raw
@@ -455,7 +455,7 @@ def quarantinePrunedFileRule(options, sdsFile):
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
         - ``dry_run``: If True, doesn't move/delete the files (`bool`)
-    SDSFile : `SDSFile`
+    sds_file : `SDSFile`
         The file to be processed.
 
     Raises
@@ -466,36 +466,36 @@ def quarantinePrunedFileRule(options, sdsFile):
     """
     try:
         # Move the raw .D file
-        d_file_path = os.path.join(sdsFile.archiveRoot,
-                                   sdsFile.custom_quality_subdir('D'),
-                                   sdsFile.custom_quality_filename('D'))
-        dest_dir = os.path.join(options['quarantine_path'],
-                                sdsFile.custom_quality_subdir('D'))
-        if options['dry_run']:
-            logger.info('Would move %s to %s/', d_file_path, dest_dir)
+        d_file_path = os.path.join(sds_file.archive_root,
+                                   sds_file.custom_quality_subdir("D"),
+                                   sds_file.custom_quality_filename("D"))
+        dest_dir = os.path.join(options["quarantine_path"],
+                                sds_file.custom_quality_subdir("D"))
+        if options["dry_run"]:
+            logger.info("Would move %s to %s/", d_file_path, dest_dir)
         else:
             os.makedirs(dest_dir, exist_ok=True)
             shutil.move(d_file_path, dest_dir)
-            logger.info('Moved %s to %s/', d_file_path, dest_dir)
+            logger.info("Moved %s to %s/", d_file_path, dest_dir)
 
         # Delete the .Q file
-        q_file_path = sdsFile.filepath
-        if options['dry_run']:
-            logger.info('Would remove %s', q_file_path)
+        q_file_path = sds_file.filepath
+        if options["dry_run"]:
+            logger.info("Would remove %s", q_file_path)
         else:
             os.remove(q_file_path)
-            logger.info('Removed %s', q_file_path)
+            logger.info("Removed %s", q_file_path)
 
         # TODO: Report
 
     except (KeyError, shutil.Error, PermissionError) as ex:
         raise ExitPipelineException(True, str(ex))
 
-    raise ExitPipelineException(False, 'File quarantined')
+    raise ExitPipelineException(False, "File quarantined")
 
 
-def testPrint(options, sdsFile):
+def test_print(options, sds_file):
     """Prints the filename."""
-    logger.info(sdsFile.filename)
-    logger.info(sdsFile.directory)
-    logger.info(sdsFile.irodsDirectory)
+    logger.info(sds_file.filename)
+    logger.info(sds_file.directory)
+    logger.info(sds_file.irods_directory)

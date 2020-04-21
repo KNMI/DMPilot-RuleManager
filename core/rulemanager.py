@@ -20,87 +20,81 @@ class RuleManager():
     def __init__(self):
 
         # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
+        self.logger = logging.getLogger("RuleManager")
         self.logger.debug("Initializing the Rule Manager.")
 
         self.rules = None
         self.conditions = None
-        self.ruleSequence = None
+        self.rule_sequence = None
 
-    def __signalHandler(self, signum, frame):
-        """
-        Collector.__signalHandler
-        Raise an exception when a signal SIGALRM was received
-        """
+    def __signal_handler(self, signum, frame):
+        """Raise an exception when a signal SIGALRM was received."""
 
         raise TimeoutError("Metric calculation has timed out.")
 
-    def loadRules(self, ruleModule, conditionModule, ruleSequenceFile):
+    def load_rules(self, rule_module, condition_module, rule_sequence_file):
         """Loads the rules.
 
         Parameters
         ----------
-        ruleModule : module
+        rule_module : module
             A module containing all the rule handling functions.
-        conditionModule : module
+        condition_module : module
             A module containing all the condition functions.
-        ruleSequenceFile : `str`
+        rule_sequence_file : `str`
             The path for a JSON file defining in which order to run the rules,
             and the name of the rule map file.
         """
 
         # Load the Python scripted rules and conditions
-        self.rules = ruleModule
-        self.conditions = conditionModule
+        self.rules = rule_module
+        self.conditions = condition_module
 
         rule_desc = None    # Rule configuration
         rule_seq = None     # Rule order
 
         # Load the rule sequence JSON file
         try:
-            with open(ruleSequenceFile) as order_file:
+            with open(rule_sequence_file) as order_file:
                 rule_seq = json.load(order_file)
         except IOError:
-            raise IOError("The rule sequence file %s could not be found." % ruleSequenceFile)
+            raise IOError("The rule sequence file %s could not be found." % rule_sequence_file)
 
         # Load the rule configuration JSON file
-        ruleMapFile = rule_seq["ruleMap"]
+        rule_map_file = rule_seq["rule_map"]
         try:
-            with open(ruleMapFile) as rule_file:
+            with open(rule_map_file) as rule_file:
                 rule_desc = json.load(rule_file)
         except IOError:
-            raise IOError("The rulemap %s could not be found." % ruleMapFile)
+            raise IOError("The rulemap %s could not be found." % rule_map_file)
 
         # Confirm rule map against the schema
         try:
             jsonschema.validate(rule_desc, JSON_RULE_SCHEMA)
         except jsonschema.exceptions.ValidationError:
-            raise ValueError("The rulemap %s does not validate against the schema." % ruleMapFile)
+            raise ValueError("The rulemap %s does not validate against the schema." % rule_map_file)
 
         # Get the rule from the map
         try:
-            self.ruleSequence = [rule_desc[rule_name] for rule_name in rule_seq["sequence"]]
+            self.rule_sequence = [rule_desc[rule_name] for rule_name in rule_seq["sequence"]]
             for rule_name in rule_seq["sequence"]:
-                rule_desc[rule_name]["ruleName"] = rule_name
+                rule_desc[rule_name]["rule_name"] = rule_name
         except KeyError as exception:
             raise ValueError("The rule %s could not be found in the configured rule map %s." %
-                             (exception.args[0], ruleMapFile))
+                             (exception.args[0], rule_map_file))
 
         # Check if the rules are valid
-        self.__checkRuleSequence(self.ruleSequence)
+        self.__check_rule_sequence(self.rule_sequence)
 
-    def __checkRuleSequence(self, sequence):
-        """
-        Def RuleManager.__checkRuleSequence
-        Checks validity of the configured rule sequence
-        """
+    def __check_rule_sequence(self, sequence):
+        """Check validity of the configured rule sequence."""
 
         # Check each rule that it exists & is a callable Python function
         for item in sequence:
 
             # Check if the rule exists
             try:
-                rule, timeout = self.getRule(item)
+                rule, timeout = self.get_rule(item)
             except AttributeError:
                 raise NotImplementedError(
                     "Python rule for configured sequence item %s does not exist." %
@@ -112,11 +106,8 @@ class RuleManager():
                     "Python rule for configured sequence item %s is not callable." %
                     item)
 
-    def bindOptions(self, definitions, item):
-        """
-        Def RuleManager.bindOptions
-        Binds options to a function call
-        """
+    def bind_options(self, definitions, item):
+        """Bind options to a function call."""
 
         def invert(f):
             @wraps(f)
@@ -125,23 +116,21 @@ class RuleManager():
             return g
 
         # Invert the boolean result from the condition
-        if (definitions == self.conditions) and item["functionName"].startswith("!"):
-            return partial(invert(getattr(definitions, item["functionName"][1:])), item["options"])
+        if (definitions == self.conditions) and item["function_name"].startswith("!"):
+            return partial(invert(getattr(definitions, item["function_name"][1:])),
+                           item["options"])
         else:
-            return partial(getattr(definitions, item["functionName"]), item["options"])
+            return partial(getattr(definitions, item["function_name"]), item["options"])
 
-    def getRule(self, rule):
-        """
-        Def RuleManager.getRule
-        Returns specific rule from name and its execution timeout
-        """
+    def get_rule(self, rule):
+        """Return specific rule from name and its execution timeout."""
 
         # Bind the rule options to the function call
         # There may be multiple conditions defined per rule
         rule_obj = Rule(
-            self.bindOptions(self.rules, rule),
-            map(lambda x: self.bindOptions(self.conditions, x), rule["conditions"]),
-            name=rule["ruleName"]
+            self.bind_options(self.rules, rule),
+            map(lambda x: self.bind_options(self.conditions, x), rule["conditions"]),
+            name=rule["rule_name"]
         )
 
         # Get timeout from rule-specific config or from default value
@@ -168,10 +157,10 @@ class RuleManager():
             self.logger.info("Processing item %s (%d/%d)." % (item.filename, i+1, total))
 
             # Get the sequence of rules to be applied
-            for rule, timeout in map(self.getRule, self.ruleSequence):
+            for rule, timeout in map(self.get_rule, self.rule_sequence):
 
                 # Set a signal
-                signal.signal(signal.SIGALRM, self.__signalHandler)
+                signal.signal(signal.SIGALRM, self.__signal_handler)
                 signal.alarm(timeout)
 
                 # Rule options are bound to the call
@@ -194,7 +183,7 @@ class RuleManager():
 
                     self.logger.info("%s: Exiting pipeline for this file" % (item.filename))
 
-                    # The 'finally' block WILL be executed even after breaking
+                    # The "finally" block WILL be executed even after breaking
                     break
 
                 # The rule was timed out

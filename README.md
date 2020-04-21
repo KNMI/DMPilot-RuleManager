@@ -82,10 +82,10 @@ the JSON rule map, naming the rule and defining its options, like so:
 ```
 {
     "EXAMPLE": {
-        "functionName": "exampleRule",
+        "function_name": "example_rule",
         "options": { ... }
         "conditions": [{
-            "functionName": "exampleCondition",
+            "function_name": "example_condition",
             "options": { ... }
         }, ...]
     },
@@ -111,7 +111,7 @@ order they should be run.
 
 Rules are subject to conditions before being executed. These so called conditionals are
 defined in rules.json and have a name like `assertQualityCondition`. The result of the operation
-can be negated by adding an exclamation in front of the function name e.g. `!assertQualityCondition`.
+can be negated by adding an exclamation in front of the function name e.g. `!assert_quality_condition`.
 
 These function names refer to conditions defined in the conditions directory and should be loaded during
 the initialization of the rule manager.
@@ -158,7 +158,7 @@ An example on how to use it:
 
 ```python
 rm = RuleManager() # Initialization, sets up logging
-rm.loadRules(rules_module, conditions_module, ruleseq_file) # Loads the rules
+rm.load_rules(rules_module, conditions_module, ruleseq_file) # Loads the rules
 rm.sequence(item_list) # Executes the sequence of rules on all items
 ```
 

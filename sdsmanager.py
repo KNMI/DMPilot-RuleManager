@@ -9,7 +9,7 @@ import argparse
 
 import core.logger
 from core.rulemanager import RuleManager
-from orfeus.sdscollector import SDSFileCollector
+from sds.sdscollector import SDSFileCollector
 import rules.sdsrules as sdsrules
 import conditions.sdsconditions as sdsconditions
 
@@ -19,7 +19,7 @@ from configuration import config
 def main():
     try:
         # Initialize logger
-        logger = logging.getLogger('RuleManager')
+        logger = logging.getLogger("RuleManager")
         logger.info("Running SDS Manager.")
 
         # Parse command line arguments
@@ -29,13 +29,13 @@ def main():
                                   "(defaults to the value in configuration.py)"),
                             default=config["DATA_DIR"])
         parser.add_argument("--ruleseq", help="rule sequence file", required=True)
-        parser.add_argument("--collect_wildcards", nargs='+',
+        parser.add_argument("--collect_wildcards", nargs="+",
                             help=("files to collect, defined by one or more wildcard string(s) "
                                   "within quotes (in the case of more than one string, any file "
                                   "that matches at least one of them is collected)"))
         parser.add_argument("--from_file",
                             help="files to collect, listed in a text file or stdin '-'",
-                            type=argparse.FileType('r'))
+                            type=argparse.FileType("r"))
         parser.add_argument("--collect_finished",
                             help=("collect all files with modification date older that last "
                                   "midnight plus the given number of minutes"),
@@ -44,8 +44,8 @@ def main():
                             help=("whether (and how) to sort collected files "
                                   "by name before processing them "
                                   "(defaults to none)"),
-                            choices=['none', 'asc', 'desc'],
-                            default='none')
+                            choices=["none", "asc", "desc"],
+                            default="none")
         parsedargs = vars(parser.parse_args())
 
         # Check collection parameters
@@ -57,33 +57,33 @@ def main():
 
         # Set up rules
         RM = RuleManager()
-        RM.loadRules(sdsrules, sdsconditions, parsedargs["ruleseq"])
+        RM.load_rules(sdsrules, sdsconditions, parsedargs["ruleseq"])
 
         # Collect files
-        fileCollector = SDSFileCollector(parsedargs["dir"])
+        file_collector = SDSFileCollector(parsedargs["dir"])
 
         if parsedargs["collect_wildcards"] is not None:
-            fileCollector.filterFromWildcardsArray(parsedargs["collect_wildcards"])
+            file_collector.filter_from_wildcards_array(parsedargs["collect_wildcards"])
         if parsedargs["from_file"] is not None:
             filename_list = []
             with parsedargs["from_file"] as list_file:
                 for line in list_file:
                     filename_list.append(line.strip())
-            fileCollector.filterFromFileList(filename_list)
+            file_collector.filter_from_file_list(filename_list)
         if parsedargs["collect_finished"] is not None:
-            fileCollector.filterFinishedFiles(parsedargs["collect_finished"])
+            file_collector.filter_finished_files(parsedargs["collect_finished"])
 
         # Sort files alphabetically
-        if parsedargs["sort"] != 'none':
-            fileCollector.sortFiles(parsedargs["sort"])
+        if parsedargs["sort"] != "none":
+            file_collector.sort_files(parsedargs["sort"])
 
         # Apply the sequence of rules on files
-        RM.sequence(fileCollector.files)
+        RM.sequence(file_collector.files)
 
         logger.info("Finished SDS Manager execution.")
 
     except Exception as e:
-        logger.error('General error!: "%s"' % e, exc_info=True)
+        logger.error("General error!: '%s'" % e, exc_info=True)
 
 
 if __name__ == "__main__":

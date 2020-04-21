@@ -9,7 +9,7 @@ from .constants import (DB_REFERENCE, MINIMUM_PERIOD, NUMBER_OF_FREQUENCIES,
                         OCTAVE_PERIOD_STEP, SEGMENT_LENGTH)
 
 
-logger = logging.getLogger('RuleManager')
+logger = logging.getLogger("RuleManager")
 
 
 class PSDCollector():
@@ -206,10 +206,10 @@ class PSDCollector():
         -------
         responses : `list` of `dict`
             Each element of the list is a dictionary with the following fields:
-                * 'start_time' : `obspy.UTCDateTime`
-                * 'end_time' : `obspy.UTCDateTime`
-                * 'response' : `numpy.ndarray`
-                * 'frequencies' : `numpy.ndarray`
+                * "start_time" : `obspy.UTCDateTime`
+                * "end_time" : `obspy.UTCDateTime`
+                * "response" : `numpy.ndarray`
+                * "frequencies" : `numpy.ndarray`
 
         """
         inventory = sds_file.inventory
@@ -228,8 +228,8 @@ class PSDCollector():
             response_dict = {}
 
             # Store time frame for this response
-            response_dict['start_time'] = channel.start_date
-            response_dict['end_time'] = channel.end_date  # TODO is end_date None or inexistent?
+            response_dict["start_time"] = channel.start_date
+            response_dict["end_time"] = channel.end_date  # TODO is end_date None or inexistent?
 
             # Evaluate the response to VEL for infrasound channels
             # Seismic stations should go to ACC to be consistent with the NLNM, NHNM
@@ -247,8 +247,8 @@ class PSDCollector():
                 output=output
             )
 
-            response_dict['response'] = resp
-            response_dict['frequencies'] = freqs
+            response_dict["response"] = resp
+            response_dict["frequencies"] = freqs
 
             # Drop phase imaginary information
             resp = np.abs(resp)
@@ -295,11 +295,11 @@ class PSDCollector():
             resp = None
             freqs = None
             for response in all_responses:
-                if (response['start_time'] < segmentStart
-                        and (response['end_time'] is None
-                             or segmentStart + SEGMENT_LENGTH < response['end_time'])):
-                    resp = response['response']
-                    freqs = response['frequencies']
+                if (response["start_time"] < segmentStart
+                        and (response["end_time"] is None
+                             or segmentStart + SEGMENT_LENGTH < response["end_time"])):
+                    resp = response["response"]
+                    freqs = response["frequencies"]
 
             # If no response contains segment and is not cached, skip this segment
             if not cache_response and (resp is None or freqs is None):
@@ -329,16 +329,16 @@ class PSDCollector():
                 "fileId": SDSFile.filename,
                 "checksum": SDSFile.checksum,
                 "checksumInventory": resp_checksum,
-                'net': SDSFile.net,
-                'sta': SDSFile.sta,
-                'loc': SDSFile.loc,
-                'cha': SDSFile.cha,
-                'quality': SDSFile.quality,
-                'ts': segmentStart.datetime,
-                'te': (segmentStart + SEGMENT_LENGTH).datetime,
-                'shift': shift,
-                'offset': offset,
-                'bin': binary
+                "net": SDSFile.net,
+                "sta": SDSFile.sta,
+                "loc": SDSFile.loc,
+                "cha": SDSFile.cha,
+                "quality": SDSFile.quality,
+                "ts": segmentStart.datetime,
+                "te": (segmentStart + SEGMENT_LENGTH).datetime,
+                "shift": shift,
+                "offset": offset,
+                "bin": binary
             }
 
             psdObjects.append(psd_record)
@@ -354,8 +354,8 @@ class PSDCollector():
         # no matter if they are at the beggining of the day or not. This way,
         # we can check if the file needs to be processed when previous/next
         # files are added/modified, in all possible cases.
-        psdObjects[0]['checksum_prev'] = SDSFile.previous.checksum
-        psdObjects[-1]['checksum_next'] = SDSFile.next.checksum
+        psdObjects[0]["checksum_prev"] = SDSFile.previous.checksum
+        psdObjects[-1]["checksum_next"] = SDSFile.next.checksum
 
         return psdObjects
 
@@ -370,13 +370,13 @@ class PSDCollector():
 
         """
         psd_objects = self.process(SDSFile)
-        psd_objects = [(rec['net'],
-                        rec['sta'],
-                        rec['loc'],
-                        rec['cha'],
-                        rec['quality'],
-                        rec['ts'].isoformat(),
-                        rec['shift'],
-                        rec['offset'],
-                        rec['bin']) for rec in psd_objects]
+        psd_objects = [(rec["net"],
+                        rec["sta"],
+                        rec["loc"],
+                        rec["cha"],
+                        rec["quality"],
+                        rec["ts"].isoformat(),
+                        rec["shift"],
+                        rec["offset"],
+                        rec["bin"]) for rec in psd_objects]
         self.storeObjects(psd_objects)

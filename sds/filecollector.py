@@ -13,37 +13,31 @@ class FileCollector:
     Used for collecting files from a directory
     """
 
-    def __init__(self, archiveDir):
-        """
-        def fileCollector.__init__
-        Initializes a file collector class
-        """
+    def __init__(self, archive_dir):
+        """Initialize a file collector class."""
 
         # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
+        self.logger = logging.getLogger("RuleManager")
         self.logger.debug("Initializing the %s." % self.__class__.__name__)
 
         self._initialized = datetime.now()
-        self.archiveDir = archiveDir
+        self.archive_dir = archive_dir
 
         # During initialization collect all files in the archive
         # This may be optimized when required
-        self.files = self.collectAllFiles()
+        self.files = self.collect_all_files()
 
-    def collectAllFiles(self):
-        """
-        def fileCollector.collectAll
-        Stores all files in the directory
-        """
+    def collect_all_files(self):
+        """Store all files in the directory."""
 
-        collectedFiles = list()
+        collected_files = list()
 
         # Walk over the directory and find all files
-        for subdir, dirs, files in os.walk(self.archiveDir):
+        for subdir, dirs, files in os.walk(self.archive_dir):
             for file in files:
                 try:
-                    collectedFiles.append(file)
+                    collected_files.append(file)
                 except ValueError:
                     pass
 
-        return collectedFiles
+        return collected_files

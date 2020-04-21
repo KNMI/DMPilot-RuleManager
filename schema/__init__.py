@@ -15,7 +15,7 @@ JSON_RULE_SCHEMA = {
         "rule": {
             "type": "object",
             "properties": {
-                "functionName": {"type": "string"},
+                "function_name": {"type": "string"},
                 "options": {"type": "object"},
                 "conditions": {
                         "type": "array",
@@ -24,7 +24,7 @@ JSON_RULE_SCHEMA = {
                 "timeout": {"type": "integer"},
                 "description": {"type": "string"}
             },
-            "required": ["functionName", "options", "conditions"],
+            "required": ["function_name", "options", "conditions"],
             "additionalProperties": False
         },
         "condition": {
@@ -32,10 +32,10 @@ JSON_RULE_SCHEMA = {
             "items": {
                     "type": "object",
                     "properties": {
-                        "functionName": {"type": "string"},
+                        "function_name": {"type": "string"},
                         "options": {"type": "object"}
                     },
-                "required": ["functionName", "options"],
+                "required": ["function_name", "options"],
                 "additionalProperties": False
             }
         }

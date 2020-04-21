@@ -1,92 +1,92 @@
 {
     "DELETE_REPLICATION": {
         "description": "TODO",
-        "functionName": "TODO",
+        "function_name": "TODO",
         "options": {},
         "conditions": []
     },
     "DELETE_PID": {
         "description": "TODO",
-        "functionName": "TODO",
+        "function_name": "TODO",
         "options": {},
         "conditions": []
     },
     "DELETE_PPSD": {
         "description": "Deletes PPSD metadata.",
-        "functionName": "deletePPSDMetadataRule",
+        "function_name": "delete_ppsd_metadata_rule",
         "options": {},
         "conditions": []
     },
     "DELETE_DCAT": {
         "description": "Deletes Dublin Core metadata from WFCatalog.",
-        "functionName": "deleteDCMetadataRule",
+        "function_name": "delete_dc_metadata_rule",
         "options": {},
         "conditions": []
     },
     "DELETE_WFCATALOG": {
         "description": "Deletes waveform metadata from WFCatalog.",
-        "functionName": "deleteWaveformMetadataRule",
+        "function_name": "delete_waveform_metadata_rule",
         "options": {},
         "conditions": []
     },
     "DELETE_TEMP_ARCHIVE": {
         "description": "Deletes file from local archive.",
-        "functionName": "purgeRule",
+        "function_name": "purge_rule",
         "options": {},
         "conditions": []
     },
     "DELETE_ARCHIVE": {
         "description": "Deletes file from S3 if its metadata is deleted.",
-        "functionName": "TODO",
+        "function_name": "TODO",
         "options": {},
         "conditions": [
             {
-                "functionName": "!assertPPSDMetadataExistsCondition",
+                "function_name": "!assert_ppsd_metadata_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "!assertDCMetadataExistsCondition",
+                "function_name": "!assert_dc_metadata_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "!assertWFCatalogExistsCondition",
+                "function_name": "!assert_wf_catalog_exists_condition",
                 "options": {}
             }
         ]
     },
     "DELETE_FROM_DELETION_DB": {
         "description": "Removes the file from the deletion list if all deletion steps were successful.",
-        "functionName": "removeFromDeletionDatabaseRule",
+        "function_name": "remove_from_deletion_database_rule",
         "options": {},
         "conditions": [
             {
-                "functionName": "!assertFileReplicatedCondition",
+                "function_name": "!assert_file_replicated_condition",
                 "options": {
-                    "replicationRoot": "/remoteZone/home/rods#localZone/"
+                    "replication_root": "/remoteZone/home/rods#localZone/"
                 }
             },
             {
-                "functionName": "!assertPIDCondition",
+                "function_name": "!assert_pid_condition",
                 "options": {}
             },
             {
-                "functionName": "!assertPPSDMetadataExistsCondition",
+                "function_name": "!assert_ppsd_metadata_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "!assertDCMetadataExistsCondition",
+                "function_name": "!assert_dc_metadata_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "!assertWFCatalogExistsCondition",
+                "function_name": "!assert_wfcatalog_exists_condition",
                 "options": {}
             },
             {
-                "functionName": "!assertTempArchiveExistCondition",
+                "function_name": "!assert_temp_archive_exist_condition",
                 "options": {}
             },
             {
-                "functionName": "!assertIRODSExistCondition",
+                "function_name": "!assert_irods_exist_condition",
                 "options": {}
             }
         ]

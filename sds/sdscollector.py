@@ -14,8 +14,8 @@ from datetime import date, datetime, timedelta
 from itertools import repeat
 import dateutil.parser as parser
 
-from orfeus.sdsfile import SDSFile
-from orfeus.filecollector import FileCollector
+from sds.sdsfile import SDSFile
+from sds.filecollector import FileCollector
 
 
 class SDSFileCollector(FileCollector):
@@ -27,43 +27,40 @@ class SDSFileCollector(FileCollector):
 
     files = []
 
-    def __init__(self, archiveDir):
-        """
-        def fileCollector.__init__
-        Initializes a file collector class
-        """
+    def __init__(self, archive_dir):
+        """Initialize a file collector class."""
 
         # Initialize logger
-        self.logger = logging.getLogger('RuleManager')
+        self.logger = logging.getLogger("RuleManager")
 
         # Collects all filenames
-        super().__init__(archiveDir)
+        super().__init__(archive_dir)
 
         # Process filenames
         sds_files = []
         for filename in self.files:
             try:
-                sds_files.append(SDSFile(filename, self.archiveDir))
+                sds_files.append(SDSFile(filename, self.archive_dir))
             except Exception as e:
                 self.logger.debug("Unable to parse file '%s' as SDSFile: '%s'" % (filename,
                                                                                   str(e)))
         self.files = sds_files
 
-    def _collectFromDate(self, iDate, mode="file_name"):
+    def _collect_from_date(self, i_date, mode="file_name"):
         """
         Collects SDS files for a particular date, based on file's name or on
         file's modification time
         """
 
         # Parse provided date if necessary
-        if not isinstance(iDate, datetime) and not isinstance(iDate, date):
-            iDate = parser.parse(iDate)
+        if not isinstance(i_date, datetime) and not isinstance(i_date, date):
+            i_date = parser.parse(i_date)
 
         if mode == "file_name":
 
             # Extract the julian day and year
-            day = iDate.strftime("%j")
-            year = iDate.strftime("%Y")
+            day = i_date.strftime("%j")
+            year = i_date.strftime("%Y")
             self.logger.debug("Searching files whose name's date is '%s.%s'" % (year, day))
 
             # Filter by day and year
@@ -72,9 +69,10 @@ class SDSFileCollector(FileCollector):
         elif mode == "mod_time":
 
             # Extract start and end of the date
-            date_start = datetime(iDate.year, iDate.month, iDate.day)
+            date_start = datetime(i_date.year, i_date.month, i_date.day)
             date_end = date_start + timedelta(days=1)
-            self.logger.debug("Searching files modified between '%s' and '%s'" % (date_start, date_end))
+            self.logger.debug("Searching files modified between '%s' and '%s'" % (date_start,
+                                                                                  date_end))
 
             # Filter by modification time
             files = list(filter(lambda x: (x.modified >= date_start and x.modified < date_end),
@@ -86,7 +84,7 @@ class SDSFileCollector(FileCollector):
         self.logger.debug("Found %d files using '%s' mode." % (len(files), mode))
         return files
 
-    def _collectFromWildcards(self, filename):
+    def _collect_from_wildcards(self, filename):
         """Collects SDS files based on a filename that allows wildcards."""
 
         # Check if an SDS file was specified
@@ -101,7 +99,7 @@ class SDSFileCollector(FileCollector):
         self.logger.debug("Found %d files for this filename/wildcard." % len(files))
         return files
 
-    def filterFromWildcardsArray(self, wildcards_array):
+    def filter_from_wildcards_array(self, wildcards_array):
         """Filters SDS files based on an array of filenames that allow
         wildcards. Accepts all files that match at least one of the
         wildcards."""
@@ -109,14 +107,14 @@ class SDSFileCollector(FileCollector):
         self.logger.debug("Searching files for a list of %d filenames/wildcards" % len(wildcards_array))
 
         # Aggregate files found for each wildcards combination
-        collectedFiles = list()
+        collected_files = list()
         for wildcards in wildcards_array:
-            collectedFiles += self._collectFromWildcards(wildcards)
-        self.files = list(set(collectedFiles))
+            collected_files += self._collect_from_wildcards(wildcards)
+        self.files = list(set(collected_files))
 
         self.logger.debug("Found %d unique files in total." % len(self.files))
 
-    def filterFinishedFiles(self, tolerance):
+    def filter_finished_files(self, tolerance):
         """Filters all SDS files with modification timestamp older than last
         midnight + tolerance minutes."""
 
@@ -129,7 +127,7 @@ class SDSFileCollector(FileCollector):
         self.files = list(filter(lambda f: f.modified < timestamp, self.files))
         self.logger.debug("Found %d files." % len(self.files))
 
-    def filterFromDateRange(self, iDate, days, mode="file_name"):
+    def filter_from_date_range(self, i_date, days, mode="file_name"):
         """Filters files from a range of dates;
             if days > 0: [date, date + N - 1]
             if days == 0: nothing
@@ -137,10 +135,10 @@ class SDSFileCollector(FileCollector):
         """
 
         # Parse provided date if necessary
-        if not isinstance(iDate, datetime) and not isinstance(iDate, date):
-            iDate = parser.parse(iDate)
+        if not isinstance(i_date, datetime) and not isinstance(i_date, date):
+            i_date = parser.parse(i_date)
 
-        collectedFiles = list()
+        collected_files = list()
 
         # Go over every day in increasing order, skipping "date" if days is negative
         if days > 0:
@@ -150,22 +148,22 @@ class SDSFileCollector(FileCollector):
             start = days
             stop = 0
         for day in range(start, stop):
-            collectedFiles += self._collectFromDate(iDate + timedelta(days=day), mode=mode)
+            collected_files += self._collect_from_date(i_date + timedelta(days=day), mode=mode)
 
-        self.files = collectedFiles
+        self.files = collected_files
 
-    def filterFromPastDays(self, days, mode='file_name'):
+    def filter_from_past_days(self, days, mode="file_name"):
         """Filters files from N days in the past: [today - N, yesterday]"""
 
         # Negative days, skipping today
-        self.filterFromDateRange(datetime.now(), -days, mode=mode)
+        self.filter_from_date_range(datetime.now(), -days, mode=mode)
 
-    def filterFromFileList(self, file_list):
+    def filter_from_file_list(self, file_list):
         """Filter files that are in a list of filenames."""
 
         self.files = list(filter(lambda x: x.filename in file_list, self.files))
 
-    def sortFiles(self, order):
+    def sort_files(self, order):
         """Sort files by filename."""
         self.logger.debug("Sorting files by filename (%s)" % order)
         self.files = sorted(self.files, key=lambda sdsfile: sdsfile.filename,

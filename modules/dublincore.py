@@ -3,16 +3,15 @@
 from datetime import datetime
 
 
-def extractDCMetadata(SDSFile, pid):
-    """Computes Dublin Core metadata for the file described by
-    `SDSFile`."""
+def extract_dc_metadata(sds_file, pid):
+    """Computes Dublin Core metadata for the file described by `sds_file`."""
 
-    nowTime = datetime.now()
+    now_time = datetime.now()
 
     # Determine coordinates
-    location = SDSFile.location
+    location = sds_file.location
     if location is None:
-        raise ValueError("Impossible to locate %s." % SDSFile.filename)
+        raise ValueError("Impossible to locate %s." % sds_file.filename)
 
     lon = location["longitude"]
     lat = location["latitude"]
@@ -21,8 +20,8 @@ def extractDCMetadata(SDSFile, pid):
     # Build the document that will be saved
     document = {
         "_cls": "eudat.models.mongo.wf_do",
-        "fileId": SDSFile.filename,
-        "checksum": SDSFile.checksum,
+        "fileId": sds_file.filename,
+        "checksum": sds_file.checksum,
         "dc_identifier": pid,
         "dc_title": "INGV_Repository",
         "dc_subject": "mSEED, waveform, quality",
@@ -31,17 +30,17 @@ def extractDCMetadata(SDSFile, pid):
         "dc_publisher": "EIDA NODE (TODO)",
         "dc_type": "seismic waveform",
         "dc_format": "MSEED",
-        "dc_date": nowTime,
+        "dc_date": now_time,
         "dc_coverage_x": lat,
         "dc_coverage_y": lon,
         "dc_coverage_z": ele,
-        "dc_coverage_t_min": SDSFile.sampleStart,
-        "dc_coverage_t_max": SDSFile.sampleEnd,
-        "dcterms_available": nowTime,
-        "dcterms_dateAccepted": nowTime,
+        "dc_coverage_t_min": sds_file.sample_start,
+        "dc_coverage_t_max": sds_file.sample_end,
+        "dcterms_available": now_time,
+        "dcterms_dateAccepted": now_time,
         "dc_rights": "open access",
         "dcterms_isPartOf": "wfmetadata_catalog",
-        "irods_path": SDSFile.irodsPath
+        "irods_path": sds_file.irods_path
     }
 
     return document
