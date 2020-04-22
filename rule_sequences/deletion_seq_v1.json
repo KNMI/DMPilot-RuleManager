@@ -1,10 +1,10 @@
 {
-    "rule_map" : "/home/rulemanager/rule_maps/deletion_rules_v1.json",
+    "rule_map" : "/home/rulemanager/rule_maps/deletion_rules.json",
     "sequence" : [
         "DELETE_PPSD",
         "DELETE_WFCATALOG",
         "DELETE_TEMP_ARCHIVE",
-        "DELETE_ARCHIVE",
-        "DELETE_FROM_DELETION_DB"
+        "DELETE_S3_V1",
+        "DELETE_FROM_DELETION_DB_V1"
     ]
 }

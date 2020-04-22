@@ -152,7 +152,7 @@ def ingestion_s3_rule(options, sds_file):
         sds_file.filename, sds_file.checksum))
 
 
-def deletion_s3_rule(options, sds_file):
+def delete_s3_rule(options, sds_file):
     """Handler for the rule that deletes a file from the S3 archive.
 
     Parameters

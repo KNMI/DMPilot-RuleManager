@@ -1,5 +1,5 @@
 {
-    "rule_map" : "/home/rulemanager/rule_maps/deletion_rules_v2.json",
+    "rule_map" : "/home/rulemanager/rule_maps/deletion_rules.json",
     "sequence" : [
         "DELETE_REPLICATION",
         "DELETE_PID",
@@ -7,7 +7,7 @@
         "DELETE_DCAT",
         "DELETE_WFCATALOG",
         "DELETE_TEMP_ARCHIVE",
-        "DELETE_ARCHIVE",
-        "DELETE_FROM_DELETION_DB"
+        "DELETE_S3_V2",
+        "DELETE_FROM_DELETION_DB_V2"
     ]
 }
