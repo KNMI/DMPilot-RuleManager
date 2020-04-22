@@ -152,6 +152,25 @@ def ingestion_s3_rule(options, sds_file):
         sds_file.filename, sds_file.checksum))
 
 
+def deletion_s3_rule(options, sds_file):
+    """Handler for the rule that deletes a file from the S3 archive.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+    sds_file : `SDSFile`
+        The description of the file to be deleted.
+
+    """
+    logger.debug("Deleting file %s from S3." % sds_file.filename)
+
+    # Attempt to delete from S3
+    s3manager.delete(sds_file)
+
+    logger.debug("Deleted file %s from S3." % sds_file.filename)
+
+
 def pid_rule(options, sds_file):
     """Handler for the PID assignment rule.
 
@@ -335,7 +354,6 @@ def waveform_metadata_rule(options, sds_file):
     ----------
     options : `dict`
         The rule's options.
-        - ``qualities``: Quality codes of the files to be processed (`list` of `str`)
     sds_file : `SDSFile`
         The file to be processed.
     """
