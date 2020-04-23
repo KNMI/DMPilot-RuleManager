@@ -159,16 +159,20 @@ def delete_s3_rule(options, sds_file):
     ----------
     options : `dict`
         The rule's options.
+        - ``dry_run``: If True, doesn't delete the file (`bool`)
     sds_file : `SDSFile`
         The description of the file to be deleted.
 
     """
-    logger.debug("Deleting file %s from S3." % sds_file.filename)
+    if options["dry_run"]:
+        logger.info("Would delete file %s from S3." % sds_file.filename)
+    else:
+        logger.debug("Deleting file %s from S3." % sds_file.filename)
 
-    # Attempt to delete from S3
-    s3manager.delete(sds_file)
+        # Attempt to delete from S3
+        s3manager.delete(sds_file)
 
-    logger.debug("Deleted file %s from S3." % sds_file.filename)
+        logger.debug("Deleted file %s from S3." % sds_file.filename)
 
 
 def pid_rule(options, sds_file):
@@ -337,13 +341,17 @@ def delete_dc_metadata_rule(options, sds_file):
     ----------
     options : `dict`
         The rule's options.
+        - ``dry_run``: If True, doesn't delete the data (`bool`)
     sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Marking %s as deleted in Dublin Core metadata." % sds_file.filename)
-    mongo_pool.delete_dc_document(sds_file)
-    logger.debug("Marked %s as deleted in Dublin Core metadata." % sds_file.filename)
+    if options["dry_run"]:
+        logger.info("Would delete all Dublin Core metadata for %s." % sds_file.filename)
+    else:
+        logger.debug("Marking %s as deleted in Dublin Core metadata." % sds_file.filename)
+        mongo_pool.delete_dc_document(sds_file)
+        logger.debug("Marked %s as deleted in Dublin Core metadata." % sds_file.filename)
 
 
 def waveform_metadata_rule(options, sds_file):
@@ -382,15 +390,18 @@ def delete_waveform_metadata_rule(options, sds_file):
     ----------
     options : `dict`
         The rule's options.
+        - ``dry_run``: If True, doesn't delete the data (`bool`)
     sds_file : `SDSFile`
         The file to be processed.
     """
 
-    logger.debug("Deleting waveform metadata for %s." % sds_file.filename)
-
-    mongo_pool.delete_wfcatalog_daily_document(sds_file)
-    mongo_pool.delete_wfcatalog_segments_documents(sds_file)
-    logger.debug("Deleted waveform metadata for %s." % sds_file.filename)
+    if options["dry_run"]:
+        logger.info("Would delete all waveform metadata for %s." % sds_file.filename)
+    else:
+        logger.debug("Deleting waveform metadata for %s." % sds_file.filename)
+        mongo_pool.delete_wfcatalog_daily_document(sds_file)
+        mongo_pool.delete_wfcatalog_segments_documents(sds_file)
+        logger.debug("Deleted waveform metadata for %s." % sds_file.filename)
 
 
 def remove_from_deletion_database_rule(options, sds_file):
@@ -431,7 +442,7 @@ def quarantine_raw_file_rule(options, sds_file):
     options : `dict`
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
-        - ``dry_run``: If True, doesn't move/delete the files (`bool`)
+        - ``dry_run``: If True, doesn't move the files (`bool`)
     sds_file : `SDSFile`
         The file to be processed.
 
