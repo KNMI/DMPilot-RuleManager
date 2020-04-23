@@ -69,7 +69,7 @@
             }
         ]
     },
-    "DELETE_FROM_DELETION_DB_V2": {
+    "DELETE_FROM_DELETION_DB_V1": {
         "description": "Removes the file from the deletion list if all deletion steps were successful.",
         "function_name": "remove_from_deletion_database_rule",
         "options": {},
