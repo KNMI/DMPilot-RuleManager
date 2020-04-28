@@ -20,7 +20,7 @@ def exists(sds_file):
     bucket = _get_bucket()
 
     try:
-        bucket.Object(sds_file.s3Key).load()
+        bucket.Object(sds_file.s3_key).load()
     except ClientError as e:
         if int(e.response["Error"]["Code"]) == 404:
             return False
@@ -32,7 +32,7 @@ def exists(sds_file):
 def put(sds_file):
     """Uploads a file to S3."""
     bucket = _get_bucket()
-    new_object = bucket.Object(sds_file.s3Key)
+    new_object = bucket.Object(sds_file.s3_key)
     new_object.upload_file(sds_file.filepath,
                            ExtraArgs={"Metadata": {"checksum": str(sds_file.checksum)}})
 
@@ -40,13 +40,13 @@ def put(sds_file):
 def delete(sds_file):
     """Deletes a file from the S3 archive."""
     bucket = _get_bucket()
-    bucket.Object(sds_file.s3Key).delete()
+    bucket.Object(sds_file.s3_key).delete()
 
 
 def get_checksum(sds_file):
     """Returns the checksum registered in the object S3 metadata. Assumes the object exists."""
     bucket = _get_bucket()
-    obj = bucket.Object(sds_file.s3Key)
+    obj = bucket.Object(sds_file.s3_key)
     try:
         checksum = obj.metadata["checksum"]
         if type(sds_file.checksum) is int:
@@ -60,4 +60,4 @@ def get_checksum(sds_file):
 def download_file(sds_file, dest_path):
     """Downloads the file corresponding to `sds_file` from S3, and saves it at `dest_path`."""
     bucket = _get_bucket()
-    bucket.Object(sds_file.s3Key).download_file(dest_path)
+    bucket.Object(sds_file.s3_key).download_file(dest_path)
