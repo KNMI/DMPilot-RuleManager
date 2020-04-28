@@ -3,43 +3,79 @@
         "description": "TODO",
         "function_name": "TODO",
         "options": {},
-        "conditions": []
+        "conditions": [
+	    {
+                "function_name": "assert_file_replicated_condition",
+                "options": {
+                    "replication_root": "/remoteZone/home/rods#localZone/"
+                }
+            }
+	]
     },
     "DELETE_PID": {
         "description": "TODO",
         "function_name": "TODO",
         "options": {},
-        "conditions": []
+        "conditions": [
+	    {
+                "function_name": "assert_pid_condition",
+                "options": {}
+            }
+	]
     },
     "DELETE_PPSD": {
         "description": "Deletes PPSD metadata.",
         "function_name": "delete_ppsd_metadata_rule",
         "options": {},
-        "conditions": []
+        "conditions": [
+            {
+                "function_name": "assert_ppsd_metadata_exists_condition",
+                "options": {}
+            }
+	]
     },
     "DELETE_DCAT": {
         "description": "Deletes Dublin Core metadata from WFCatalog.",
         "function_name": "delete_dc_metadata_rule",
         "options": {},
-        "conditions": []
+        "conditions": [
+	    {
+                "function_name": "assert_dc_metadata_exists_condition",
+                "options": {}
+            }
+	]
     },
     "DELETE_WFCATALOG": {
         "description": "Deletes waveform metadata from WFCatalog.",
         "function_name": "delete_waveform_metadata_rule",
         "options": {},
-        "conditions": []
+        "conditions": [
+            {
+                "function_name": "assert_wfcatalog_exists_condition",
+                "options": {}
+            }
+	]
     },
     "DELETE_TEMP_ARCHIVE": {
         "description": "Deletes file from local archive.",
         "function_name": "purge_rule",
         "options": {},
-        "conditions": []
+        "conditions": [
+	    {
+                "function_name": "assert_temp_archive_exist_condition",
+                "options": {}
+            }
+	]
     },
     "DELETE_S3_V1": {
         "description": "Deletes file from S3 if its metadata is deleted.",
         "function_name": "delete_s3_rule",
         "options": {},
         "conditions": [
+            {
+                "function_name": "assert_s3_exists_condition",
+                "options": {}
+            },
             {
                 "function_name": "!assert_ppsd_metadata_exists_condition",
                 "options": {}
@@ -55,6 +91,10 @@
         "function_name": "delete_s3_rule",
         "options": {},
         "conditions": [
+            {
+                "function_name": "assert_s3_exists_condition",
+                "options": {}
+            },
             {
                 "function_name": "!assert_ppsd_metadata_exists_condition",
                 "options": {}
@@ -124,7 +164,7 @@
                 "options": {}
             },
             {
-                "function_name": "!assert_irods_exist_condition",
+                "function_name": "!assert_s3_exists_condition",
                 "options": {}
             }
         ]
