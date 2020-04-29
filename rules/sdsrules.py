@@ -164,7 +164,7 @@ def delete_s3_rule(options, sds_file):
         The description of the file to be deleted.
 
     """
-    if options["dry_run"]:
+    if "dry_run" in options and options["dry_run"]:
         logger.info("Would delete file %s from S3." % sds_file.filename)
     else:
         logger.debug("Deleting file %s from S3." % sds_file.filename)
@@ -346,7 +346,7 @@ def delete_dc_metadata_rule(options, sds_file):
         The file to be processed.
     """
 
-    if options["dry_run"]:
+    if "dry_run" in options and options["dry_run"]:
         logger.info("Would delete all Dublin Core metadata for %s." % sds_file.filename)
     else:
         logger.debug("Marking %s as deleted in Dublin Core metadata." % sds_file.filename)
@@ -395,7 +395,7 @@ def delete_waveform_metadata_rule(options, sds_file):
         The file to be processed.
     """
 
-    if options["dry_run"]:
+    if "dry_run" in options and options["dry_run"]:
         logger.info("Would delete all waveform metadata for %s." % sds_file.filename)
     else:
         logger.debug("Deleting waveform metadata for %s." % sds_file.filename)

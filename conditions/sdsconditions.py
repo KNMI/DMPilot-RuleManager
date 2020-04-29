@@ -38,10 +38,9 @@ def assert_s3_exists_condition(options, sds_file):
 
 def _assert_exists_and_hashes_in_document(sds_file, document, db_name="mongoDB",
                                           use_checksum_prev=False, use_checksum_next=False):
-    """Asserts that the document exists with the same checksum(s) as SDSFile"""
-
-    # Document exists and has the same hash: it exists
+    """Assert that the document exists with the same checksum(s) as SDSFile."""
     if document is not None:
+        # Document exists and has the same hash: it exists
         exists = True
         if document["checksum"] == sds_file.checksum:
             if use_checksum_prev and \
@@ -81,9 +80,27 @@ def _assert_exists_and_hashes_in_document(sds_file, document, db_name="mongoDB",
 
 
 def assert_wfcatalog_exists_condition(options, sds_file):
+    """Assert that the file metadata is present in the WFCatalog.
 
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``check_checksum``: Whether or not to compare checksums (`bool`, default `True`)
+    sds_file : `SDSFile`
+        The file being processed.
+
+    """
     # Extract the current metadata object from the database
     metadata_object = mongo_pool.get_wfcatalog_daily_document(sds_file)
+
+    # In case we don't care about the hashes, we can exit here
+    if ("check_checksum" in options
+            and options["check_checksum"] is False
+            and metadata_object is not None):
+        logger.debug("File %s exists in WFCatalog, checksum not verified."
+                     % (sds_file.filename))
+        return True
 
     # Document exists and has the same hash: it exists
     return _assert_exists_and_hashes_in_document(sds_file, metadata_object,
@@ -217,6 +234,14 @@ def assert_dc_metadata_exists_condition(options, sds_file):
 def assert_ppsd_metadata_exists_condition(options, sds_file):
     """Assert that the PPSD metadata related to the file is present in the database.
 
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``check_checksum``: Whether or not to compare checksums (`bool`, default `True`)
+    sds_file : `SDSFile`
+        The file being processed.
+
     Returns
     -------
     `bool`
@@ -233,6 +258,12 @@ def assert_ppsd_metadata_exists_condition(options, sds_file):
 
     # Document exists and has the same hash: it exists
     if ppsd_documents:
+            # In case we don't care about the hashes, we can exit here
+        if "check_checksum" in options and options["check_checksum"] is False:
+            logger.debug("PPSD data exists for file %s, checksum not verified."
+                         % (sds_file.filename))
+            return True
+
         # Get all checksums
         checksum = {doc["checksum"] for doc in ppsd_documents}
         checksum_prev = {doc["checksum_prev"] for doc in ppsd_documents

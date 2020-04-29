@@ -30,7 +30,9 @@
         "conditions": [
             {
                 "function_name": "assert_ppsd_metadata_exists_condition",
-                "options": {}
+                "options": {
+		    "check_checksum": false
+		}
             }
 	]
     },
@@ -52,7 +54,9 @@
         "conditions": [
             {
                 "function_name": "assert_wfcatalog_exists_condition",
-                "options": {}
+                "options": {
+		    "check_checksum": false
+		}
             }
 	]
     },
@@ -78,11 +82,15 @@
             },
             {
                 "function_name": "!assert_ppsd_metadata_exists_condition",
-                "options": {}
+                "options": {
+		    "check_checksum": false
+		}
             },
             {
                 "function_name": "!assert_wfcatalog_exists_condition",
-                "options": {}
+                "options": {
+		    "check_checksum": false
+		}
             }
         ]
     },
@@ -97,7 +105,9 @@
             },
             {
                 "function_name": "!assert_ppsd_metadata_exists_condition",
-                "options": {}
+                "options": {
+		    "check_checksum": false
+		}
             },
             {
                 "function_name": "!assert_dc_metadata_exists_condition",
@@ -105,7 +115,9 @@
             },
             {
                 "function_name": "!assert_wf_catalog_exists_condition",
-                "options": {}
+                "options": {
+		    "check_checksum": false
+		}
             }
         ]
     },
@@ -116,11 +128,15 @@
         "conditions": [
             {
                 "function_name": "!assert_ppsd_metadata_exists_condition",
-                "options": {}
+                "options": {
+		    "check_checksum": false
+		}
             },
             {
                 "function_name": "!assert_wfcatalog_exists_condition",
-                "options": {}
+                "options": {
+		    "check_checksum": false
+		}
             },
             {
                 "function_name": "!assert_temp_archive_exist_condition",
