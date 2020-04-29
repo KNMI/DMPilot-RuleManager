@@ -36,12 +36,6 @@ def assert_s3_exists_condition(options, sds_file):
     return s3manager.exists(sds_file)
 
 
-def assert_irods_not_exist_condition(options, sds_file):
-    """Asserts that the SDSFile is not in iRODS."""
-    # The file was not already ingested by iRODS
-    return not irods_session.exists(sds_file)
-
-
 def _assert_exists_and_hashes_in_document(sds_file, document, db_name="mongoDB",
                                           use_checksum_prev=False, use_checksum_next=False):
     """Asserts that the document exists with the same checksum(s) as SDSFile"""
@@ -95,10 +89,6 @@ def assert_wfcatalog_exists_condition(options, sds_file):
     return _assert_exists_and_hashes_in_document(sds_file, metadata_object,
                                                  db_name="WFCatalog",
                                                  use_checksum_prev=True)
-
-
-def assert_wfcatalog_not_exists_condition(options, sds_file):
-    return not assert_wfcatalog_exists_condition(options, sds_file)
 
 
 def _get_neighbor(sds_file, neighbor):
@@ -224,10 +214,6 @@ def assert_dc_metadata_exists_condition(options, sds_file):
                                                  db_name="DublinCoreMetadata")
 
 
-def assert_dc_metadata_not_exists_condition(options, sds_file):
-    return not assert_dc_metadata_exists_condition(options, sds_file)
-
-
 def assert_ppsd_metadata_exists_condition(options, sds_file):
     """Assert that the PPSD metadata related to the file is present in the database.
 
@@ -296,10 +282,6 @@ def assert_ppsd_metadata_exists_condition(options, sds_file):
     else:
         logger.debug("PPSD data does not exist for file %s." % sds_file.filename)
         return False
-
-
-def assert_ppsd_metadata_not_exists_condition(options, sds_file):
-    return not assert_ppsd_metadata_exists_condition(options, sds_file)
 
 
 def assert_pruned_file_exists_condition(options, sds_file):
