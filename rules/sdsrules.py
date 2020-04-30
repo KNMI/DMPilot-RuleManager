@@ -159,7 +159,7 @@ def delete_s3_rule(options, sds_file):
     ----------
     options : `dict`
         The rule's options.
-        - ``dry_run``: If True, doesn't delete the file (`bool`)
+        - ``dry_run``: If True, doesn't delete the file (`bool`, default `False`)
     sds_file : `SDSFile`
         The description of the file to be deleted.
 
@@ -341,7 +341,7 @@ def delete_dc_metadata_rule(options, sds_file):
     ----------
     options : `dict`
         The rule's options.
-        - ``dry_run``: If True, doesn't delete the data (`bool`)
+        - ``dry_run``: If True, doesn't delete the data (`bool`, default `False`)
     sds_file : `SDSFile`
         The file to be processed.
     """
@@ -390,7 +390,7 @@ def delete_waveform_metadata_rule(options, sds_file):
     ----------
     options : `dict`
         The rule's options.
-        - ``dry_run``: If True, doesn't delete the data (`bool`)
+        - ``dry_run``: If True, doesn't delete the data (`bool`, default `False`)
     sds_file : `SDSFile`
         The file to be processed.
     """
@@ -442,7 +442,7 @@ def quarantine_raw_file_rule(options, sds_file):
     options : `dict`
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
-        - ``dry_run``: If True, doesn't move the files (`bool`)
+        - ``dry_run``: If True, doesn't move the files (`bool`, default `False`)
     sds_file : `SDSFile`
         The file to be processed.
 
@@ -456,7 +456,7 @@ def quarantine_raw_file_rule(options, sds_file):
         # Move the raw file
         source_path = sds_file.filepath
         dest_dir = sds_file.custom_directory(options["quarantine_path"])
-        if options["dry_run"]:
+        if "dry_run" in options and options["dry_run"]:
             logger.info("Would move %s to %s/", source_path, dest_dir)
         else:
             os.makedirs(dest_dir, exist_ok=True)
@@ -483,7 +483,7 @@ def quarantine_pruned_file_rule(options, sds_file):
     options : `dict`
         The rule's options.
         - ``quarantine_path``: Directory for the quarantine area (`str`)
-        - ``dry_run``: If True, doesn't move/delete the files (`bool`)
+        - ``dry_run``: If True, doesn't move/delete the files (`bool`, default `False`)
     sds_file : `SDSFile`
         The file to be processed.
 
@@ -500,7 +500,7 @@ def quarantine_pruned_file_rule(options, sds_file):
                                    sds_file.custom_quality_filename("D"))
         dest_dir = os.path.join(options["quarantine_path"],
                                 sds_file.custom_quality_subdir("D"))
-        if options["dry_run"]:
+        if "dry_run" in options and options["dry_run"]:
             logger.info("Would move %s to %s/", d_file_path, dest_dir)
         else:
             os.makedirs(dest_dir, exist_ok=True)
@@ -509,7 +509,7 @@ def quarantine_pruned_file_rule(options, sds_file):
 
         # Delete the .Q file
         q_file_path = sds_file.filepath
-        if options["dry_run"]:
+        if "dry_run" in options and options["dry_run"]:
             logger.info("Would remove %s", q_file_path)
         else:
             os.remove(q_file_path)

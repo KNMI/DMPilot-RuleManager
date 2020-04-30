@@ -27,6 +27,17 @@ def assert_irods_exists_condition(options, sds_file):
 
 
 def assert_s3_exists_condition(options, sds_file):
+    """Assert that the file is archived in S3.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``check_checksum``: Whether or not to verify the file checksum (`bool`, default `True`)
+    sds_file : `SDSFile`
+        The file being processed.
+
+    """
     if "check_checksum" in options:
         if options["check_checksum"]:
             return (s3manager.exists(sds_file)
