@@ -28,7 +28,7 @@
                 }
             },
             {
-                "function_name": "assert_wfcatalog_not_exists_condition",
+                "function_name": "!assert_wfcatalog_exists_condition",
                 "options": {}
             }
         ]

@@ -132,7 +132,7 @@
                 }
             },
             {
-                "function_name": "assert_wfcatalog_not_exists_condition",
+                "function_name": "!assert_wfcatalog_exists_condition",
                 "options": {}
             }
         ]
@@ -150,7 +150,7 @@
                 }
             },
             {
-                "function_name": "assert_dc_metadata_not_exists_condition",
+                "function_name": "!assert_dc_metadata_exists_condition",
                 "options": {}
             },
             {
@@ -174,7 +174,7 @@
                 }
             },
             {
-                "function_name": "assert_ppsd_metadata_not_exists_condition",
+                "function_name": "!assert_ppsd_metadata_exists_condition",
                 "options": {}
             }
         ]
