@@ -18,7 +18,17 @@ logger = logging.getLogger("RuleManager")
 
 
 def assert_quality_condition(options, sds_file):
-    """Asserts that the SDSFile quality is in options."""
+    """Assert that the SDSFile quality is in a list given in the options.
+
+    Parameters
+    ----------
+    options : `dict`
+        The rule's options.
+        - ``qualities``: List of qualities to accept (`list` of `str`)
+    sds_file : `SDSFile`
+        The file being processed.
+
+    """
     return sds_file.quality in options["qualities"]
 
 
