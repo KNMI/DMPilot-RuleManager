@@ -526,5 +526,3 @@ def quarantine_pruned_file_rule(options, sds_file):
 def test_print(options, sds_file):
     """Prints the filename."""
     logger.info(sds_file.filename)
-    logger.info(sds_file.directory)
-    logger.info(sds_file.irods_directory)
