@@ -154,7 +154,7 @@ class RuleManager():
         # Items can be SDSFiles or metadata (XML) files
         for i, item in enumerate(items):
 
-            self.logger.info("Processing item %s (%d/%d)." % (item.filename, i+1, total))
+            self.logger.info("%s - Item %d of %d" % (str(item), i+1, total))
 
             # Get the sequence of rules to be applied
             for rule, timeout in map(self.get_rule, self.rule_sequence):
@@ -165,42 +165,42 @@ class RuleManager():
 
                 # Rule options are bound to the call
                 try:
-                    self.logger.debug("%s: Executing rule '%s'." % (item.filename, rule.name))
+                    self.logger.debug("%s - %s - Executing" % (str(item), rule.name))
                     rule.apply(item)
-                    self.logger.info("%s: Successfully executed rule '%s'."
-                                     % (item.filename, rule.name))
+                    self.logger.info("%s - %s - Success"
+                                     % (str(item), rule.name))
 
                 # A rule called for the pipeline to be exited for this file
                 except ExitPipelineException as e:
                     if e.is_error:
                         # The exception came from an error
-                        self.logger.error("%s: Rule execution '%s' failed: %s"
-                                          % (item.filename, rule.name, e.message))
+                        self.logger.error("%s - %s - Failure: %s"
+                                          % (str(item), rule.name, e.message))
                     else:
                         # A rule executed successfully and called for an exit
-                        self.logger.info("%s: Successfully executed rule '%s'."
-                                         % (item.filename, rule.name))
+                        self.logger.info("%s - %s - Success"
+                                         % (str(item), rule.name))
 
-                    self.logger.info("%s: Exiting pipeline for this file" % (item.filename))
+                    self.logger.info("%s - Exit" % (str(item)))
 
                     # The "finally" block WILL be executed even after breaking
                     break
 
                 # The rule was timed out
                 except TimeoutError:
-                    self.logger.warning("%s: Timeout calling rule '%s'."
-                                        % (item.filename, rule.name))
+                    self.logger.warning("%s - %s - Timeout"
+                                        % (str(item), rule.name))
 
                 # Condition assertion errors
                 except AssertionError as e:
                     self.logger.info(
-                        "%s: Not executed rule '%s'. Rule did not pass condition '%s'."
-                        % (item.filename, rule.name, e))
+                        "%s - %s - Did not pass condition '%s'."
+                        % (str(item), rule.name, e))
 
                 # Other exceptions
                 except Exception as e:
-                    self.logger.error("%s: Rule execution '%s' failed: %s"
-                                      % (item.filename, rule.name, e), exc_info=False)
+                    self.logger.error("%s - %s - Failure: %s"
+                                      % (str(item), rule.name, e), exc_info=False)
 
                 # Disable the alarm
                 finally:

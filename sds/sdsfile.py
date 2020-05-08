@@ -558,3 +558,6 @@ class SDSFile():
         ])
 
         return SDSFile(new_filename, self.archive_root)
+
+    def __str__(self):
+        return "%s (%s)" % (self.filename, self.modified)
