@@ -116,6 +116,12 @@
                 "options": {
                     "check_checksum": true
                 }
+            },
+            {
+                "function_name": "assert_modification_time_newer_than",
+                "options": {
+                    "days": 6
+                }
             }
         ]
     },
@@ -134,6 +140,12 @@
             {
                 "function_name": "!assert_wfcatalog_exists_condition",
                 "options": {}
+            },
+            {
+                "function_name": "assert_modification_time_newer_than",
+                "options": {
+                    "days": 6
+                }
             }
         ]
     },
@@ -176,6 +188,12 @@
             {
                 "function_name": "!assert_ppsd_metadata_exists_condition",
                 "options": {}
+            },
+            {
+                "function_name": "assert_modification_time_newer_than",
+                "options": {
+                    "days": 6
+                }
             }
         ]
     },
