@@ -59,20 +59,44 @@ def assert_s3_exists_condition(options, sds_file):
 
 def _assert_exists_and_hashes_in_document(sds_file, document, db_name="mongoDB",
                                           use_checksum_prev=False, use_checksum_next=False):
-    """Assert that the document exists with the same checksum(s) as SDSFile."""
+    """Assert that the document exists with the same checksum(s) as SDSFile.
+
+    Parameters
+    ----------
+    sds_file : `SDSFile`
+        The file being processed.
+    document : `dict`
+        The document corresponding to `sds_file`. Can be `None` in case it doesn't exist.
+    db_name : `str`
+        The database name to be used in logs (default `"mongoDB"`).
+    use_checksum_prev : `bool`
+        Whether or not to check the document's `checksum_prev` against the checksum
+        of `sds_file.previous`. Ignored if `sds_file.previous.checksum` is `None`
+        (default `False`).
+    use_checksum_next : `bool`
+        Whether or not to check the document's `checksum_next` against the checksum
+        of `sds_file.next`. Ignored if `sds_file.next.checksum` is `None` (default `False`).
+
+    Returns
+    -------
+    `bool`
+
+    """
     if document is not None:
         # Document exists and has the same hash: it exists
         exists = True
         if document["checksum"] == sds_file.checksum:
-            if use_checksum_prev and \
-                    document["checksum_prev"] != sds_file.previous.checksum:
+            if (use_checksum_prev
+                    and sds_file.previous.checksum is not None
+                    and document["checksum_prev"] != sds_file.previous.checksum):
                 same_hash = False
                 msg = ("File %s does exist in %s, but the previous file has a "
                        "different checksum (%s vs %s).") % (
                        sds_file.filename, db_name, document["checksum_prev"],
                        sds_file.previous.checksum)
-            elif use_checksum_next and \
-                    document["checksum_next"] != sds_file.next.checksum:
+            elif (use_checksum_next
+                  and sds_file.next.checksum is not None
+                  and document["checksum_next"] != sds_file.next.checksum):
                 same_hash = False
                 msg = ("File %s does exist in %s, but the next file has a "
                        "different checksum (%s vs %s).") % (
