@@ -340,11 +340,11 @@ def assert_ppsd_metadata_exists_condition(options, sds_file):
             logger.debug("PPSD data exists for file %s, but with a different checksum (%s vs %s)." % (
                             sds_file.filename, checksum, sds_file.checksum))
             return False
-        if checksum_prev != sds_checksum_prev:
+        if sds_checksum_prev is not None and checksum_prev != sds_checksum_prev:
             logger.debug("PPSD data exists for file %s, but with a different checksum_prev (%s vs %s)." % (
                             sds_file.filename, checksum_prev, sds_checksum_prev))
             return False
-        if checksum_next != sds_checksum_next:
+        if sds_checksum_next is not None and checksum_next != sds_checksum_next:
             logger.debug("PPSD data exists for file %s, but with a different checksum_next (%s vs %s)." % (
                             sds_file.filename, checksum_next, sds_checksum_next))
             return False
