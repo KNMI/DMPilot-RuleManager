@@ -127,6 +127,9 @@ def _assert_exists_and_hashes_in_document(sds_file, document, db_name="mongoDB",
 def assert_wfcatalog_exists_condition(options, sds_file):
     """Assert that the file metadata is present in the WFCatalog.
 
+    Ignores neighbours' checksums if those files are gone from the local archive,
+    even when `check_checksum` is `True`.
+
     Parameters
     ----------
     options : `dict`
@@ -279,6 +282,9 @@ def assert_dc_metadata_exists_condition(options, sds_file):
 def assert_ppsd_metadata_exists_condition(options, sds_file):
     """Assert that the PPSD metadata related to the file is present in the database.
 
+    Ignores neighbours' checksums if those files are gone from the local archive,
+    even when `check_checksum` is `True`.
+
     Parameters
     ----------
     options : `dict`
@@ -303,7 +309,7 @@ def assert_ppsd_metadata_exists_condition(options, sds_file):
 
     # Document exists and has the same hash: it exists
     if ppsd_documents:
-            # In case we don't care about the hashes, we can exit here
+        # In case we don't care about the hashes, we can exit here
         if "check_checksum" in options and options["check_checksum"] is False:
             logger.debug("PPSD data exists for file %s, checksum not verified."
                          % (sds_file.filename))
