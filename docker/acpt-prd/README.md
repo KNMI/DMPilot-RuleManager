@@ -38,7 +38,8 @@ docker-compose -f docker/acpt-prd/docker-compose.yml --project-directory ./ run 
 
  1. Update code (`git pull -v`)
  2. Re-build container image(s) (see _Preparation_)
- 3. Re-run container
+ 3. (Optional) Prune previous images (`docker image prune`)
+ 4. Re-run container
 
 # Update configuration
 
