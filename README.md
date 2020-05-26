@@ -165,3 +165,13 @@ rm.sequence(item_list) # Executes the sequence of rules on all items
 The `RuleManager` only applies the policies to the items. Both the
 rules and the items are entirely transparent to it. It should run as
 long as the functions defining the rules accept the data type passed.
+
+
+_This work is co-funded by the EOSC-hub project (Horizon 2020) under Grant number 777536_ 
+
+<img src="https://www.eosc-hub.eu/sites/all/themes/theme1/logo.png" width="200" >
+
+<img src="https://ec.europa.eu/info/sites/info/themes/europa/images/svg/logo/logo--en.svg" width="200" >
+
+
+
